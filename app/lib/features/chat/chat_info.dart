@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:keys_lite/theme/phosphor.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../core/api.dart';
@@ -116,13 +117,13 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
     final api = context.api;
     final isAdmin = m['chatRole'] == 'admin';
     showActionSheet(context, [
-      SheetAction(Icons.chat_bubble_outline, 'Message ${p.firstName}', () => openDirectChat(context, p.id)),
-      SheetAction(Icons.person_outline, 'View profile', () => context.push('/users/${p.id}')),
+      SheetAction(PhosphorIconsRegular.chatCircle, 'Message ${p.firstName}', () => openDirectChat(context, p.id)),
+      SheetAction(PhosphorIconsRegular.user, 'View profile', () => context.push('/users/${p.id}')),
       if (_admin && _chat!['type'] == 'group') ...[
         isAdmin
-            ? SheetAction(Icons.remove_moderator_outlined, 'Dismiss as admin', () => _act(() => api.delete('/chats/$_id/admins/${p.id}'), '${p.name} is no longer an admin'))
-            : SheetAction(Icons.admin_panel_settings_outlined, 'Make group admin', () => _act(() => api.post('/chats/$_id/admins/${p.id}'), '${p.name} is now an admin')),
-        SheetAction(Icons.person_remove_outlined, 'Remove from group', () async {
+            ? SheetAction(PhosphorIconsRegular.shieldSlash, 'Dismiss as admin', () => _act(() => api.delete('/chats/$_id/admins/${p.id}'), '${p.name} is no longer an admin'))
+            : SheetAction(PhosphorIconsRegular.shieldCheck, 'Make group admin', () => _act(() => api.post('/chats/$_id/admins/${p.id}'), '${p.name} is now an admin')),
+        SheetAction(PhosphorIconsRegular.userMinus, 'Remove from group', () async {
           final ok = await confirmSheet(context, title: 'Remove ${p.name}?', body: 'They will no longer be able to send or receive messages in this group.', confirm: 'Remove');
           if (ok) await _act(() => api.delete('/chats/$_id/members/${p.id}'));
         }, destructive: true),
@@ -181,14 +182,14 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                         child: Material(
                           color: KColors.surfaceInverted,
                           shape: const CircleBorder(),
-                          child: IconButton(tooltip: 'Change group icon', iconSize: 16, color: Colors.white, icon: const Icon(Icons.edit), onPressed: _changeIcon),
+                          child: IconButton(tooltip: 'Change group icon', iconSize: 16, color: Colors.white, icon: const Icon(PhosphorIconsRegular.pencilSimple), onPressed: _changeIcon),
                         ),
                       ),
                   ]),
                   const SizedBox(height: 12),
                   Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                     Flexible(child: Text(c['name'] ?? '', style: KText.headingSmall, textAlign: TextAlign.center)),
-                    if (_admin && isGroupType) IconButton(tooltip: 'Edit group name', icon: const Icon(Icons.edit_outlined, size: 18), onPressed: () => _editText('name', 'Group name', c['name'], 100)),
+                    if (_admin && isGroupType) IconButton(tooltip: 'Edit group name', icon: const Icon(PhosphorIconsRegular.pencilSimple, size: 18), onPressed: () => _editText('name', 'Group name', c['name'], 100)),
                   ]),
                   if (_group) Text(plural(c['memberCount'] ?? 0, 'member'), style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
                   if (_group) ...[
@@ -217,12 +218,12 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
               SliverToBoxAdapter(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   const Divider(),
-                  if (canAdd) ListTile(leading: const Icon(Icons.person_add_alt), title: const Text('Add members'), onTap: () => context.push('/chats/$_id/add').then((_) => _load())),
-                  if (canAdd) ListTile(leading: const Icon(Icons.link), title: const Text('Copy group link'), onTap: () => copyGroupLink(context, _id)),
-                  if (_admin && isGroupType) ListTile(leading: const Icon(Icons.tune), title: const Text('Group settings'), onTap: () => context.push('/chats/$_id/settings').then((_) => _load())),
+                  if (canAdd) ListTile(leading: const Icon(PhosphorIconsRegular.userPlus), title: const Text('Add members'), onTap: () => context.push('/chats/$_id/add').then((_) => _load())),
+                  if (canAdd) ListTile(leading: const Icon(PhosphorIconsRegular.link), title: const Text('Copy group link'), onTap: () => copyGroupLink(context, _id)),
+                  if (_admin && isGroupType) ListTile(leading: const Icon(PhosphorIconsRegular.slidersHorizontal), title: const Text('Group settings'), onTap: () => context.push('/chats/$_id/settings').then((_) => _load())),
                   if (_admin && _requests > 0)
                     ListTile(
-                      leading: const Icon(Icons.how_to_reg_outlined),
+                      leading: const Icon(PhosphorIconsRegular.userCheck),
                       title: const Text('Join requests'),
                       trailing: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -255,9 +256,9 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                         subtitle: Text(m['reason'] == 'removed' ? 'Removed' : 'Left', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
                       ),
                   ],
-                  if (member && c['type'] != 'update') ListTile(leading: const Icon(Icons.logout, color: KColors.error), title: Text('Exit group', style: TextStyle(color: KColors.error)), onTap: _exit),
+                  if (member && c['type'] != 'update') ListTile(leading: const Icon(PhosphorIconsRegular.signOut, color: KColors.error), title: Text('Exit group', style: TextStyle(color: KColors.error)), onTap: _exit),
                   ListTile(
-                    leading: const Icon(Icons.flag_outlined, color: KColors.error),
+                    leading: const Icon(PhosphorIconsRegular.flag, color: KColors.error),
                     title: Text('Report group', style: TextStyle(color: KColors.error)),
                     onTap: () => showReportSheet(context, itemType: 'group_chat', itemId: _id, title: 'Report group', intro: 'Tell us why you are reporting this group chat. No one would be notified that you reported.'),
                   ),
@@ -334,7 +335,7 @@ class _SharedState extends State<_Shared> {
                   InkWell(
                     onTap: () => m['kind'] == 'video' ? context.push('/video', extra: api.absolute(m['url'])) : context.push('/media', extra: {'urls': [m['url']]}),
                     child: m['kind'] == 'video'
-                        ? Container(color: Colors.black87, child: const Icon(Icons.play_circle_fill, color: Colors.white, semanticLabel: 'Video'))
+                        ? Container(color: Colors.black87, child: const Icon(PhosphorIconsFill.playCircle, color: Colors.white, semanticLabel: 'Video'))
                         : Image.network(api.absolute(m['url']), fit: BoxFit.cover, errorBuilder: (_, _, _) => Container(color: KColors.surfaceSubtle)),
                   ),
             ],
@@ -344,7 +345,7 @@ class _SharedState extends State<_Shared> {
             if (widget.tab == 'links')
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.link),
+                leading: const Icon(PhosphorIconsRegular.link),
                 title: Text(item['link']?['title'] ?? item['link']?['url'] ?? '', maxLines: 1, overflow: TextOverflow.ellipsis),
                 subtitle: Text(item['link']?['url'] ?? '', maxLines: 1, overflow: TextOverflow.ellipsis, style: KText.paragraphSmall.copyWith(color: KColors.textLink)),
                 onTap: () => launchUrl(Uri.parse(item['link']['url']), mode: LaunchMode.externalApplication),
@@ -466,8 +467,8 @@ class _JoinRequestsScreenState extends State<JoinRequestsScreen> {
                         trailing: _done[r['person']['id']] != null
                             ? Text(_done[r['person']['id']]!, style: KText.paragraphMediumSmall.copyWith(color: KColors.textSecondary))
                             : Row(mainAxisSize: MainAxisSize.min, children: [
-                                IconButton(tooltip: 'Decline', icon: const Icon(Icons.close, color: KColors.error), onPressed: () => _decide(r['person']['id'], 'decline')),
-                                IconButton(tooltip: 'Approve', icon: const Icon(Icons.check, color: KColors.success), onPressed: () => _decide(r['person']['id'], 'approve')),
+                                IconButton(tooltip: 'Decline', icon: const Icon(PhosphorIconsRegular.x, color: KColors.error), onPressed: () => _decide(r['person']['id'], 'decline')),
+                                IconButton(tooltip: 'Approve', icon: const Icon(PhosphorIconsRegular.check, color: KColors.success), onPressed: () => _decide(r['person']['id'], 'approve')),
                               ]),
                       ),
                   ]),

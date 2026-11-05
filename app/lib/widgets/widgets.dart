@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:keys_lite/theme/phosphor.dart';
 import 'package:flutter/services.dart';
 import '../core/api.dart';
 import '../theme/tokens.dart';
@@ -59,7 +60,7 @@ class KeysHeader extends StatelessWidget {
                 IconButton(
                   key: const Key('back'),
                   tooltip: 'Back',
-                  icon: const Icon(Icons.chevron_left, size: 30, color: KColors.iconDefault),
+                  icon: const Icon(PhosphorIconsRegular.caretLeft, size: 30, color: KColors.iconDefault),
                   onPressed: onBack ?? () => Navigator.of(context).maybePop(),
                 ),
               const Spacer(),
@@ -104,7 +105,7 @@ class PageHeader extends StatelessWidget implements PreferredSizeWidget {
                       key: const Key('back'),
                       radius: 22,
                       onTap: onBack ?? () => Navigator.of(context).maybePop(),
-                      child: const Icon(Icons.chevron_left, size: 26, color: KColors.iconDefault),
+                      child: const Icon(PhosphorIconsRegular.caretLeft, size: 26, color: KColors.iconDefault),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -343,7 +344,7 @@ class _KeysTextFieldState extends State<KeysTextField> {
             if (widget.obscure)
               IconButton(
                 tooltip: _hidden ? 'Show password' : 'Hide password',
-                icon: Icon(_hidden ? Icons.visibility_off_outlined : Icons.visibility_outlined, size: 20, color: KColors.textSecondary),
+                icon: Icon(_hidden ? PhosphorIconsRegular.eyeSlash : PhosphorIconsRegular.eye, size: 20, color: KColors.textSecondary),
                 onPressed: () => setState(() => _hidden = !_hidden),
               ),
             if (widget.suffix != null) widget.suffix!,
@@ -362,7 +363,7 @@ class ErrorLine extends StatelessWidget {
   Widget build(BuildContext context) => Semantics(
         liveRegion: true,
         child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Padding(padding: EdgeInsets.only(top: 1), child: Icon(Icons.error_outline, size: 16, color: KColors.error)),
+          const Padding(padding: EdgeInsets.only(top: 1), child: Icon(PhosphorIconsRegular.warningCircle, size: 16, color: KColors.error)),
           const SizedBox(width: 6),
           Expanded(child: Text(text, style: KText.paragraphSmall.copyWith(color: KColors.error, fontSize: 13, height: 18 / 13))),
         ]),
@@ -477,7 +478,7 @@ class PasswordRules extends StatelessWidget {
         return Padding(
           padding: const EdgeInsets.only(top: 6),
           child: Row(children: [
-            Icon(pass ? Icons.check_circle : Icons.radio_button_unchecked, size: 16, color: pass ? KColors.success : KColors.textTertiary),
+            Icon(pass ? PhosphorIconsFill.checkCircle : PhosphorIconsRegular.circle, size: 16, color: pass ? KColors.success : KColors.textTertiary),
             const SizedBox(width: 8),
             Text(rules[i], style: KText.paragraphSmall.copyWith(color: pass ? KColors.success : KColors.textSecondary, fontSize: 13)),
           ]),
@@ -514,7 +515,7 @@ class CircleImage extends StatelessWidget {
               padding: EdgeInsets.all(size * 0.04),
               child: Container(
                 decoration: BoxDecoration(color: badge == MarkBadge.check ? KColors.success : KColors.error, shape: BoxShape.circle),
-                child: Icon(badge == MarkBadge.check ? Icons.check_rounded : Icons.close_rounded, color: Colors.white, size: size * 0.24),
+                child: Icon(badge == MarkBadge.check ? PhosphorIconsRegular.check : PhosphorIconsRegular.x, color: Colors.white, size: size * 0.24),
               ),
             ),
           ),
@@ -598,7 +599,7 @@ class OptionTile extends StatelessWidget {
                 if (subtitle != null) Text(subtitle!, style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
               ]),
             ),
-            Icon(selected ? Icons.radio_button_checked : Icons.radio_button_unchecked, color: selected ? KColors.selected : KColors.textTertiary),
+            Icon(selected ? PhosphorIconsFill.radioButton : PhosphorIconsRegular.circle, color: selected ? KColors.selected : KColors.textTertiary),
           ]),
         ),
       ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:keys_lite/theme/phosphor.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/api.dart';
 import '../../core/feed_models.dart';
@@ -55,16 +56,16 @@ class _BoardScreenState extends State<BoardScreen> {
     final items = <SheetAction>[
       if (mine) ...[
         // CBM-15.4: reassign needs a board of 5+.
-        if (voting && s['kind'] != 'champion') SheetAction(Icons.swap_horiz, 'Reassign my role', () => _propose('reassign', occ)),
-        SheetAction(Icons.logout, 'Exit committee', () async {
+        if (voting && s['kind'] != 'champion') SheetAction(PhosphorIconsRegular.arrowsLeftRight, 'Reassign my role', () => _propose('reassign', occ)),
+        SheetAction(PhosphorIconsRegular.signOut, 'Exit committee', () async {
           await context.push('/board/exit');
           _load();
         }, destructive: true),
       ] else if (iAmCommittee && voting) ...[
-        if (s['kind'] != 'champion') SheetAction(Icons.swap_horiz, 'Reassign member', () => _propose('reassign', occ)),
-        SheetAction(Icons.person_remove_outlined, 'Remove member', () => _propose('remove', occ), destructive: true),
+        if (s['kind'] != 'champion') SheetAction(PhosphorIconsRegular.arrowsLeftRight, 'Reassign member', () => _propose('reassign', occ)),
+        SheetAction(PhosphorIconsRegular.userMinus, 'Remove member', () => _propose('remove', occ), destructive: true),
       ],
-      SheetAction(Icons.person_outline, 'View profile', () => context.push('/users/${occ.id}')),
+      SheetAction(PhosphorIconsRegular.user, 'View profile', () => context.push('/users/${occ.id}')),
     ];
     await showActionSheet(context, items);
   }
@@ -107,15 +108,15 @@ class _BoardScreenState extends State<BoardScreen> {
           child: Row(children: [
             Text(_tab == 2 ? plural(counts['champions'], 'Champion') : _tab == 1 ? plural(counts['members'], 'Member') : plural(counts['all'], 'Member'), style: KText.paragraphMediumLarge),
             const Spacer(),
-            IconButton(tooltip: 'Community size and tiers', icon: const Icon(Icons.info, color: KColors.brand), onPressed: () => context.push('/board/tiers')),
+            IconButton(tooltip: 'Community size and tiers', icon: const Icon(PhosphorIconsFill.info, color: KColors.brand), onPressed: () => context.push('/board/tiers')),
           ]),
         ),
         if (b['canManageSeats'] == true)
           ListTile(
-            leading: const Icon(Icons.tune),
+            leading: const Icon(PhosphorIconsRegular.slidersHorizontal),
             title: const Text('Manage seats'),
             subtitle: const Text('Activate or deactivate empty committee and champion seats'),
-            trailing: const Icon(Icons.chevron_right),
+            trailing: const Icon(PhosphorIconsRegular.caretRight),
             onTap: () async {
               await context.push('/board/manage');
               _load();
@@ -137,13 +138,13 @@ class _BoardScreenState extends State<BoardScreen> {
                   title: Row(children: [
                     Flexible(child: Text(s['occupant']['name'], style: KText.paragraphMediumLarge)),
                     const SizedBox(width: 4),
-                    s['kind'] == 'champion' ? const Icon(Icons.workspace_premium, size: 16, color: KColors.progressStart) : const CommitteeMark(size: 14),
+                    s['kind'] == 'champion' ? const Icon(PhosphorIconsFill.sealCheck, size: 16, color: KColors.progressStart) : const CommitteeMark(size: 14),
                   ]),
                   subtitle: Text(s['role'], style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
-                  trailing: IconButton(tooltip: 'Actions', icon: const Icon(Icons.more_vert), onPressed: () => _actions(s)),
+                  trailing: IconButton(tooltip: 'Actions', icon: const Icon(PhosphorIconsRegular.dotsThreeVertical), onPressed: () => _actions(s)),
                 )
               : ListTile(
-                  leading: const CircleAvatar(radius: 22, backgroundColor: KColors.surfaceSubtle, child: Icon(Icons.person, color: KColors.textTertiary)),
+                  leading: const CircleAvatar(radius: 22, backgroundColor: KColors.surfaceSubtle, child: Icon(PhosphorIconsFill.user, color: KColors.textTertiary)),
                   title: Text(s['status'] == 'pending' ? 'Active Application' : 'Unoccupied', style: KText.paragraphMediumLarge),
                   subtitle: Text(s['role'], style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
                   trailing: s['status'] == 'pending'
@@ -163,7 +164,7 @@ class _BoardScreenState extends State<BoardScreen> {
       ]),
       actions: [
         if (b['mySeat'] != null && b['mySeat']['kind'] != 'champion')
-          IconButton(tooltip: 'Invite members to committee board', icon: const Icon(Icons.person_add_alt), onPressed: () => context.push('/board/invite')),
+          IconButton(tooltip: 'Invite members to committee board', icon: const Icon(PhosphorIconsRegular.userPlus), onPressed: () => context.push('/board/invite')),
       ],
     );
   }
@@ -250,7 +251,7 @@ class _JoinBoardScreenState extends State<JoinBoardScreen> with Busy {
       case 0:
         body = Column(children: [
           const SizedBox(height: 40),
-          const Icon(Icons.groups_2_outlined, size: 72),
+          const Icon(PhosphorIconsRegular.usersThree, size: 72),
           const SizedBox(height: 20),
           Text('Welcome to Committee', style: KText.headingSmall),
           const SizedBox(height: 8),
@@ -310,7 +311,7 @@ class _JoinBoardScreenState extends State<JoinBoardScreen> with Busy {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(color: KColors.brandSubtle, borderRadius: BorderRadius.circular(KRadius.sm), border: Border.all(color: KColors.brand)),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Row(children: [const Icon(Icons.info_outline, size: 16), const SizedBox(width: 6), Text('About the role', style: KText.paragraphMediumSmall)]),
+                Row(children: [const Icon(PhosphorIconsRegular.info, size: 16), const SizedBox(width: 6), Text('About the role', style: KText.paragraphMediumSmall)]),
                 const SizedBox(height: 6),
                 for (final line in about) Text('•  $line', style: KText.paragraphSmall),
               ]),
@@ -345,7 +346,7 @@ class BoardDoneScreen extends StatelessWidget {
   Widget build(BuildContext context) => KeysScaffold(
         body: Column(children: [
           const SizedBox(height: 120),
-          CircleAvatar(radius: 40, backgroundColor: pending ? KColors.brand : KColors.success, child: Icon(pending ? Icons.hourglass_top : Icons.check_rounded, color: Colors.white, size: 40)),
+          CircleAvatar(radius: 40, backgroundColor: pending ? KColors.brand : KColors.success, child: Icon(pending ? PhosphorIconsRegular.hourglassHigh : PhosphorIconsRegular.check, color: Colors.white, size: 40)),
           const SizedBox(height: 24),
           Intro(center: true, title: title, body: message),
         ]),
@@ -416,7 +417,7 @@ class _ManageSeatsScreenState extends State<ManageSeatsScreen> {
         if (_tab == 0) ...[
           Padding(padding: const EdgeInsets.fromLTRB(16, 0, 16, 4), child: Text("Preset roles (Can't be edited)", style: KText.overline)),
           for (final s in List<Map<String, dynamic>>.from(m['presetRoles']))
-            ListTile(title: Text(s['role']), subtitle: Text(s['occupant']?['name'] ?? 'Unoccupied'), trailing: const Icon(Icons.lock_outline, size: 18)),
+            ListTile(title: Text(s['role']), subtitle: Text(s['occupant']?['name'] ?? 'Unoccupied'), trailing: const Icon(PhosphorIconsRegular.lock, size: 18)),
           Padding(padding: const EdgeInsets.fromLTRB(16, 16, 16, 4), child: Text('Additional Seats · ${m['tierLabel']}', style: KText.overline)),
           if ((m['additionalSeats'] as List).isEmpty)
             Padding(padding: const EdgeInsets.all(16), child: Text('Tier 1 has no additional committee seats. They unlock at Tier 2.', style: KText.paragraphMedium.copyWith(color: KColors.textSecondary))),

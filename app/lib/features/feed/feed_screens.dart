@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:keys_lite/theme/phosphor.dart';
 import 'package:go_router/go_router.dart';
 import 'package:video_player/video_player.dart';
 import '../../core/api.dart';
@@ -180,7 +181,7 @@ class UnavailablePost extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(32),
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Icon(error.code == 'POST_REMOVED' ? Icons.gpp_bad_outlined : Icons.visibility_off_outlined, size: 48, color: KColors.textTertiary),
+            Icon(error.code == 'POST_REMOVED' ? PhosphorIconsRegular.shieldWarning : PhosphorIconsRegular.eyeSlash, size: 48, color: KColors.textTertiary),
             const SizedBox(height: 16),
             Text(error.data['title'] ?? 'Not available', style: KText.headingXSmall),
             const SizedBox(height: 8),
@@ -253,7 +254,7 @@ class _VideoScreenState extends State<VideoScreen> {
                   tooltip: c.value.isPlaying ? 'Pause' : 'Play',
                   iconSize: 48,
                   color: Colors.white,
-                  icon: Icon(c.value.isPlaying ? Icons.pause_circle : Icons.play_circle),
+                  icon: Icon(c.value.isPlaying ? PhosphorIconsRegular.pauseCircle : PhosphorIconsRegular.playCircle),
                   onPressed: () => setState(() => c.value.isPlaying ? c.pause() : c.play()),
                 ),
               ])

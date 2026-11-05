@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:keys_lite/theme/phosphor.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../core/api.dart';
@@ -65,7 +66,7 @@ class ChatAvatar extends StatelessWidget {
         height: size,
         child: Stack(children: [
           url == null && group
-              ? CircleAvatar(radius: size / 2, backgroundColor: KColors.surfaceSubtle, child: Icon(Icons.groups_outlined, size: size * 0.5, color: KColors.textSecondary))
+              ? CircleAvatar(radius: size / 2, backgroundColor: KColors.surfaceSubtle, child: Icon(PhosphorIconsRegular.usersThree, size: size * 0.5, color: KColors.textSecondary))
               : Avatar(url, size: size),
           if (online)
             Positioned(
@@ -108,15 +109,15 @@ Future<void> showChatOptions(BuildContext context, ChatCell c, VoidCallback onCh
 
   return showActionSheet(context, [
     c.pinned
-        ? SheetAction(Icons.push_pin_outlined, 'Unpin chat', () => call(() => api.delete('/chats/${c.id}/pin'), 'Chat unpinned'))
-        : SheetAction(Icons.push_pin_outlined, 'Pin chat', () => call(() => api.post('/chats/${c.id}/pin'), 'Chat pinned')),
+        ? SheetAction(PhosphorIconsRegular.pushPin, 'Unpin chat', () => call(() => api.delete('/chats/${c.id}/pin'), 'Chat unpinned'))
+        : SheetAction(PhosphorIconsRegular.pushPin, 'Pin chat', () => call(() => api.post('/chats/${c.id}/pin'), 'Chat pinned')),
     c.muted
-        ? SheetAction(Icons.volume_up_outlined, 'Unmute notifications', () => call(() => api.put('/chats/${c.id}/mute', {'duration': null}), 'Notifications unmuted'))
-        : SheetAction(Icons.volume_off_outlined, 'Mute notifications', () async {
+        ? SheetAction(PhosphorIconsRegular.speakerSimpleHigh, 'Unmute notifications', () => call(() => api.put('/chats/${c.id}/mute', {'duration': null}), 'Notifications unmuted'))
+        : SheetAction(PhosphorIconsRegular.speakerSimpleSlash, 'Mute notifications', () async {
             final d = await pickMuteDuration(context, title: 'Mute notifications', body: "You won't be notified about new messages in this chat.");
             if (d != null) await call(() => api.put('/chats/${c.id}/mute', {'duration': d}), 'Notifications muted');
           }),
-    SheetAction(Icons.delete_outline, 'Delete chat', () async {
+    SheetAction(PhosphorIconsRegular.trash, 'Delete chat', () async {
       final ok = await confirmSheet(context, title: 'Delete this chat?', body: 'Messages will be removed for you only. New messages will bring the chat back.', confirm: 'Delete');
       if (ok) await call(() => api.post('/chats/${c.id}/hide'), 'Chat deleted');
     }, destructive: true),

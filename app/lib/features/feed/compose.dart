@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:keys_lite/theme/phosphor.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/api.dart';
@@ -183,18 +184,18 @@ class _ComposeScreenState extends State<ComposeScreen> with Busy {
                 top: 4,
                 child: InkWell(
                   onTap: () => setState(() => _photos.removeAt(i)),
-                  child: Semantics(label: 'Remove photo ${i + 1}', child: const CircleAvatar(radius: 12, backgroundColor: Colors.black54, child: Icon(Icons.close, size: 14, color: Colors.white))),
+                  child: Semantics(label: 'Remove photo ${i + 1}', child: const CircleAvatar(radius: 12, backgroundColor: Colors.black54, child: Icon(PhosphorIconsRegular.x, size: 14, color: Colors.white))),
                 ),
               ),
             ]),
           ),
         );
       case 'video':
-        return _FileChip(icon: Icons.videocam_outlined, title: _video!.name, onRemove: () => setState(() => _video = null));
+        return _FileChip(icon: PhosphorIconsRegular.videoCamera, title: _video!.name, onRemove: () => setState(() => _video = null));
       case 'document':
-        return _FileChip(icon: Icons.description_outlined, title: _doc!.title, subtitle: _doc!.file.name, onRemove: () => setState(() => _doc = null));
+        return _FileChip(icon: PhosphorIconsRegular.fileText, title: _doc!.title, subtitle: _doc!.file.name, onRemove: () => setState(() => _doc = null));
       case 'link':
-        return _FileChip(icon: Icons.link, title: _link!['title'] ?? _link!['url'], subtitle: _link!['url'], onRemove: () => setState(() => _link = null));
+        return _FileChip(icon: PhosphorIconsRegular.link, title: _link!['title'] ?? _link!['url'], subtitle: _link!['url'], onRemove: () => setState(() => _link = null));
       default:
         return const SizedBox.shrink();
     }
@@ -220,7 +221,7 @@ class _ComposeScreenState extends State<ComposeScreen> with Busy {
               child: Row(children: [
                 IconButton(
                   tooltip: 'Close',
-                  icon: const Icon(Icons.close),
+                  icon: const Icon(PhosphorIconsRegular.x),
                   onPressed: () async {
                     if (await _confirmDiscard() && context.mounted) context.pop();
                   },
@@ -249,8 +250,8 @@ class _ComposeScreenState extends State<ComposeScreen> with Busy {
                           builder: (c) => SafeArea(
                             child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
                               Padding(padding: const EdgeInsets.fromLTRB(20, 0, 20, 8), child: Text('Audience', style: KText.headingSmall)),
-                              ListTile(leading: const Icon(Icons.public), title: const Text('Everyone in this community'), onTap: () => Navigator.pop(c, 'all')),
-                              ListTile(leading: const Icon(Icons.groups_outlined), title: const Text('Only members of this club'), onTap: () => Navigator.pop(c, 'members')),
+                              ListTile(leading: const Icon(PhosphorIconsRegular.globe), title: const Text('Everyone in this community'), onTap: () => Navigator.pop(c, 'all')),
+                              ListTile(leading: const Icon(PhosphorIconsRegular.usersThree), title: const Text('Only members of this club'), onTap: () => Navigator.pop(c, 'members')),
                             ]),
                           ),
                         );
@@ -261,7 +262,7 @@ class _ComposeScreenState extends State<ComposeScreen> with Busy {
                         decoration: BoxDecoration(border: Border.all(color: KColors.borderDefault), borderRadius: BorderRadius.circular(KRadius.pill)),
                         child: Row(mainAxisSize: MainAxisSize.min, children: [
                           Text(_audience == 'all' ? 'Everyone' : 'Members only', style: KText.paragraphMedium),
-                          const Icon(Icons.keyboard_arrow_down, size: 18),
+                          const Icon(PhosphorIconsRegular.caretDown, size: 18),
                         ]),
                       ),
                     ),
@@ -317,12 +318,12 @@ class _ComposeScreenState extends State<ComposeScreen> with Busy {
               child: Row(children: [
                 // FED-04.1: once one attachment type is used, the others are unavailable.
                 if (!_editing) ...[
-                  IconButton(tooltip: 'Add photos', icon: const Icon(Icons.image_outlined), onPressed: t == 'none' || t == 'photos' ? _addPhotos : null),
-                  IconButton(tooltip: 'Add video', icon: const Icon(Icons.videocam_outlined), onPressed: t == 'none' ? _addVideo : null),
-                  IconButton(tooltip: 'Add document', icon: const Icon(Icons.attach_file), onPressed: t == 'none' ? _addDocument : null),
+                  IconButton(tooltip: 'Add photos', icon: const Icon(PhosphorIconsRegular.image), onPressed: t == 'none' || t == 'photos' ? _addPhotos : null),
+                  IconButton(tooltip: 'Add video', icon: const Icon(PhosphorIconsRegular.videoCamera), onPressed: t == 'none' ? _addVideo : null),
+                  IconButton(tooltip: 'Add document', icon: const Icon(PhosphorIconsRegular.paperclip), onPressed: t == 'none' ? _addDocument : null),
                 ],
-                IconButton(tooltip: 'Tag someone', icon: const Icon(Icons.alternate_email), onPressed: _tag),
-                if (!_editing) IconButton(tooltip: 'Add link', icon: const Icon(Icons.link), onPressed: t == 'none' ? _addLink : null),
+                IconButton(tooltip: 'Tag someone', icon: const Icon(PhosphorIconsRegular.at), onPressed: _tag),
+                if (!_editing) IconButton(tooltip: 'Add link', icon: const Icon(PhosphorIconsRegular.link), onPressed: t == 'none' ? _addLink : null),
               ]),
             ),
           ]),
@@ -351,7 +352,7 @@ class _FileChip extends StatelessWidget {
               if (subtitle != null) Text(subtitle!, style: KText.paragraphSmall.copyWith(color: KColors.textSecondary), maxLines: 1, overflow: TextOverflow.ellipsis),
             ]),
           ),
-          IconButton(tooltip: 'Remove', icon: const Icon(Icons.close), onPressed: onRemove),
+          IconButton(tooltip: 'Remove', icon: const Icon(PhosphorIconsRegular.x), onPressed: onRemove),
         ]),
       );
 }
@@ -394,7 +395,7 @@ class _AddDocumentSheetState extends State<_AddDocumentSheet> {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(color: KColors.surfaceSubtle, borderRadius: BorderRadius.circular(KRadius.md)),
               child: Row(children: [
-                const Icon(Icons.upload_file_outlined),
+                const Icon(PhosphorIconsRegular.fileArrowUp),
                 const SizedBox(width: 12),
                 Expanded(child: Text(_file?.name ?? 'Select a document', style: KText.paragraphMediumLarge.copyWith(fontSize: 15))),
               ]),

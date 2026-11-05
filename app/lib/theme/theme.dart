@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'phosphor.dart';
 import 'tokens.dart';
 
 ThemeData buildTheme() {
@@ -11,6 +12,11 @@ ThemeData buildTheme() {
       secondary: KColors.brand,
       surface: KColors.surfaceDefault,
       error: KColors.error,
+    ),
+    // Back and close buttons Flutter draws itself use the design's Phosphor icons.
+    actionIconTheme: ActionIconThemeData(
+      backButtonIconBuilder: (_) => const Icon(PhosphorIconsRegular.caretLeft, size: 26),
+      closeButtonIconBuilder: (_) => const Icon(PhosphorIconsRegular.x, size: 24),
     ),
     textSelectionTheme: const TextSelectionThemeData(cursorColor: KColors.textPrimary),
     snackBarTheme: const SnackBarThemeData(

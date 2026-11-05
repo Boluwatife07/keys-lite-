@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:keys_lite/theme/phosphor.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/api.dart';
 import '../../core/feed_models.dart';
@@ -39,7 +40,7 @@ class _PersonTile extends StatelessWidget {
         subtitle: p.role == null ? null : Text(p.role!, style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
         trailing: selected == null
             ? null
-            : Icon(selected! ? Icons.check_box : Icons.check_box_outline_blank, color: selected! ? KColors.surfaceInverted : KColors.textTertiary),
+            : Icon(selected! ? PhosphorIconsFill.checkSquare : PhosphorIconsRegular.square, color: selected! ? KColors.surfaceInverted : KColors.textTertiary),
       );
 }
 
@@ -94,7 +95,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
       body: Column(children: [
         Padding(padding: const EdgeInsets.fromLTRB(16, 4, 16, 8), child: SearchField(controller: _q, hint: 'Search residents')),
         ListTile(
-          leading: const CircleAvatar(radius: 22, backgroundColor: KColors.brand, child: Icon(Icons.group_add_outlined, color: KColors.textPrimary)),
+          leading: const CircleAvatar(radius: 22, backgroundColor: KColors.brand, child: Icon(PhosphorIconsRegular.usersThree, color: KColors.textPrimary)),
           title: Text('New group', style: KText.paragraphMediumLarge),
           onTap: () => context.push('/chats/new/group'),
         ),
@@ -302,7 +303,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with Busy {
                 radius: 44,
                 backgroundColor: KColors.surfaceSubtle,
                 backgroundImage: _icon == null ? null : MemoryImage(_icon!.bytes),
-                child: _icon == null ? const Icon(Icons.add_a_photo_outlined, color: KColors.textSecondary) : null,
+                child: _icon == null ? const Icon(PhosphorIconsRegular.camera, color: KColors.textSecondary) : null,
               ),
             ),
           ),

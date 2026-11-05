@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:keys_lite/theme/phosphor.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../core/api.dart';
@@ -86,7 +87,7 @@ class _EmailScreenState extends State<EmailScreen> with Busy {
           const Expanded(child: Divider(color: KColors.borderDefault)),
         ]),
         const SizedBox(height: 32),
-        KeysButton('Continue with Apple', variant: ButtonVariant.outline, icon: const Icon(Icons.apple, size: 24, color: KColors.textPrimary), onPressed: busy ? null : () => _social(SocialProvider.apple)),
+        KeysButton('Continue with Apple', variant: ButtonVariant.outline, icon: const Icon(PhosphorIconsFill.appleLogo, size: 24, color: KColors.textPrimary), onPressed: busy ? null : () => _social(SocialProvider.apple)),
         const SizedBox(height: 16),
         KeysButton('Continue with Google', variant: ButtonVariant.outline, icon: const GoogleMark(), onPressed: busy ? null : () => _social(SocialProvider.google)),
         const SizedBox(height: 32),
@@ -411,7 +412,7 @@ class PasswordResetDoneScreen extends StatelessWidget {
   Widget build(BuildContext context) => KeysScaffold(
         body: Column(children: [
           const SizedBox(height: 120),
-          const CircleAvatar(radius: 36, backgroundColor: KColors.success, child: Icon(Icons.check_rounded, color: Colors.white, size: 40)),
+          const CircleAvatar(radius: 36, backgroundColor: KColors.success, child: Icon(PhosphorIconsRegular.check, color: Colors.white, size: 40)),
           const SizedBox(height: 24),
           const Intro(center: true, title: 'Password reset', body: 'Your password has been changed. For your security, you have been signed out on all devices.'),
         ]),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:keys_lite/theme/phosphor.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/api.dart';
 import '../../core/feed_models.dart';
@@ -111,7 +112,7 @@ class _CreatePollScreenState extends State<CreatePollScreen> {
         header: Padding(
           padding: const EdgeInsets.fromLTRB(4, 4, 16, 0),
           child: Row(children: [
-            IconButton(tooltip: 'Back', icon: const Icon(Icons.chevron_left, size: 30), onPressed: () async {
+            IconButton(tooltip: 'Back', icon: const Icon(PhosphorIconsRegular.caretLeft, size: 30), onPressed: () async {
               if (await _confirmDiscard() && context.mounted) context.pop();
             }),
             Text('Create poll', style: KText.headingXSmall),
@@ -144,7 +145,7 @@ class _CreatePollScreenState extends State<CreatePollScreen> {
                 ),
               TextButton.icon(
                 onPressed: () => _pickImage(_options[i]),
-                icon: const Icon(Icons.image_outlined, size: 18),
+                icon: const Icon(PhosphorIconsRegular.image, size: 18),
                 label: Text(_options[i].image == null ? 'Add image' : 'Change image'),
                 style: TextButton.styleFrom(foregroundColor: KColors.textSecondary),
               ),
@@ -159,7 +160,7 @@ class _CreatePollScreenState extends State<CreatePollScreen> {
               child: OutlinedButton.icon(
                 onPressed: () => setState(() => _options.add(_Option())),
                 style: OutlinedButton.styleFrom(shape: const StadiumBorder(), foregroundColor: KColors.textPrimary),
-                icon: const Icon(Icons.add, size: 18),
+                icon: const Icon(PhosphorIconsRegular.plus, size: 18),
                 label: const Text('Add option'),
               ),
             ),
@@ -179,7 +180,7 @@ class _CreatePollScreenState extends State<CreatePollScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
               decoration: BoxDecoration(color: KColors.surfaceSubtle, borderRadius: BorderRadius.circular(KRadius.sm)),
-              child: Row(children: [Expanded(child: Text(kDurations[_duration]!, style: KText.paragraphLarge)), const Icon(Icons.keyboard_arrow_down)]),
+              child: Row(children: [Expanded(child: Text(kDurations[_duration]!, style: KText.paragraphLarge)), const Icon(PhosphorIconsRegular.caretDown)]),
             ),
           ),
           const SizedBox(height: 20),

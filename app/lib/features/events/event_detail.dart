@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:keys_lite/theme/phosphor.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -86,7 +87,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
           child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
             child: Column(mainAxisSize: MainAxisSize.min, children: [
-              const CircleAvatar(radius: 32, backgroundColor: Color(0xFFE6F6EA), child: Icon(Icons.confirmation_number_outlined, size: 32, color: KColors.success)),
+              const CircleAvatar(radius: 32, backgroundColor: Color(0xFFE6F6EA), child: Icon(PhosphorIconsRegular.ticket, size: 32, color: KColors.success)),
               const SizedBox(height: 12),
               Text(r['title'] ?? "You're going", style: KText.headingSmall),
               const SizedBox(height: 8),
@@ -141,27 +142,27 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     final status = e['status'];
     showActionSheet(context, [
       if (e['canEdit'] == true)
-        SheetAction(Icons.edit_outlined, 'Edit event', () async {
+        SheetAction(PhosphorIconsRegular.pencilSimple, 'Edit event', () async {
           final r = await context.push('/events/${widget.id}/edit');
           if (r != null) _load();
         }),
-      if (_team && status != 'draft') SheetAction(Icons.confirmation_number_outlined, 'Tickets', () => context.push('/events/${widget.id}/attendees')),
-      if (e['canScan'] == true) SheetAction(Icons.qr_code_scanner, 'QR Scan', () => context.push('/events/${widget.id}/scan')),
-      if (_team && status == 'completed') SheetAction(Icons.star_outline, 'Ratings', () => context.push('/events/${widget.id}/ratings')),
+      if (_team && status != 'draft') SheetAction(PhosphorIconsRegular.ticket, 'Tickets', () => context.push('/events/${widget.id}/attendees')),
+      if (e['canScan'] == true) SheetAction(PhosphorIconsRegular.scan, 'QR Scan', () => context.push('/events/${widget.id}/scan')),
+      if (_team && status == 'completed') SheetAction(PhosphorIconsRegular.star, 'Ratings', () => context.push('/events/${widget.id}/ratings')),
       if (status == 'live' && !_team)
         e['saved'] == true
-            ? SheetAction(Icons.bookmark_remove_outlined, 'Remove bookmark', () => _act(() => api.delete('/events/${widget.id}/save')))
-            : SheetAction(Icons.bookmark_add_outlined, 'Bookmark event', () => _act(() => api.post('/events/${widget.id}/save'))),
-      if (status == 'live' && _role == 'host') SheetAction(Icons.event_busy_outlined, 'Cancel event', _cancel, destructive: true),
+            ? SheetAction(PhosphorIconsRegular.bookmarkSimple, 'Remove bookmark', () => _act(() => api.delete('/events/${widget.id}/save')))
+            : SheetAction(PhosphorIconsRegular.bookmarkSimple, 'Bookmark event', () => _act(() => api.post('/events/${widget.id}/save'))),
+      if (status == 'live' && _role == 'host') SheetAction(PhosphorIconsRegular.calendarX, 'Cancel event', _cancel, destructive: true),
       if (status == 'draft' && _role == 'host')
-        SheetAction(Icons.delete_outline, 'Delete draft', () async {
+        SheetAction(PhosphorIconsRegular.trash, 'Delete draft', () async {
           final router = GoRouter.of(context);
           final ok = await confirmSheet(context, title: 'Delete draft?', body: 'This draft and its planning chat will be removed.', confirm: 'Delete');
           if (!ok) return;
           await _act(() => api.delete('/events/${widget.id}'));
           router.pop(true);
         }, destructive: true),
-      if (!_team && status != 'draft') SheetAction(Icons.flag_outlined, 'Report event', () => showReportSheet(context, itemType: 'event', itemId: widget.id, title: 'Report event')),
+      if (!_team && status != 'draft') SheetAction(PhosphorIconsRegular.flag, 'Report event', () => showReportSheet(context, itemType: 'event', itemId: widget.id, title: 'Report event')),
     ]);
   }
 
@@ -169,11 +170,11 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     final e = _e!;
     final deps = context.deps;
     showActionSheet(context, [
-      SheetAction(Icons.link, 'Copy link', () async {
+      SheetAction(PhosphorIconsRegular.link, 'Copy link', () async {
         await deps.sharer.copy(e['shareLink']);
         if (mounted) showToast(context, 'Link copied');
       }),
-      SheetAction(Icons.ios_share, 'Share via', () => deps.sharer.share('${e['shareText']} ${e['shareLink']}')),
+      SheetAction(PhosphorIconsRegular.shareFat, 'Share via', () => deps.sharer.share('${e['shareText']} ${e['shareLink']}')),
     ]);
   }
 
@@ -186,7 +187,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
           Padding(padding: const EdgeInsets.fromLTRB(20, 0, 20, 8), child: Text('Hosts', style: KText.headingSmall)),
           for (final h in hosts)
             ListTile(
-              leading: h['external'] == true ? const CircleAvatar(backgroundColor: KColors.surfaceSubtle, child: Icon(Icons.business_outlined)) : Avatar(h['person']?['photoUrl'], size: 40),
+              leading: h['external'] == true ? const CircleAvatar(backgroundColor: KColors.surfaceSubtle, child: Icon(PhosphorIconsRegular.buildings)) : Avatar(h['person']?['photoUrl'], size: 40),
               title: Text(h['name']),
               subtitle: Text(h['external'] == true ? 'External • This co-host is not on Keys.' : '${h['role']}${h['status'] == 'invited' ? ' (invited)' : ''}'),
               onTap: h['person'] == null ? null : () {
@@ -196,7 +197,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               trailing: _role == 'host' && h['id'] != null
                   ? IconButton(
                       tooltip: 'Remove ${h['name']}',
-                      icon: const Icon(Icons.person_remove_outlined),
+                      icon: const Icon(PhosphorIconsRegular.userMinus),
                       onPressed: () {
                         Navigator.pop(c);
                         _act(() => context.api.delete('/events/${widget.id}/cohosts/${h['id']}'));
@@ -274,10 +275,10 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
       appBar: AppBar(
         backgroundColor: KColors.surfaceDefault,
         surfaceTintColor: Colors.transparent,
-        leading: IconButton(tooltip: 'Back', icon: const Icon(Icons.chevron_left, size: 30), onPressed: () => context.pop()),
+        leading: IconButton(tooltip: 'Back', icon: const Icon(PhosphorIconsRegular.caretLeft, size: 30), onPressed: () => context.pop()),
         actions: [
-          if (status == 'live' || status == 'draft') IconButton(tooltip: 'Share event', icon: const Icon(Icons.share_outlined), onPressed: _share),
-          if (status != 'cancelled' || _team) IconButton(tooltip: 'Event options', icon: const Icon(Icons.more_vert), onPressed: _menu),
+          if (status == 'live' || status == 'draft') IconButton(tooltip: 'Share event', icon: const Icon(PhosphorIconsRegular.shareNetwork), onPressed: _share),
+          if (status != 'cancelled' || _team) IconButton(tooltip: 'Event options', icon: const Icon(PhosphorIconsRegular.dotsThreeVertical), onPressed: _menu),
         ],
       ),
       floatingActionButton: e['canScan'] == true && status == 'live'
@@ -288,7 +289,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               foregroundColor: KColors.textPrimary,
               shape: const CircleBorder(),
               onPressed: () => context.push('/events/${widget.id}/scan'),
-              child: const Icon(Icons.qr_code_scanner),
+              child: const Icon(PhosphorIconsRegular.scan),
             )
           : null,
       body: RefreshIndicator(
@@ -310,7 +311,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                               ? context.push('/video', extra: context.api.absolute(media[i]['url']))
                               : context.push('/media', extra: {'urls': media.where((m) => m['kind'] == 'photo').map((m) => m['url']).toList(), 'index': i}),
                           child: media[i]['kind'] == 'video'
-                              ? Container(color: Colors.black87, child: const Center(child: Icon(Icons.play_circle_fill, size: 56, color: Colors.white)))
+                              ? Container(color: Colors.black87, child: const Center(child: Icon(PhosphorIconsFill.playCircle, size: 56, color: Colors.white)))
                               : Image.network(context.api.absolute(media[i]['url']), fit: BoxFit.cover, width: double.infinity, errorBuilder: (_, _, _) => Container(color: KColors.surfaceSubtle)),
                         ),
                       ),
@@ -347,17 +348,17 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Expanded(child: Text(item.title, style: KText.headingSmall)),
                 if (e['chatId'] != null)
-                  IconButton.filledTonal(tooltip: 'Event group chat', icon: const Icon(Icons.chat_outlined), onPressed: () => context.push('/chats/${e['chatId']}')),
+                  IconButton.filledTonal(tooltip: 'Event group chat', icon: const Icon(PhosphorIconsRegular.chatText), onPressed: () => context.push('/chats/${e['chatId']}')),
               ]),
               const SizedBox(height: 10),
-              _Info(Icons.calendar_today_outlined, item.startAt == null ? 'Date to be set' : eventDay(item.startAt!)),
-              _Info(Icons.schedule, eventTimes(item)),
+              _Info(PhosphorIconsRegular.calendarBlank, item.startAt == null ? 'Date to be set' : eventDay(item.startAt!)),
+              _Info(PhosphorIconsRegular.clock, eventTimes(item)),
               if (item.format == 'online')
-                _Info(Icons.videocam_outlined, e['link'] != null ? '${item.platform} • Join link' : (item.platform ?? 'Online'), link: e['link'])
+                _Info(PhosphorIconsRegular.videoCamera, e['link'] != null ? '${item.platform} • Join link' : (item.platform ?? 'Online'), link: e['link'])
               else
-                _Info(Icons.place_outlined, item.locationName ?? 'Location to be added',
+                _Info(PhosphorIconsRegular.mapPin, item.locationName ?? 'Location to be added',
                     link: e['lat'] == null ? null : 'https://www.google.com/maps/search/?api=1&query=${e['lat']},${e['lng']}'),
-              if (e['meetingId'] != null) _Info(Icons.tag, 'Meeting ID ${e['meetingId']}${e['meetingPassword'] != null ? ' • Password ${e['meetingPassword']}' : ''}'),
+              if (e['meetingId'] != null) _Info(PhosphorIconsRegular.hash, 'Meeting ID ${e['meetingId']}${e['meetingPassword'] != null ? ' • Password ${e['meetingPassword']}' : ''}'),
             ]),
           ),
           section(
@@ -422,7 +423,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   FilledButton.icon(
                     style: FilledButton.styleFrom(backgroundColor: KColors.surfaceInverted, shape: const StadiumBorder()),
                     onPressed: () => context.push('/events/${widget.id}/attendees'),
-                    icon: const Icon(Icons.chevron_right),
+                    icon: const Icon(PhosphorIconsRegular.caretRight),
                     label: const Text('View'),
                   ),
               ]),
@@ -445,7 +446,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                             radius: 30,
                             backgroundColor: KColors.surfaceSubtle,
                             backgroundImage: g['photoUrl'] == null ? null : NetworkImage(context.api.absolute(g['photoUrl'])),
-                            child: g['photoUrl'] == null ? const Icon(Icons.person_outline) : null,
+                            child: g['photoUrl'] == null ? const Icon(PhosphorIconsRegular.user) : null,
                           ),
                         ),
                         const SizedBox(height: 6),
@@ -670,7 +671,7 @@ class _RatingSheetState extends State<_RatingSheet> with Busy {
           child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(children: [
               Expanded(child: Text(widget.e.title, style: KText.paragraphMediumLarge.copyWith(fontWeight: FontWeight.w600))),
-              IconButton(tooltip: 'Close', icon: const Icon(Icons.close), onPressed: _close),
+              IconButton(tooltip: 'Close', icon: const Icon(PhosphorIconsRegular.x), onPressed: _close),
             ]),
             if (widget.e.coverUrl != null)
               ClipRRect(borderRadius: BorderRadius.circular(KRadius.sm), child: Image.network(context.api.absolute(widget.e.coverUrl!), height: 140, width: double.infinity, fit: BoxFit.cover, errorBuilder: (_, _, _) => const SizedBox())),
@@ -685,7 +686,7 @@ class _RatingSheetState extends State<_RatingSheet> with Busy {
                   tooltip: '$i star${i == 1 ? '' : 's'}',
                   iconSize: 40,
                   onPressed: () => setState(() => _stars = i),
-                  icon: Icon(i <= _stars ? Icons.star_rounded : Icons.star_outline_rounded, color: const Color(0xFFFFC21A)),
+                  icon: Icon(i <= _stars ? PhosphorIconsFill.star : PhosphorIconsRegular.star, color: const Color(0xFFFFC21A)),
                 ),
             ]),
             Row(children: [
@@ -799,7 +800,7 @@ class _TicketScreenState extends State<TicketScreen> {
       appBar: AppBar(
         backgroundColor: KColors.surfaceSubtle,
         surfaceTintColor: Colors.transparent,
-        leading: IconButton(tooltip: 'Close', icon: const Icon(Icons.close), onPressed: () => context.pop()),
+        leading: IconButton(tooltip: 'Close', icon: const Icon(PhosphorIconsRegular.x), onPressed: () => context.pop()),
         actions: [if (active && t?['checkedInAt'] == null) TextButton(onPressed: _cancel, child: Text('Cancel ticket', style: TextStyle(color: KColors.error)))],
       ),
       body: t == null
@@ -848,7 +849,7 @@ class _TicketScreenState extends State<TicketScreen> {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                 child: Row(children: [
-                  Expanded(child: KeysButton('Download', icon: const Icon(Icons.download, color: Colors.white, size: 18), onPressed: _download)),
+                  Expanded(child: KeysButton('Download', icon: const Icon(PhosphorIconsRegular.downloadSimple, color: Colors.white, size: 18), onPressed: _download)),
                   const SizedBox(width: 12),
                   Expanded(child: KeysButton('Share', variant: ButtonVariant.outline, onPressed: () => showShareSheet(context, t!['shareLink']))),
                 ]),
@@ -1029,7 +1030,7 @@ class _ScanScreenState extends State<ScanScreen> {
       appBar: AppBar(
         backgroundColor: KColors.surfaceInverted,
         foregroundColor: Colors.white,
-        leading: IconButton(tooltip: 'Close', icon: const Icon(Icons.close), onPressed: () => context.pop()),
+        leading: IconButton(tooltip: 'Close', icon: const Icon(PhosphorIconsRegular.x), onPressed: () => context.pop()),
         title: Text('Scan Tickets', style: KText.headingXSmall.copyWith(color: Colors.white)),
         titleSpacing: 0,
       ),
@@ -1051,7 +1052,7 @@ class _ScanScreenState extends State<ScanScreen> {
                                 final v = cap.barcodes.isEmpty ? null : cap.barcodes.first.rawValue;
                                 if (v != null) _check(v);
                               })
-                            : Container(color: Colors.black, child: const Center(child: Icon(Icons.qr_code_scanner, color: Colors.white38, size: 96))),
+                            : Container(color: Colors.black, child: const Center(child: Icon(PhosphorIconsRegular.scan, color: Colors.white38, size: 96))),
                       ),
                     ),
                     TextButton(onPressed: _type, child: const Text('Enter code instead', style: TextStyle(color: Colors.white))),
@@ -1061,7 +1062,7 @@ class _ScanScreenState extends State<ScanScreen> {
                       width: 120,
                       height: 120,
                       decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: color, width: 4)),
-                      child: Icon(ok ? Icons.done_all : Icons.close, color: color, size: 56),
+                      child: Icon(ok ? PhosphorIconsRegular.checks : PhosphorIconsRegular.x, color: color, size: 56),
                     ),
                     const SizedBox(height: 20),
                     Text(r['title'], style: KText.headingSmall.copyWith(color: Colors.white)),
@@ -1089,7 +1090,7 @@ class _ScanScreenState extends State<ScanScreen> {
                     ],
                   ]),
           ),
-          if (r != null) KeysButton('Scan next', variant: ButtonVariant.light, icon: const Icon(Icons.qr_code_scanner, size: 18), onPressed: () => setState(() => _result = null)),
+          if (r != null) KeysButton('Scan next', variant: ButtonVariant.light, icon: const Icon(PhosphorIconsRegular.scan, size: 18), onPressed: () => setState(() => _result = null)),
         ]),
       ),
     );
@@ -1144,7 +1145,7 @@ class _RatingsScreenState extends State<RatingsScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 3),
                   child: Row(children: [
                     SizedBox(width: 20, child: Text('${b['stars']}')),
-                    const Icon(Icons.star_rounded, size: 16, color: Color(0xFFFFC21A)),
+                    const Icon(PhosphorIconsFill.star, size: 16, color: Color(0xFFFFC21A)),
                     const SizedBox(width: 8),
                     Expanded(child: LinearProgressIndicator(value: d['count'] == 0 ? 0 : b['count'] / d['count'], minHeight: 8, color: const Color(0xFFFFC21A), backgroundColor: KColors.surfaceSubtle, borderRadius: BorderRadius.circular(4))),
                     SizedBox(width: 36, child: Text('${b['count']}', textAlign: TextAlign.right)),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:keys_lite/theme/phosphor.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -89,12 +90,12 @@ class _UpdateDetailScreenState extends State<UpdateDetailScreen> {
       appBar: AppBar(
         backgroundColor: KColors.surfaceDefault,
         surfaceTintColor: Colors.transparent,
-        leading: IconButton(tooltip: 'Back', icon: const Icon(Icons.chevron_left, size: 30), onPressed: () => Navigator.of(context).maybePop()),
+        leading: IconButton(tooltip: 'Back', icon: const Icon(PhosphorIconsRegular.caretLeft, size: 30), onPressed: () => Navigator.of(context).maybePop()),
         actions: [
           if (u != null)
             IconButton(
               tooltip: 'Update options',
-              icon: const Icon(Icons.more_vert),
+              icon: const Icon(PhosphorIconsRegular.dotsThreeVertical),
               onPressed: () => showUpdateOptions(context, u, onChanged: _load, onEdit: _edit, onGone: () => context.pop(true)),
             ),
         ],
@@ -122,7 +123,7 @@ class _UpdateDetailScreenState extends State<UpdateDetailScreen> {
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(color: const Color(0xFFE6F6EA), borderRadius: BorderRadius.circular(KRadius.md)),
           child: Row(children: [
-            const Icon(Icons.check_circle, color: KColors.success, size: 20),
+            const Icon(PhosphorIconsFill.checkCircle, color: KColors.success, size: 20),
             const SizedBox(width: 8),
             Expanded(child: Text('This update has been resolved', style: KText.paragraphMedium.copyWith(color: KColors.success))),
           ]),
@@ -141,7 +142,7 @@ class _UpdateDetailScreenState extends State<UpdateDetailScreen> {
         Expanded(child: AuthorLine(u.author, subtitle: me?.communityName)),
         if (chat != null)
           Stack(clipBehavior: Clip.none, children: [
-            IconButton(tooltip: chat['joined'] == true ? 'Open group chat' : 'Join group chat', icon: const Icon(Icons.chat_outlined), onPressed: _openChat),
+            IconButton(tooltip: chat['joined'] == true ? 'Open group chat' : 'Join group chat', icon: const Icon(PhosphorIconsRegular.chatText), onPressed: _openChat),
             if (chat['joined'] != true && !u.resolved)
               Positioned(right: 8, top: 8, child: Container(width: 9, height: 9, decoration: const BoxDecoration(color: KColors.error, shape: BoxShape.circle))),
           ]),
@@ -242,7 +243,7 @@ class _AdditionalItem extends StatelessWidget {
           IconButton(
             tooltip: 'Additional update options',
             visualDensity: VisualDensity.compact,
-            icon: const Icon(Icons.more_horiz),
+            icon: const Icon(PhosphorIconsRegular.dotsThree),
             onPressed: () => _options(context, mine),
           ),
         ]),
@@ -264,12 +265,12 @@ class _AdditionalItem extends StatelessWidget {
   void _options(BuildContext context, bool mine) {
     final api = context.api;
     showActionSheet(context, [
-      SheetAction(Icons.copy, 'Copy text', () async {
+      SheetAction(PhosphorIconsRegular.copy, 'Copy text', () async {
         await Clipboard.setData(ClipboardData(text: a['text'] ?? ''));
         if (context.mounted) showToast(context, 'Copied');
       }),
       if (mine && !resolved)
-        SheetAction(Icons.edit_outlined, 'Edit additional update', () async {
+        SheetAction(PhosphorIconsRegular.pencilSimple, 'Edit additional update', () async {
           final c = TextEditingController(text: a['text']);
           final text = await showModalBottomSheet<String>(
             context: context,
@@ -297,7 +298,7 @@ class _AdditionalItem extends StatelessWidget {
           }
         }),
       if (mine)
-        SheetAction(Icons.delete_outline, 'Delete additional update', () async {
+        SheetAction(PhosphorIconsRegular.trash, 'Delete additional update', () async {
           final ok = await confirmSheet(context, title: 'Delete additional update?', body: 'Residents will see that this additional update is no longer available.', confirm: 'Delete');
           if (!ok) return;
           try {
@@ -309,7 +310,7 @@ class _AdditionalItem extends StatelessWidget {
           }
         }, destructive: true)
       else
-        SheetAction(Icons.flag_outlined, 'Report', () => showReportSheet(context, itemType: 'additional_update', itemId: a['id'], title: 'Report additional update')),
+        SheetAction(PhosphorIconsRegular.flag, 'Report', () => showReportSheet(context, itemType: 'additional_update', itemId: a['id'], title: 'Report additional update')),
     ]);
   }
 }
@@ -372,13 +373,13 @@ class _AdditionalComposerState extends State<_AdditionalComposer> with Busy {
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
               child: Row(children: [
                 ClipRRect(borderRadius: BorderRadius.circular(6), child: Image.memory(_image!.bytes, width: 56, height: 56, fit: BoxFit.cover)),
-                IconButton(tooltip: 'Remove image', icon: const Icon(Icons.close), onPressed: () => setState(() => _image = null)),
+                IconButton(tooltip: 'Remove image', icon: const Icon(PhosphorIconsRegular.x), onPressed: () => setState(() => _image = null)),
               ]),
             ),
           Padding(
             padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
             child: Row(children: [
-              IconButton(tooltip: 'Add image', icon: const Icon(Icons.image_outlined), onPressed: _image == null ? _pick : null),
+              IconButton(tooltip: 'Add image', icon: const Icon(PhosphorIconsRegular.image), onPressed: _image == null ? _pick : null),
               Expanded(
                 child: TextField(
                   controller: _c,
@@ -399,7 +400,7 @@ class _AdditionalComposerState extends State<_AdditionalComposer> with Busy {
               const SizedBox(width: 4),
               busy
                   ? const Padding(padding: EdgeInsets.all(12), child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)))
-                  : IconButton(tooltip: 'Post additional update', icon: const Icon(Icons.send), color: KColors.textPrimary, onPressed: ready ? _send : null),
+                  : IconButton(tooltip: 'Post additional update', icon: const Icon(PhosphorIconsFill.paperPlaneRight), color: KColors.textPrimary, onPressed: ready ? _send : null),
             ]),
           ),
         ]),

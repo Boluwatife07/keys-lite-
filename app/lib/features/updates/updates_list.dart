@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:keys_lite/theme/phosphor.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/api.dart';
 import '../../core/feed_models.dart';
@@ -140,7 +141,7 @@ class UpdatesTabState extends State<UpdatesTab> {
             foregroundColor: KColors.textPrimary,
             shape: const CircleBorder(),
             onPressed: _create,
-            child: const Icon(Icons.add, size: 28),
+            child: const Icon(PhosphorIconsRegular.plus, size: 28),
           ),
         ),
     ]);
@@ -164,8 +165,8 @@ class SearchField extends StatelessWidget {
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: KText.paragraphLarge.copyWith(color: KColors.textTertiary),
-          prefixIcon: const Icon(Icons.search, color: KColors.textPrimary),
-          suffixIcon: controller.text.isEmpty ? null : IconButton(tooltip: 'Clear search', icon: const Icon(Icons.close, size: 20), onPressed: controller.clear),
+          prefixIcon: const Icon(PhosphorIconsRegular.magnifyingGlass, color: KColors.textPrimary),
+          suffixIcon: controller.text.isEmpty ? null : IconButton(tooltip: 'Clear search', icon: const Icon(PhosphorIconsRegular.x, size: 20), onPressed: controller.clear),
           filled: true,
           fillColor: KColors.surfaceSubtle,
           contentPadding: const EdgeInsets.symmetric(vertical: 12),
@@ -207,8 +208,8 @@ class UpdateCard extends StatelessWidget {
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Row(children: [
                       Expanded(child: Text(u.title, style: KText.paragraphMediumLarge.copyWith(fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis)),
-                      if (u.pinned) const Padding(padding: EdgeInsets.only(left: 6), child: Icon(Icons.push_pin, size: 18, semanticLabel: 'Pinned')),
-                      if (u.muted) const Padding(padding: EdgeInsets.only(left: 6), child: Icon(Icons.volume_off_outlined, size: 18, semanticLabel: 'Muted')),
+                      if (u.pinned) const Padding(padding: EdgeInsets.only(left: 6), child: Icon(PhosphorIconsFill.pushPin, size: 18, semanticLabel: 'Pinned')),
+                      if (u.muted) const Padding(padding: EdgeInsets.only(left: 6), child: Icon(PhosphorIconsRegular.speakerSimpleSlash, size: 18, semanticLabel: 'Muted')),
                     ]),
                     const SizedBox(height: 4),
                     Text(u.details, style: KText.paragraphMedium.copyWith(color: KColors.textSecondary), maxLines: 3, overflow: TextOverflow.ellipsis),
@@ -257,33 +258,33 @@ Future<void> showUpdateOptions(BuildContext context, UpdateItem u, {required Voi
   return showActionSheet(context, [
     if (!u.resolved)
       u.pinned
-          ? SheetAction(Icons.push_pin_outlined, 'Unpin update', () => call(() => api.delete('/updates/${u.id}/pin'), 'Update unpinned'), subtitle: 'Remove this update from the top.')
-          : SheetAction(Icons.push_pin_outlined, 'Pin update', () => call(() => api.post('/updates/${u.id}/pin'), 'Update pinned'), subtitle: 'Keep this update fixed at the top.'),
+          ? SheetAction(PhosphorIconsRegular.pushPin, 'Unpin update', () => call(() => api.delete('/updates/${u.id}/pin'), 'Update unpinned'), subtitle: 'Remove this update from the top.')
+          : SheetAction(PhosphorIconsRegular.pushPin, 'Pin update', () => call(() => api.post('/updates/${u.id}/pin'), 'Update pinned'), subtitle: 'Keep this update fixed at the top.'),
     if (!u.resolved)
       u.muted
-          ? SheetAction(Icons.volume_up_outlined, 'Unmute update', () => call(() => api.put('/updates/${u.id}/mute', {'duration': null}), 'Update unmuted'), subtitle: 'Resume receiving notifications for this update.')
-          : SheetAction(Icons.volume_off_outlined, 'Mute update', () async {
+          ? SheetAction(PhosphorIconsRegular.speakerSimpleHigh, 'Unmute update', () => call(() => api.put('/updates/${u.id}/mute', {'duration': null}), 'Update unmuted'), subtitle: 'Resume receiving notifications for this update.')
+          : SheetAction(PhosphorIconsRegular.speakerSimpleSlash, 'Mute update', () async {
               final d = await pickMuteDuration(context, title: 'Mute update', body: "You won't get notifications for new additional updates on this update.");
               if (d != null) await call(() => api.put('/updates/${u.id}/mute', {'duration': d}), 'Update muted');
             }, subtitle: 'Stop receiving notifications for this update.'),
-    if (!fromList) SheetAction(Icons.ios_share, 'Share update', () => showShareSheet(context, u.shareLink), subtitle: 'Copy the link or share it.'),
-    if (!fromList && u.isMine && !u.resolved && onEdit != null) SheetAction(Icons.edit_outlined, 'Edit update', onEdit, subtitle: 'Change the details of this update.'),
+    if (!fromList) SheetAction(PhosphorIconsRegular.shareFat, 'Share update', () => showShareSheet(context, u.shareLink), subtitle: 'Copy the link or share it.'),
+    if (!fromList && u.isMine && !u.resolved && onEdit != null) SheetAction(PhosphorIconsRegular.pencilSimple, 'Edit update', onEdit, subtitle: 'Change the details of this update.'),
     if (!fromList && u.canResolve)
-      SheetAction(Icons.check_circle_outline, 'Resolve update', () async {
+      SheetAction(PhosphorIconsRegular.checkCircle, 'Resolve update', () async {
         final ok = await confirmSheet(context,
             title: 'Resolve update?',
             body: 'This update will move to resolved updates. Additional updates and its group chat become read-only.',
             confirm: 'Resolve');
         if (ok) await call(() => api.post('/updates/${u.id}/resolve'));
       }, subtitle: 'Mark this update as resolved.'),
-    SheetAction(Icons.delete_outline, 'Delete for me', () async {
+    SheetAction(PhosphorIconsRegular.trash, 'Delete for me', () async {
       final ok = await confirmSheet(context, title: 'Delete for me?', body: 'This update will be removed from your updates. Other residents will still see it.', confirm: 'Delete');
       if (!ok) return;
       await call(() => api.post('/updates/${u.id}/hide'));
       onGone?.call();
     }, subtitle: 'Remove this update for me'),
     if (!fromList && u.isMine && !u.resolved)
-      SheetAction(Icons.delete_forever_outlined, 'Delete update', () async {
+      SheetAction(PhosphorIconsRegular.trash, 'Delete update', () async {
         final ok = await confirmSheet(context, title: 'Delete update?', body: 'This update will be deleted for all residents. This cannot be undone.', confirm: 'Delete');
         if (!ok) return;
         await call(() => api.delete('/updates/${u.id}'));
@@ -326,7 +327,7 @@ class _ResolvedUpdatesScreenState extends State<ResolvedUpdatesScreen> {
   @override
   Widget build(BuildContext context) => Scaffold(
         backgroundColor: KColors.surfaceDefault,
-        appBar: AppBar(backgroundColor: KColors.surfaceDefault, surfaceTintColor: Colors.transparent, leading: IconButton(tooltip: 'Back', icon: const Icon(Icons.chevron_left, size: 30), onPressed: () => Navigator.of(context).maybePop()), titleSpacing: 0, title: Text('Resolved updates', style: KText.headingXSmall)),
+        appBar: AppBar(backgroundColor: KColors.surfaceDefault, surfaceTintColor: Colors.transparent, leading: IconButton(tooltip: 'Back', icon: const Icon(PhosphorIconsRegular.caretLeft, size: 30), onPressed: () => Navigator.of(context).maybePop()), titleSpacing: 0, title: Text('Resolved updates', style: KText.headingXSmall)),
         body: ListView(padding: const EdgeInsets.fromLTRB(16, 8, 16, 24), children: [
           SearchField(controller: _search, hint: 'Search by update title'),
           const SizedBox(height: 16),

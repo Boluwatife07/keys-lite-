@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:keys_lite/theme/phosphor.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../core/api.dart';
@@ -54,20 +55,20 @@ class _PostCardState extends State<PostCard> {
   Future<void> _openMenu() async {
     if (p.isMine) {
       await showActionSheet(context, [
-        if (!p.isPoll) SheetAction(Icons.edit_outlined, 'Edit post', () async {
+        if (!p.isPoll) SheetAction(PhosphorIconsRegular.pencilSimple, 'Edit post', () async {
           final r = await context.push<Post>('/feed/compose', extra: {'edit': p});
           if (r != null) _set(r);
         }),
-        SheetAction(Icons.delete_outline, 'Delete post', _delete, destructive: true),
+        SheetAction(PhosphorIconsRegular.trash, 'Delete post', _delete, destructive: true),
       ]);
       return;
     }
     final a = p.author;
     await showActionSheet(context, [
-      if (p.canDelete) SheetAction(Icons.delete_outline, 'Delete post', _delete, destructive: true),
-      SheetAction(Icons.volume_off_outlined, 'Mute ${a.firstName}', () => muteFromPost(context, a, () => widget.onChanged(null)), subtitle: 'Stop seeing posts from this user for 30 days'),
-      SheetAction(Icons.flag_outlined, 'Report this post', () => showReportSheet(context, itemType: p.isPoll ? 'poll' : 'post', itemId: p.id, title: 'Report this post'), subtitle: "${a.firstName} won't know you reported."),
-      SheetAction(Icons.block, 'Block ${a.firstName}', () async {
+      if (p.canDelete) SheetAction(PhosphorIconsRegular.trash, 'Delete post', _delete, destructive: true),
+      SheetAction(PhosphorIconsRegular.speakerSimpleSlash, 'Mute ${a.firstName}', () => muteFromPost(context, a, () => widget.onChanged(null)), subtitle: 'Stop seeing posts from this user for 30 days'),
+      SheetAction(PhosphorIconsRegular.flag, 'Report this post', () => showReportSheet(context, itemType: p.isPoll ? 'poll' : 'post', itemId: p.id, title: 'Report this post'), subtitle: "${a.firstName} won't know you reported."),
+      SheetAction(PhosphorIconsRegular.prohibit, 'Block ${a.firstName}', () async {
         if (await blockPerson(context, a)) widget.onChanged(null);
       }, subtitle: "${a.firstName} won't be able to message you. They won't know you blocked them."),
     ]);
@@ -104,7 +105,7 @@ class _PostCardState extends State<PostCard> {
             child: InkWell(
               onTap: () => context.push('/clubs/${p.club!['id']}'),
               child: Row(children: [
-                const Icon(Icons.groups_outlined, size: 16, color: KColors.textSecondary),
+                const Icon(PhosphorIconsRegular.usersThree, size: 16, color: KColors.textSecondary),
                 const SizedBox(width: 6),
                 Flexible(child: Text(p.club!['name'] ?? '', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary), overflow: TextOverflow.ellipsis)),
               ]),
@@ -132,7 +133,7 @@ class _PostCardState extends State<PostCard> {
               ),
             ),
             Text(timeAgo(p.createdAt), style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
-            SizedBox(width: 32, height: 24, child: IconButton(padding: EdgeInsets.zero, tooltip: 'More options', icon: const Icon(Icons.more_vert, size: 20), onPressed: _openMenu)),
+            SizedBox(width: 32, height: 24, child: IconButton(padding: EdgeInsets.zero, tooltip: 'More options', icon: const Icon(PhosphorIconsRegular.dotsThreeVertical, size: 20), onPressed: _openMenu)),
           ]),
         ),
         const SizedBox(height: 10),
@@ -169,8 +170,8 @@ class _PostCardState extends State<PostCard> {
         Padding(
           padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
           child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-            _Action(icon: p.likedByMe ? Icons.favorite : Icons.favorite_border, color: p.likedByMe ? KColors.error : null, label: 'Like', onTap: _toggleLike, selected: p.likedByMe),
-            if (p.canComment) _Action(icon: Icons.chat_bubble_outline, label: 'Comment', onTap: () async {
+            _Action(icon: p.likedByMe ? PhosphorIconsFill.heart : PhosphorIconsRegular.heart, color: p.likedByMe ? KColors.error : null, label: 'Like', onTap: _toggleLike, selected: p.likedByMe),
+            if (p.canComment) _Action(icon: PhosphorIconsRegular.chatCircle, label: 'Comment', onTap: () async {
               final api = context.api;
               await showCommentsSheet(context, p);
               if (!mounted) return;
@@ -178,7 +179,7 @@ class _PostCardState extends State<PostCard> {
                 _set(Post(Map<String, dynamic>.from((await api.get('/posts/${p.id}'))['post'])));
               } catch (_) {}
             }),
-            _Action(icon: Icons.reply_outlined, label: 'Share', onTap: () => showShareSheet(context, p.shareLink), flip: true),
+            _Action(icon: PhosphorIconsRegular.arrowBendUpLeft, label: 'Share', onTap: () => showShareSheet(context, p.shareLink), flip: true),
           ]),
         ),
       ]),
@@ -268,7 +269,7 @@ class _Attachment extends StatelessWidget {
             height: 200,
             decoration: BoxDecoration(color: KColors.surfaceInverted, borderRadius: BorderRadius.circular(KRadius.md)),
             alignment: Alignment.center,
-            child: Semantics(label: 'Play video', child: const Icon(Icons.play_circle_fill, color: Colors.white, size: 56)),
+            child: Semantics(label: 'Play video', child: const Icon(PhosphorIconsFill.playCircle, color: Colors.white, size: 56)),
           ),
         );
       case 'document':
@@ -304,7 +305,7 @@ class _Attachment extends StatelessWidget {
                   ),
                 ]),
               ),
-              const Icon(Icons.download_outlined),
+              const Icon(PhosphorIconsRegular.downloadSimple),
             ]),
           ),
         );
@@ -363,7 +364,7 @@ class _MediaViewerState extends State<MediaViewer> {
               SafeArea(
                 child: Column(children: [
                   Row(children: [
-                    IconButton(tooltip: 'Close', icon: const Icon(Icons.close, color: Colors.white), onPressed: () => Navigator.pop(context)),
+                    IconButton(tooltip: 'Close', icon: const Icon(PhosphorIconsRegular.x, color: Colors.white), onPressed: () => Navigator.pop(context)),
                     const Spacer(),
                     if (widget.urls.length > 1) Padding(padding: const EdgeInsets.only(right: 16), child: Text('${_i + 1}/${widget.urls.length}', style: const TextStyle(color: Colors.white))),
                   ]),

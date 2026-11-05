@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:keys_lite/theme/phosphor.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/api.dart';
 import '../../core/models.dart';
@@ -109,7 +110,7 @@ class _AddressScreenState extends State<AddressScreen> with Busy {
           error: _addressError,
           onChanged: _onType,
           fieldKey: const Key('address-field'),
-          suffix: _picked != null ? const Icon(Icons.check_circle, color: KColors.success, size: 20) : null,
+          suffix: _picked != null ? const Icon(PhosphorIconsFill.checkCircle, color: KColors.success, size: 20) : null,
         ),
         if (_suggestions.isNotEmpty)
           Container(
@@ -119,7 +120,7 @@ class _AddressScreenState extends State<AddressScreen> with Busy {
             child: Material(color: KColors.surfaceDefault, child: Column(children: [
               for (final s in _suggestions)
                 ListTile(
-                  leading: const Icon(Icons.location_on_outlined, color: KColors.textSecondary),
+                  leading: const Icon(PhosphorIconsRegular.mapPin, color: KColors.textSecondary),
                   title: Text(s['primary'], style: KText.paragraphMediumLarge),
                   subtitle: Text(s['secondary'], style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
                   onTap: () => _pick(s),
@@ -174,7 +175,7 @@ class Counts extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = KText.paragraphMedium.copyWith(color: KColors.textSecondary);
     return Row(mainAxisSize: MainAxisSize.min, children: [
-      const Icon(Icons.people_outline, size: 18, color: KColors.textSecondary),
+      const Icon(PhosphorIconsRegular.users, size: 18, color: KColors.textSecondary),
       const SizedBox(width: 4),
       Text('${formatCount(c.residents!)} residents', style: s),
       Container(width: 1, height: 10, margin: const EdgeInsets.symmetric(horizontal: 10), color: KColors.borderDefault),
@@ -493,7 +494,7 @@ class SimilarDevelopmentsScreen extends StatelessWidget {
                       ].join(' · '), style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
                     ]),
                   ),
-                  const Icon(Icons.chevron_right, color: KColors.textSecondary),
+                  const Icon(PhosphorIconsRegular.caretRight, color: KColors.textSecondary),
                 ]),
               ),
             ),
@@ -611,7 +612,7 @@ class _ShapeDevelopmentScreenState extends State<ShapeDevelopmentScreen> with Bu
         else ...[
           Text('Your street', style: KText.overline),
           const SizedBox(height: 8),
-          _StreetRow(name: d['yourStreet']['name'], trailing: const Icon(Icons.lock_outline, size: 18, color: KColors.textSecondary)),
+          _StreetRow(name: d['yourStreet']['name'], trailing: const Icon(PhosphorIconsRegular.lock, size: 18, color: KColors.textSecondary)),
           const SizedBox(height: 20),
           Row(children: [
             Expanded(child: Text('Connected streets', style: KText.overline)),
@@ -627,10 +628,10 @@ class _ShapeDevelopmentScreenState extends State<ShapeDevelopmentScreen> with Bu
                 name: s['name'],
                 sub: s['hasStreetCommunity'] == true ? 'Has its own street community. It will stay linked to both.' : null,
                 trailing: _picked.contains(s['key'])
-                    ? IconButton(tooltip: 'Remove ${s['name']}', icon: const Icon(Icons.check_circle, color: KColors.selected), onPressed: () => setState(() => _picked.remove(s['key'])))
+                    ? IconButton(tooltip: 'Remove ${s['name']}', icon: const Icon(PhosphorIconsFill.checkCircle, color: KColors.selected), onPressed: () => setState(() => _picked.remove(s['key'])))
                     : IconButton(
                         tooltip: 'Add ${s['name']}',
-                        icon: Icon(Icons.add_circle_outline, color: full ? KColors.textTertiary : KColors.textPrimary),
+                        icon: Icon(PhosphorIconsRegular.plusCircle, color: full ? KColors.textTertiary : KColors.textPrimary),
                         onPressed: full ? null : () => setState(() => _picked.add(s['key'])),
                       ),
               ),
@@ -656,7 +657,7 @@ class _StreetRow extends StatelessWidget {
         padding: const EdgeInsets.only(left: 12, top: 4, bottom: 4),
         decoration: BoxDecoration(color: KColors.surfaceDefault, borderRadius: BorderRadius.circular(KRadius.sm), border: Border.all(color: KColors.borderDefault)),
         child: Row(children: [
-          const Icon(Icons.signpost_outlined, size: 20, color: KColors.textSecondary),
+          const Icon(PhosphorIconsRegular.signpost, size: 20, color: KColors.textSecondary),
           const SizedBox(width: 10),
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

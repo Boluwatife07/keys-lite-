@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:keys_lite/theme/phosphor.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../core/api.dart';
@@ -91,11 +92,11 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
     final c = _c!;
     final deps = context.deps;
     showActionSheet(context, [
-      SheetAction(Icons.link, 'Copy link', () async {
+      SheetAction(PhosphorIconsRegular.link, 'Copy link', () async {
         await deps.sharer.copy(c['shareLink']);
         if (mounted) showToast(context, 'Club link copied.');
       }),
-      SheetAction(Icons.ios_share, 'Share via', () => deps.sharer.share('${c['shareText']} ${c['shareLink']}')),
+      SheetAction(PhosphorIconsRegular.shareFat, 'Share via', () => deps.sharer.share('${c['shareText']} ${c['shareLink']}')),
     ]);
   }
 
@@ -105,29 +106,29 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
     final member = c['isMember'] == true;
     showActionSheet(context, [
       if (c['canEdit'] == true)
-        SheetAction(Icons.edit_outlined, 'Edit club details', () async {
+        SheetAction(PhosphorIconsRegular.pencilSimple, 'Edit club details', () async {
           final r = await context.push('/clubs/$_id/edit', extra: c);
           if (r != null) _load();
         }),
-      if (member) SheetAction(Icons.people_outline, 'Members', () => context.push('/clubs/$_id/members').then((_) => _load())),
-      if (_role == 'president' && c['status'] == 'active' && c['transfer'] == null) SheetAction(Icons.swap_horiz, 'Transfer ownership', _transfer),
+      if (member) SheetAction(PhosphorIconsRegular.users, 'Members', () => context.push('/clubs/$_id/members').then((_) => _load())),
+      if (_role == 'president' && c['status'] == 'active' && c['transfer'] == null) SheetAction(PhosphorIconsRegular.arrowsLeftRight, 'Transfer ownership', _transfer),
       if (_role == 'president' && c['transfer'] != null)
-        SheetAction(Icons.undo, 'Withdraw ownership offer', () => _act(() => api.delete('/clubs/$_id/transfer'))),
+        SheetAction(PhosphorIconsRegular.arrowCounterClockwise, 'Withdraw ownership offer', () => _act(() => api.delete('/clubs/$_id/transfer'))),
       if (member)
         c['muted'] == true
-            ? SheetAction(Icons.volume_up_outlined, 'Unmute notifications', () => _act(() => api.put('/clubs/$_id/mute', {'duration': null})))
-            : SheetAction(Icons.volume_off_outlined, 'Mute notifications', () async {
+            ? SheetAction(PhosphorIconsRegular.speakerSimpleHigh, 'Unmute notifications', () => _act(() => api.put('/clubs/$_id/mute', {'duration': null})))
+            : SheetAction(PhosphorIconsRegular.speakerSimpleSlash, 'Mute notifications', () async {
                 final d = await pickMuteDuration(context, title: 'Mute ${c['name']}', body: "You won't get notifications from this club.");
                 if (d != null) await _act(() => api.put('/clubs/$_id/mute', {'duration': d}));
               }),
-      SheetAction(Icons.share_outlined, 'Share', _share),
-      if (_role != 'president') SheetAction(Icons.flag_outlined, 'Report club', () => showReportSheet(context, itemType: 'club', itemId: _id, title: 'Report club', intro: 'Tell us why you are reporting this club')),
+      SheetAction(PhosphorIconsRegular.shareNetwork, 'Share', _share),
+      if (_role != 'president') SheetAction(PhosphorIconsRegular.flag, 'Report club', () => showReportSheet(context, itemType: 'club', itemId: _id, title: 'Report club', intro: 'Tell us why you are reporting this club')),
       if (member && _role != 'president')
-        SheetAction(Icons.logout, 'Leave club', () async {
+        SheetAction(PhosphorIconsRegular.signOut, 'Leave club', () async {
           final ok = await confirmSheet(context, title: 'Leave club', body: "Are you sure you want to leave ${c['name']}? You will no longer have access to this club's content.", confirm: 'Leave');
           if (ok) await _act(() => api.post('/clubs/$_id/leave'));
         }, destructive: true),
-      if (_role == 'president' && c['status'] == 'active') SheetAction(Icons.delete_outline, 'Delete club', _delete, destructive: true),
+      if (_role == 'president' && c['status'] == 'active') SheetAction(PhosphorIconsRegular.trash, 'Delete club', _delete, destructive: true),
     ]);
   }
 
@@ -191,8 +192,8 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
       context: context,
       builder: (c) => SafeArea(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          ListTile(leading: const Icon(Icons.campaign_outlined), title: const Text('Announcement'), onTap: () => Navigator.pop(c, 'post')),
-          ListTile(leading: const Icon(Icons.event_outlined), title: const Text('Club event'), onTap: () => Navigator.pop(c, 'event')),
+          ListTile(leading: const Icon(PhosphorIconsRegular.megaphone), title: const Text('Announcement'), onTap: () => Navigator.pop(c, 'post')),
+          ListTile(leading: const Icon(PhosphorIconsRegular.calendarDots), title: const Text('Club event'), onTap: () => Navigator.pop(c, 'event')),
         ]),
       ),
     );
@@ -216,7 +217,7 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
     return Scaffold(
       backgroundColor: KColors.surfaceDefault,
       floatingActionButton: _manager && c['status'] == 'active'
-          ? FloatingActionButton(heroTag: 'club-create', tooltip: 'Create in club', backgroundColor: KColors.brand, foregroundColor: KColors.textPrimary, shape: const CircleBorder(), onPressed: _create, child: const Icon(Icons.add, size: 28))
+          ? FloatingActionButton(heroTag: 'club-create', tooltip: 'Create in club', backgroundColor: KColors.brand, foregroundColor: KColors.textPrimary, shape: const CircleBorder(), onPressed: _create, child: const Icon(PhosphorIconsRegular.plus, size: 28))
           : null,
       body: RefreshIndicator(
         onRefresh: _load,
@@ -226,10 +227,10 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
             expandedHeight: 240,
             backgroundColor: KColors.surfaceDefault,
             foregroundColor: Colors.white,
-            leading: IconButton(tooltip: 'Back', icon: const Icon(Icons.chevron_left, size: 30, shadows: [Shadow(blurRadius: 6)]), onPressed: () => context.pop()),
+            leading: IconButton(tooltip: 'Back', icon: const Icon(PhosphorIconsRegular.caretLeft, size: 30, shadows: [Shadow(blurRadius: 6)]), onPressed: () => context.pop()),
             actions: [
-              IconButton(tooltip: 'Share club', icon: const Icon(Icons.share_outlined, shadows: [Shadow(blurRadius: 6)]), onPressed: _share),
-              IconButton(tooltip: 'Club options', icon: const Icon(Icons.more_vert, shadows: [Shadow(blurRadius: 6)]), onPressed: _menu),
+              IconButton(tooltip: 'Share club', icon: const Icon(PhosphorIconsRegular.shareNetwork, shadows: [Shadow(blurRadius: 6)]), onPressed: _share),
+              IconButton(tooltip: 'Club options', icon: const Icon(PhosphorIconsRegular.dotsThreeVertical, shadows: [Shadow(blurRadius: 6)]), onPressed: _menu),
             ],
             flexibleSpace: FlexibleSpaceBar(
               background: c['coverUrl'] == null
@@ -258,12 +259,12 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
                         onTap: _about,
                         child: Row(children: [
                           Flexible(child: Text(c['name'], style: KText.headingSmall, overflow: TextOverflow.ellipsis)),
-                          const Icon(Icons.chevron_right),
+                          const Icon(PhosphorIconsRegular.caretRight),
                         ]),
                       ),
                     ),
                   ),
-                  if (c['chatId'] != null) IconButton(tooltip: 'Club group chat', icon: const Icon(Icons.chat_outlined), onPressed: () => context.push('/chats/${c['chatId']}')),
+                  if (c['chatId'] != null) IconButton(tooltip: 'Club group chat', icon: const Icon(PhosphorIconsRegular.chatText), onPressed: () => context.push('/chats/${c['chatId']}')),
                 ]),
               ),
               if (_role == 'president' && transfer != null)
@@ -275,7 +276,7 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(color: KColors.surfaceSubtle, borderRadius: BorderRadius.circular(KRadius.sm)),
-                      child: Row(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.hourglass_empty, size: 14), const SizedBox(width: 4), Text(transfer['status'], style: KText.paragraphSmall)]),
+                      child: Row(mainAxisSize: MainAxisSize.min, children: [const Icon(PhosphorIconsRegular.hourglass, size: 14), const SizedBox(width: 4), Text(transfer['status'], style: KText.paragraphSmall)]),
                     ),
                   ]),
                 ),
@@ -323,7 +324,7 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(color: KColors.surfaceSubtle, borderRadius: BorderRadius.circular(KRadius.md)),
                   child: Column(children: [
-                    const Icon(Icons.lock_outline),
+                    const Icon(PhosphorIconsRegular.lock),
                     const SizedBox(height: 8),
                     Text('Join ${c['name']}', style: KText.paragraphMediumLarge),
                     const SizedBox(height: 4),
@@ -473,19 +474,19 @@ class _ClubMembersScreenState extends State<ClubMembersScreen> {
     if (p.id == context.session.me?.id) return;
     final canRemove = (my == 'president' && m['role'] != 'president') || (my == 'admin' && m['role'] == 'member');
     showActionSheet(context, [
-      SheetAction(Icons.person_outline, 'View profile', () => context.push('/users/${p.id}')),
+      SheetAction(PhosphorIconsRegular.user, 'View profile', () => context.push('/users/${p.id}')),
       if (my == 'president' && m['role'] == 'member')
-        SheetAction(Icons.admin_panel_settings_outlined, 'Make an admin', () async {
+        SheetAction(PhosphorIconsRegular.shieldCheck, 'Make an admin', () async {
           final ok = await confirmSheet(context, title: 'Make ${p.name} an admin?', body: 'Are you sure you want to give ${p.name} admin access? They will be able to remove members, create club events and post club activities', confirm: 'Make admin');
           if (ok) await _act(() => api.post('/clubs/$id/admins/${p.id}'));
         }),
       if (my == 'president' && m['role'] == 'admin')
-        SheetAction(Icons.remove_moderator_outlined, 'Dismiss as admin', () async {
+        SheetAction(PhosphorIconsRegular.shieldSlash, 'Dismiss as admin', () async {
           final ok = await confirmSheet(context, title: 'Dismiss ${p.name}?', body: '${p.name} will no longer be able to remove members, create club events or post club activities.', confirm: 'Dismiss');
           if (ok) await _act(() => api.delete('/clubs/$id/admins/${p.id}'));
         }),
       if (canRemove)
-        SheetAction(Icons.person_remove_outlined, 'Remove ${p.firstName}', () async {
+        SheetAction(PhosphorIconsRegular.userMinus, 'Remove ${p.firstName}', () async {
           final ok = await confirmSheet(context, title: 'Remove ${p.name}', body: 'Are you sure you want to remove ${p.name} from the club?', confirm: 'Remove', destructive: true);
           if (ok) await _act(() => api.delete('/clubs/$id/members/${p.id}'));
         }, destructive: true),
@@ -512,7 +513,7 @@ class _ClubMembersScreenState extends State<ClubMembersScreen> {
               Padding(padding: const EdgeInsets.fromLTRB(16, 4, 16, 8), child: SearchField(controller: _q, hint: 'Search members')),
               if (d['myRole'] != null)
                 ListTile(
-                  leading: const CircleAvatar(backgroundColor: KColors.brand, child: Icon(Icons.link, color: KColors.textPrimary)),
+                  leading: const CircleAvatar(backgroundColor: KColors.brand, child: Icon(PhosphorIconsRegular.link, color: KColors.textPrimary)),
                   title: const Text('Invite via link'),
                   onTap: () async {
                     final api = context.api;
@@ -524,7 +525,7 @@ class _ClubMembersScreenState extends State<ClubMembersScreen> {
                 ),
               if (d['myRole'] != null)
                 ListTile(
-                  leading: const CircleAvatar(backgroundColor: KColors.surfaceSubtle, child: Icon(Icons.person_add_alt, color: KColors.textPrimary)),
+                  leading: const CircleAvatar(backgroundColor: KColors.surfaceSubtle, child: Icon(PhosphorIconsRegular.userPlus, color: KColors.textPrimary)),
                   title: const Text('Invite members'),
                   onTap: () => context.push('/clubs/${widget.id}/invite'),
                 ),
@@ -533,7 +534,7 @@ class _ClubMembersScreenState extends State<ClubMembersScreen> {
                   leading: Avatar(m['person']['photoUrl'], size: 40),
                   title: Text(m['person']['id'] == context.session.me?.id ? 'You' : m['person']['name']),
                   subtitle: Text(m['roleLabel']),
-                  trailing: d['myRole'] == 'president' || d['myRole'] == 'admin' ? const Icon(Icons.more_horiz) : null,
+                  trailing: d['myRole'] == 'president' || d['myRole'] == 'admin' ? const Icon(PhosphorIconsRegular.dotsThree) : null,
                   onTap: () => _options(m),
                 ),
             ]),

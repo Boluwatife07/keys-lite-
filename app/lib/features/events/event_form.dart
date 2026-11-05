@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:keys_lite/theme/phosphor.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -196,8 +197,8 @@ class _EventFormScreenState extends State<EventFormScreen> with Busy {
       context: context,
       builder: (c) => SafeArea(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          ListTile(leading: const Icon(Icons.image_outlined), title: const Text('Photo'), onTap: () => Navigator.pop(c, 'photo')),
-          ListTile(leading: const Icon(Icons.videocam_outlined), title: const Text('Video'), onTap: () => Navigator.pop(c, 'video')),
+          ListTile(leading: const Icon(PhosphorIconsRegular.image), title: const Text('Photo'), onTap: () => Navigator.pop(c, 'photo')),
+          ListTile(leading: const Icon(PhosphorIconsRegular.videoCamera), title: const Text('Video'), onTap: () => Navigator.pop(c, 'video')),
         ]),
       ),
     );
@@ -351,7 +352,7 @@ class _EventFormScreenState extends State<EventFormScreen> with Busy {
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            const CircleAvatar(radius: 32, backgroundColor: KColors.brandSubtle, child: Icon(Icons.bookmark_added_outlined, size: 32, color: KColors.textPrimary)),
+            const CircleAvatar(radius: 32, backgroundColor: KColors.brandSubtle, child: Icon(PhosphorIconsFill.bookmarkSimple, size: 32, color: KColors.textPrimary)),
             const SizedBox(height: 12),
             Text('Event saved as a draft', style: KText.headingSmall, textAlign: TextAlign.center),
             const SizedBox(height: 8),
@@ -429,7 +430,7 @@ class _EventFormScreenState extends State<EventFormScreen> with Busy {
         decoration: BoxDecoration(color: KColors.surfaceSubtle, borderRadius: BorderRadius.circular(KRadius.sm)),
         child: Row(children: [
           Expanded(child: Text(value, style: KText.paragraphLarge.copyWith(color: KColors.textTertiary))),
-          const Icon(Icons.lock_outline, size: 18, color: KColors.textTertiary),
+          const Icon(PhosphorIconsRegular.lock, size: 18, color: KColors.textTertiary),
         ]),
       );
 
@@ -450,7 +451,7 @@ class _EventFormScreenState extends State<EventFormScreen> with Busy {
         alignment: Alignment.centerLeft,
         child: OutlinedButton.icon(
           onPressed: onTap,
-          icon: const Icon(Icons.add, size: 18),
+          icon: const Icon(PhosphorIconsRegular.plus, size: 18),
           label: Text(label),
           style: OutlinedButton.styleFrom(foregroundColor: KColors.textPrimary, side: const BorderSide(color: KColors.borderDefault), shape: const StadiumBorder()),
         ),
@@ -473,7 +474,7 @@ class _EventFormScreenState extends State<EventFormScreen> with Busy {
           backgroundColor: KColors.surfaceDefault,
           surfaceTintColor: Colors.transparent,
           titleSpacing: 0,
-          leading: IconButton(tooltip: 'Back', icon: const Icon(Icons.chevron_left, size: 30), onPressed: () => Navigator.of(context).maybePop()),
+          leading: IconButton(tooltip: 'Back', icon: const Icon(PhosphorIconsRegular.caretLeft, size: 30), onPressed: () => Navigator.of(context).maybePop()),
           title: Text(_id == null ? 'Create event' : 'Edit event', style: KText.headingXSmall),
         ),
         body: ListView(padding: const EdgeInsets.fromLTRB(16, 0, 16, 24), children: [
@@ -504,7 +505,7 @@ class _EventFormScreenState extends State<EventFormScreen> with Busy {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(KRadius.sm),
                       child: m.kind == 'video'
-                          ? Container(width: 80, height: 80, color: Colors.black87, child: const Icon(Icons.videocam, color: Colors.white))
+                          ? Container(width: 80, height: 80, color: Colors.black87, child: const Icon(PhosphorIconsFill.videoCamera, color: Colors.white))
                           : m.file != null
                               ? Image.memory(m.file!.bytes, width: 80, height: 80, fit: BoxFit.cover)
                               : Image.network(context.api.absolute(m.url!), width: 80, height: 80, fit: BoxFit.cover, errorBuilder: (_, _, _) => Container(width: 80, color: KColors.surfaceSubtle)),
@@ -517,7 +518,7 @@ class _EventFormScreenState extends State<EventFormScreen> with Busy {
                         label: 'Remove media ${i + 1}',
                         child: InkWell(
                           onTap: () => _touch(() => _media.removeAt(i)),
-                          child: Container(decoration: const BoxDecoration(color: Colors.black54, shape: BoxShape.circle), padding: const EdgeInsets.all(2), child: const Icon(Icons.close, size: 14, color: Colors.white)),
+                          child: Container(decoration: const BoxDecoration(color: Colors.black54, shape: BoxShape.circle), padding: const EdgeInsets.all(2), child: const Icon(PhosphorIconsRegular.x, size: 14, color: Colors.white)),
                         ),
                       ),
                     ),
@@ -592,7 +593,7 @@ class _EventFormScreenState extends State<EventFormScreen> with Busy {
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                 decoration: BoxDecoration(color: KColors.surfaceSubtle, borderRadius: BorderRadius.circular(KRadius.sm)),
                 child: Row(children: [
-                  const Icon(Icons.place_outlined, size: 20),
+                  const Icon(PhosphorIconsRegular.mapPin, size: 20),
                   const SizedBox(width: 8),
                   Expanded(child: Text(_placeName ?? 'Enter location of your event', style: KText.paragraphLarge.copyWith(color: _placeName == null ? KColors.textTertiary : null))),
                 ]),
@@ -643,13 +644,13 @@ class _EventFormScreenState extends State<EventFormScreen> with Busy {
               leading: CircleAvatar(
                 backgroundColor: KColors.surfaceSubtle,
                 backgroundImage: _lineup[i].photo != null ? MemoryImage(_lineup[i].photo!.bytes) : _lineup[i].photoUrl != null ? NetworkImage(context.api.absolute(_lineup[i].photoUrl!)) as ImageProvider : null,
-                child: _lineup[i].photo == null && _lineup[i].photoUrl == null ? const Icon(Icons.person_outline) : null,
+                child: _lineup[i].photo == null && _lineup[i].photoUrl == null ? const Icon(PhosphorIconsRegular.user) : null,
               ),
               title: Text(_lineup[i].name),
               subtitle: _lineup[i].title.isEmpty ? null : Text(_lineup[i].title),
               trailing: Row(mainAxisSize: MainAxisSize.min, children: [
                 TextButton(onPressed: () => _editGuest(i), child: const Text('Edit guest')),
-                IconButton(tooltip: 'Remove ${_lineup[i].name}', icon: const Icon(Icons.close), onPressed: () => _touch(() => _lineup.removeAt(i))),
+                IconButton(tooltip: 'Remove ${_lineup[i].name}', icon: const Icon(PhosphorIconsRegular.x), onPressed: () => _touch(() => _lineup.removeAt(i))),
               ]),
             ),
           _addButton('Add guest', () => _editGuest()),
@@ -660,7 +661,7 @@ class _EventFormScreenState extends State<EventFormScreen> with Busy {
             Wrap(spacing: 8, runSpacing: 8, children: [
               for (final c in _cohosts)
                 InputChip(
-                  avatar: c.person != null ? Avatar(c.person!.photoUrl, size: 24) : const Icon(Icons.business_outlined, size: 18),
+                  avatar: c.person != null ? Avatar(c.person!.photoUrl, size: 24) : const Icon(PhosphorIconsRegular.buildings, size: 18),
                   label: Text(c.external != null ? '${c.name} (External)' : c.name),
                   onDeleted: () => _touch(() => _cohosts.remove(c)),
                   deleteButtonTooltipMessage: 'Remove ${c.name}',
@@ -713,7 +714,7 @@ Future<bool> launchEvent(BuildContext context, String id) async {
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            const CircleAvatar(radius: 32, backgroundColor: Color(0xFFE6F6EA), child: Icon(Icons.celebration_outlined, size: 32, color: KColors.success)),
+            const CircleAvatar(radius: 32, backgroundColor: Color(0xFFE6F6EA), child: Icon(PhosphorIconsRegular.confetti, size: 32, color: KColors.success)),
             const SizedBox(height: 12),
             Text(r['title'] ?? 'Your event is live!', style: KText.headingSmall),
             const SizedBox(height: 8),
@@ -811,7 +812,7 @@ class _LocationSheetState extends State<_LocationSheet> {
               child: ListView(children: [
                 for (final s in _results)
                   ListTile(
-                    leading: const Icon(Icons.place_outlined),
+                    leading: const Icon(PhosphorIconsRegular.mapPin),
                     title: Text(s['primary'] ?? ''),
                     subtitle: Text(s['secondary'] ?? ''),
                     onTap: () => Navigator.pop(context, s),
@@ -866,7 +867,7 @@ class _GuestSheetState extends State<_GuestSheet> {
                 radius: 40,
                 backgroundColor: KColors.surfaceSubtle,
                 backgroundImage: _photo != null ? MemoryImage(_photo!.bytes) : g?.photoUrl != null ? NetworkImage(context.api.absolute(g!.photoUrl!)) as ImageProvider : null,
-                child: _photo == null && g?.photoUrl == null ? const Icon(Icons.add_a_photo_outlined) : null,
+                child: _photo == null && g?.photoUrl == null ? const Icon(PhosphorIconsRegular.camera) : null,
               ),
             ),
           ),
@@ -960,17 +961,17 @@ class _CohostPickerState extends State<_CohostPicker> {
         body: Column(children: [
           Padding(padding: const EdgeInsets.fromLTRB(16, 4, 16, 8), child: SearchField(controller: _q, hint: 'Search residents')),
           ListTile(
-            leading: const CircleAvatar(backgroundColor: KColors.surfaceSubtle, child: Icon(Icons.business_outlined, color: KColors.textPrimary)),
+            leading: const CircleAvatar(backgroundColor: KColors.surfaceSubtle, child: Icon(PhosphorIconsRegular.buildings, color: KColors.textPrimary)),
             title: const Text('Add external co-hosts'),
             subtitle: const Text('Add users or organizations not on KEYS.'),
             onTap: _external,
           ),
           for (final c in _picked.where((c) => c.external != null))
             ListTile(
-              leading: const Icon(Icons.business_outlined),
+              leading: const Icon(PhosphorIconsRegular.buildings),
               title: Text(c.external!),
               subtitle: const Text('External • This co-host is not on Keys.'),
-              trailing: IconButton(tooltip: 'Remove ${c.external}', icon: const Icon(Icons.close), onPressed: () => setState(() => _picked.remove(c))),
+              trailing: IconButton(tooltip: 'Remove ${c.external}', icon: const Icon(PhosphorIconsRegular.x), onPressed: () => setState(() => _picked.remove(c))),
             ),
           const Divider(height: 1),
           Expanded(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:keys_lite/theme/phosphor.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../core/api.dart';
@@ -83,7 +84,7 @@ class _ProposalsListState extends State<ProposalsList> {
         Row(children: [
           Text(l == null ? '' : plural(l.length, 'item'), style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
           const Spacer(),
-          ActionChip(avatar: const Icon(Icons.filter_list, size: 16), label: const Text('Filter'), onPressed: _filter),
+          ActionChip(avatar: const Icon(PhosphorIconsRegular.funnelSimple, size: 16), label: const Text('Filter'), onPressed: _filter),
         ]),
         if (l == null) const Padding(padding: EdgeInsets.all(32), child: Center(child: CircularProgressIndicator())),
         if (l != null && l.isEmpty)
@@ -124,7 +125,7 @@ class ProposalCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(color: canVote ? KColors.brand : KColors.textTertiary, borderRadius: BorderRadius.circular(6)),
-                child: const Icon(Icons.groups, size: 16),
+                child: const Icon(PhosphorIconsFill.usersThree, size: 16),
               ),
             ]),
           ),
@@ -142,14 +143,14 @@ class ProposalCard extends StatelessWidget {
                     if (p['type'] == 'reassign')
                       Padding(
                         padding: const EdgeInsets.only(top: 8),
-                        child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [Text(p['role'] ?? ''), const Padding(padding: EdgeInsets.symmetric(horizontal: 12), child: Icon(Icons.arrow_forward, size: 16)), Text(p['proposedRole'] ?? '')]),
+                        child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [Text(p['role'] ?? ''), const Padding(padding: EdgeInsets.symmetric(horizontal: 12), child: Icon(PhosphorIconsRegular.arrowRight, size: 16)), Text(p['proposedRole'] ?? '')]),
                       ),
                   ]),
                 ),
               ],
               const SizedBox(height: 10),
               Row(children: [
-                const Icon(Icons.schedule, size: 14, color: KColors.textSecondary),
+                const Icon(PhosphorIconsRegular.clock, size: 14, color: KColors.textSecondary),
                 const SizedBox(width: 4),
                 Text(open ? timeLeft(DateTime.parse(p['closesAt']).toLocal()) : statusLabel(p['status']), style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
               ]),

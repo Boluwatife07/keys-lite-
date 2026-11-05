@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+import 'package:keys_lite/theme/phosphor.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -195,16 +196,16 @@ class _ConversationScreenState extends State<ConversationScreen> {
     final muted = c['muted'] == true;
     final left = c['myRole'] == null;
     showActionSheet(context, [
-      if (_isDirect && c['otherUserId'] != null) SheetAction(Icons.person_outline, 'View profile', () => context.push('/users/${c['otherUserId']}')),
-      if (!_isDirect) SheetAction(Icons.info_outline, 'Group info', _openInfo),
-      SheetAction(Icons.search, 'Search', () => setState(() => _searching = true)),
+      if (_isDirect && c['otherUserId'] != null) SheetAction(PhosphorIconsRegular.user, 'View profile', () => context.push('/users/${c['otherUserId']}')),
+      if (!_isDirect) SheetAction(PhosphorIconsRegular.info, 'Group info', _openInfo),
+      SheetAction(PhosphorIconsRegular.magnifyingGlass, 'Search', () => setState(() => _searching = true)),
       muted
-          ? SheetAction(Icons.volume_up_outlined, 'Unmute notifications', () => _act(() => api.put('/chats/$_id/mute', {'duration': null}), toast: 'Notifications unmuted'))
-          : SheetAction(Icons.volume_off_outlined, 'Mute notifications', () async {
+          ? SheetAction(PhosphorIconsRegular.speakerSimpleHigh, 'Unmute notifications', () => _act(() => api.put('/chats/$_id/mute', {'duration': null}), toast: 'Notifications unmuted'))
+          : SheetAction(PhosphorIconsRegular.speakerSimpleSlash, 'Mute notifications', () async {
               final d = await pickMuteDuration(context, title: 'Mute notifications', body: "You won't be notified about new messages in this chat.");
               if (d != null) await _act(() => api.put('/chats/$_id/mute', {'duration': d}), toast: 'Notifications muted');
             }),
-      SheetAction(Icons.cleaning_services_outlined, 'Clear chat', () async {
+      SheetAction(PhosphorIconsRegular.broom, 'Clear chat', () async {
         final ok = await confirmSheet(context, title: 'Clear this chat?', body: 'All messages will be removed for you. Others in the chat will still see them.', confirm: 'Clear');
         if (!ok) return;
         await _act(() => api.post('/chats/$_id/clear'), toast: 'Chat cleared', reload: false);
@@ -212,21 +213,21 @@ class _ConversationScreenState extends State<ConversationScreen> {
       }),
       if (_isDirect && c['otherUserId'] != null)
         c['blockedByMe'] == true
-            ? SheetAction(Icons.block, 'Unblock', _unblock)
-            : SheetAction(Icons.block, 'Block', () async {
+            ? SheetAction(PhosphorIconsRegular.prohibit, 'Unblock', _unblock)
+            : SheetAction(PhosphorIconsRegular.prohibit, 'Block', () async {
                 final p = PersonRef({'id': c['otherUserId'], 'name': c['name']});
                 if (await blockPerson(context, p)) _loadChat();
               }),
-      SheetAction(Icons.flag_outlined, _isDirect ? 'Report user' : 'Report group', () {
+      SheetAction(PhosphorIconsRegular.flag, _isDirect ? 'Report user' : 'Report group', () {
         if (_isDirect) {
           showReportSheet(context, itemType: 'user', itemId: c['otherUserId'], title: 'Report ${c['name']}', intro: "Tell us why you are reporting this user. They won't be notified that you reported them.");
         } else {
           showReportSheet(context, itemType: 'group_chat', itemId: _id, title: 'Report group', intro: 'Tell us why you are reporting this group chat. No one would be notified that you reported.');
         }
       }),
-      if (!_isDirect && !left) SheetAction(Icons.logout, 'Exit group', _exit, destructive: true),
+      if (!_isDirect && !left) SheetAction(PhosphorIconsRegular.signOut, 'Exit group', _exit, destructive: true),
       if (_isDirect || left)
-        SheetAction(Icons.delete_outline, 'Delete chat', () async {
+        SheetAction(PhosphorIconsRegular.trash, 'Delete chat', () async {
           final router = GoRouter.of(context);
           final ok = await confirmSheet(context, title: 'Delete this chat?', body: 'Messages will be removed for you only.', confirm: 'Delete');
           if (!ok) return;
@@ -296,21 +297,21 @@ class _ConversationScreenState extends State<ConversationScreen> {
               ]),
             ),
           if (canAct && _chat?['canSend'] == true)
-            ListTile(leading: const Icon(Icons.reply), title: const Text('Reply'), onTap: () {
+            ListTile(leading: const Icon(PhosphorIconsRegular.arrowBendUpLeft), title: const Text('Reply'), onTap: () {
               Navigator.pop(c);
               setState(() => _replyTo = m);
             }),
           if ((m['text'] as String? ?? '').isNotEmpty)
-            ListTile(leading: const Icon(Icons.copy), title: const Text('Copy'), onTap: () async {
+            ListTile(leading: const Icon(PhosphorIconsRegular.copy), title: const Text('Copy'), onTap: () async {
               Navigator.pop(c);
               await Clipboard.setData(ClipboardData(text: m['text']));
               if (mounted) showToast(context, 'Message copied');
             }),
-          ListTile(leading: const Icon(Icons.forward_outlined), title: const Text('Forward'), onTap: () {
+          ListTile(leading: const Icon(PhosphorIconsRegular.arrowBendUpRight), title: const Text('Forward'), onTap: () {
             Navigator.pop(c);
             context.push('/chats/forward', extra: {'messageIds': [m['id']]});
           }),
-          ListTile(leading: const Icon(Icons.delete_outline, color: KColors.error), title: Text('Delete', style: TextStyle(color: KColors.error)), onTap: () {
+          ListTile(leading: const Icon(PhosphorIconsRegular.trash, color: KColors.error), title: Text('Delete', style: TextStyle(color: KColors.error)), onTap: () {
             Navigator.pop(c);
             _delete(m);
           }),
@@ -404,7 +405,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
       backgroundColor: KColors.surfaceDefault,
       surfaceTintColor: Colors.transparent,
       titleSpacing: 0,
-      leading: IconButton(tooltip: 'Back', icon: const Icon(Icons.chevron_left, size: 30), onPressed: () => context.pop()),
+      leading: IconButton(tooltip: 'Back', icon: const Icon(PhosphorIconsRegular.caretLeft, size: 30), onPressed: () => context.pop()),
       title: c == null
           ? null
           : Semantics(
@@ -427,7 +428,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
                 ]),
               ),
             ),
-      actions: [if (c != null) IconButton(tooltip: 'Chat options', icon: const Icon(Icons.more_vert), onPressed: _menu)],
+      actions: [if (c != null) IconButton(tooltip: 'Chat options', icon: const Icon(PhosphorIconsRegular.dotsThreeVertical), onPressed: _menu)],
     );
   }
 
@@ -436,7 +437,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
           tooltip: 'Close search',
-          icon: const Icon(Icons.close),
+          icon: const Icon(PhosphorIconsRegular.x),
           onPressed: () => setState(() {
             _searching = false;
             _matches = null;
@@ -450,7 +451,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
           onSubmitted: _search,
           decoration: const InputDecoration(hintText: 'Search in chat', border: InputBorder.none),
         ),
-        actions: [IconButton(tooltip: 'Search', icon: const Icon(Icons.search), onPressed: () => _search(_searchCtl.text))],
+        actions: [IconButton(tooltip: 'Search', icon: const Icon(PhosphorIconsRegular.magnifyingGlass), onPressed: () => _search(_searchCtl.text))],
       );
 
   Widget _matchList() {
@@ -559,7 +560,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
                   await _act(() => api.post('/chats/$_id/request/delete'), toast: 'Message request deleted', reload: false);
                   router.pop();
                 },
-                icon: const Icon(Icons.delete_outline),
+                icon: const Icon(PhosphorIconsRegular.trash),
                 label: const Text('Delete'),
                 style: TextButton.styleFrom(foregroundColor: KColors.error, backgroundColor: const Color(0xFFFDE8EC), shape: const StadiumBorder()),
               ),
@@ -571,7 +572,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
               height: 48,
               child: OutlinedButton.icon(
                 onPressed: () => _act(() => api.post('/chats/$_id/accept')),
-                icon: const Icon(Icons.check),
+                icon: const Icon(PhosphorIconsRegular.check),
                 label: const Text('Accept'),
                 style: OutlinedButton.styleFrom(foregroundColor: KColors.textPrimary, side: const BorderSide(color: KColors.borderStrong), shape: const StadiumBorder()),
               ),
@@ -656,12 +657,12 @@ class _GroupIntro extends StatelessWidget {
         ],
         if (canAdd) ...[
           const SizedBox(height: 16),
-          KeysButton('Add members', variant: ButtonVariant.outline, icon: const Icon(Icons.add, size: 18), onPressed: () async {
+          KeysButton('Add members', variant: ButtonVariant.outline, icon: const Icon(PhosphorIconsRegular.plus, size: 18), onPressed: () async {
             await context.push('/chats/${chat['id']}/add');
             onChanged();
           }),
           const SizedBox(height: 8),
-          KeysButton('Copy group link', variant: ButtonVariant.outline, icon: const Icon(Icons.link, size: 18), onPressed: () => copyGroupLink(context, chat['id'])),
+          KeysButton('Copy group link', variant: ButtonVariant.outline, icon: const Icon(PhosphorIconsRegular.link, size: 18), onPressed: () => copyGroupLink(context, chat['id'])),
         ],
       ]),
     );
@@ -752,7 +753,7 @@ class MessageBubble extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.only(bottom: 4),
           child: Row(mainAxisSize: MainAxisSize.min, children: [
-            const Icon(Icons.forward, size: 14, color: KColors.textTertiary),
+            const Icon(PhosphorIconsRegular.arrowBendUpRight, size: 14, color: KColors.textTertiary),
             const SizedBox(width: 4),
             Text('Forwarded', style: KText.paragraphSmall.copyWith(color: KColors.textTertiary, fontStyle: FontStyle.italic)),
           ]),
@@ -849,7 +850,7 @@ class _MediaGrid extends StatelessWidget {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(10),
           child: video
-              ? Container(height: h, color: Colors.black87, alignment: Alignment.center, child: const Icon(Icons.play_circle_fill, color: Colors.white, size: 48, semanticLabel: 'Play video'))
+              ? Container(height: h, color: Colors.black87, alignment: Alignment.center, child: const Icon(PhosphorIconsFill.playCircle, color: Colors.white, size: 48, semanticLabel: 'Play video'))
               : Image.network(api.absolute(x['url']), height: h, width: double.infinity, fit: BoxFit.cover, errorBuilder: (_, _, _) => Container(height: h, color: KColors.surfaceMuted)),
         ),
       );
@@ -956,7 +957,7 @@ class _VoiceNotePlayerState extends State<VoiceNotePlayer> {
     return SizedBox(
       width: 220,
       child: Row(children: [
-        IconButton(tooltip: _playing ? 'Pause voice message' : 'Play voice message', icon: Icon(_playing ? Icons.pause_circle_filled : Icons.play_circle_filled, size: 34), onPressed: _toggle),
+        IconButton(tooltip: _playing ? 'Pause voice message' : 'Play voice message', icon: Icon(_playing ? PhosphorIconsFill.pauseCircle : PhosphorIconsFill.playCircle, size: 34), onPressed: _toggle),
         Expanded(child: LinearProgressIndicator(value: progress.clamp(0, 1), minHeight: 3, color: KColors.textPrimary, backgroundColor: KColors.borderDefault)),
         const SizedBox(width: 8),
         Text(widget.label, style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
@@ -1013,9 +1014,9 @@ class _ComposerState extends State<Composer> with Busy {
   void _attach() {
     final media = context.deps.media;
     showActionSheet(context, [
-      SheetAction(Icons.photo_camera_outlined, 'Camera', () async => _addPhoto(await media.pickPhoto(camera: true))),
-      SheetAction(Icons.photo_outlined, 'Photo', () async => _addPhoto(await media.pickPhoto())),
-      SheetAction(Icons.videocam_outlined, 'Video', () async {
+      SheetAction(PhosphorIconsRegular.camera, 'Camera', () async => _addPhoto(await media.pickPhoto(camera: true))),
+      SheetAction(PhosphorIconsRegular.image, 'Photo', () async => _addPhoto(await media.pickPhoto())),
+      SheetAction(PhosphorIconsRegular.videoCamera, 'Video', () async {
         final f = await media.pickVideo();
         if (f == null || !mounted) return;
         if (f.size > kChatVideoBytes) return showToast(context, 'The video you selected is too large. Please choose a video of 100 MB or less.');
@@ -1027,7 +1028,7 @@ class _ComposerState extends State<Composer> with Busy {
           _video = f;
         });
       }),
-      SheetAction(Icons.description_outlined, 'Document', () async {
+      SheetAction(PhosphorIconsRegular.fileText, 'Document', () async {
         final f = await media.pickDocument(extensions: const ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt']);
         if (f == null || !mounted) return;
         if (f.size > kChatDocBytes) return showToast(context, 'The document you selected is too large. Please choose a file of 25 MB or less.');
@@ -1137,7 +1138,7 @@ class _ComposerState extends State<Composer> with Busy {
                     Text(reply['text'] ?? '', maxLines: 1, overflow: TextOverflow.ellipsis, style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
                   ]),
                 ),
-                IconButton(tooltip: 'Cancel reply', icon: const Icon(Icons.close, size: 18), onPressed: widget.onCancelReply),
+                IconButton(tooltip: 'Cancel reply', icon: const Icon(PhosphorIconsRegular.x, size: 18), onPressed: widget.onCancelReply),
               ]),
             ),
           if (_hasAttachment)
@@ -1150,14 +1151,14 @@ class _ComposerState extends State<Composer> with Busy {
                     onRemove: () => setState(() => _photos.removeAt(i)),
                     child: Image.memory(_photos[i].bytes, width: 60, height: 60, fit: BoxFit.cover),
                   ),
-                if (_video != null) _Pending(label: 'Video', onRemove: () => setState(() => _video = null), child: Container(width: 60, height: 60, color: Colors.black87, child: const Icon(Icons.videocam, color: Colors.white))),
+                if (_video != null) _Pending(label: 'Video', onRemove: () => setState(() => _video = null), child: Container(width: 60, height: 60, color: Colors.black87, child: const Icon(PhosphorIconsFill.videoCamera, color: Colors.white))),
                 if (_doc != null)
                   _Pending(
                     label: _doc!.name,
                     onRemove: () => setState(() => _doc = null),
                     child: Container(
                       width: 160, height: 60, color: KColors.surfaceSubtle, padding: const EdgeInsets.all(8),
-                      child: Row(children: [const Icon(Icons.description_outlined), const SizedBox(width: 6), Expanded(child: Text(_doc!.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: KText.paragraphSmall))]),
+                      child: Row(children: [const Icon(PhosphorIconsRegular.fileText), const SizedBox(width: 6), Expanded(child: Text(_doc!.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: KText.paragraphSmall))]),
                     ),
                   ),
               ]),
@@ -1166,16 +1167,16 @@ class _ComposerState extends State<Composer> with Busy {
             padding: const EdgeInsets.fromLTRB(4, 8, 8, 8),
             child: _recording
                 ? Row(children: [
-                    IconButton(tooltip: 'Cancel voice message', icon: const Icon(Icons.delete_outline, color: KColors.error), onPressed: () => _stopVoice(send: false)),
-                    const Icon(Icons.fiber_manual_record, color: KColors.error, size: 14),
+                    IconButton(tooltip: 'Cancel voice message', icon: const Icon(PhosphorIconsRegular.trash, color: KColors.error), onPressed: () => _stopVoice(send: false)),
+                    const Icon(PhosphorIconsFill.circle, color: KColors.error, size: 14),
                     const SizedBox(width: 6),
                     Text('${elapsed.inMinutes}:${(elapsed.inSeconds % 60).toString().padLeft(2, '0')}', style: KText.paragraphLarge),
                     const SizedBox(width: 8),
                     Expanded(child: Text('Recording…', style: KText.paragraphMedium.copyWith(color: KColors.textSecondary))),
-                    _RoundButton(icon: Icons.send, tooltip: 'Send voice message', onTap: () => _stopVoice(send: true)),
+                    _RoundButton(icon: PhosphorIconsFill.paperPlaneRight, tooltip: 'Send voice message', onTap: () => _stopVoice(send: true)),
                   ])
                 : Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
-                    IconButton(tooltip: 'Add attachment', icon: const Icon(Icons.add_circle_outline, size: 28), onPressed: busy ? null : _attach),
+                    IconButton(tooltip: 'Add attachment', icon: const Icon(PhosphorIconsRegular.plusCircle, size: 28), onPressed: busy ? null : _attach),
                     Expanded(
                       child: TextField(
                         controller: _c,
@@ -1200,9 +1201,9 @@ class _ComposerState extends State<Composer> with Busy {
                     if (busy)
                       const Padding(padding: EdgeInsets.all(12), child: SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2)))
                     else if (_ready || context.deps.recorder == null)
-                      _RoundButton(icon: Icons.send, tooltip: 'Send message', onTap: _ready ? () => _send() : null)
+                      _RoundButton(icon: PhosphorIconsFill.paperPlaneRight, tooltip: 'Send message', onTap: _ready ? () => _send() : null)
                     else
-                      _RoundButton(icon: Icons.mic, tooltip: 'Record voice message', onTap: _startVoice),
+                      _RoundButton(icon: PhosphorIconsFill.microphone, tooltip: 'Record voice message', onTap: _startVoice),
                   ]),
           ),
         ]),
@@ -1248,7 +1249,7 @@ class _Pending extends StatelessWidget {
             child: Semantics(
               button: true,
               label: 'Remove $label',
-              child: InkWell(onTap: onRemove, child: Container(decoration: const BoxDecoration(color: Colors.black54, shape: BoxShape.circle), padding: const EdgeInsets.all(2), child: const Icon(Icons.close, size: 14, color: Colors.white))),
+              child: InkWell(onTap: onRemove, child: Container(decoration: const BoxDecoration(color: Colors.black54, shape: BoxShape.circle), padding: const EdgeInsets.all(2), child: const Icon(PhosphorIconsRegular.x, size: 14, color: Colors.white))),
             ),
           ),
         ]),

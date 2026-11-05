@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:keys_lite/theme/phosphor.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/api.dart';
 import '../../core/config.dart';
@@ -22,7 +23,7 @@ class _Row extends StatelessWidget {
         leading: icon == null ? null : Icon(icon, color: KColors.textPrimary),
         title: Text(title, style: KText.paragraphMediumLarge),
         subtitle: subtitle == null ? null : Text(subtitle!, style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
-        trailing: Icon(external ? Icons.north_east : Icons.chevron_right),
+        trailing: Icon(external ? PhosphorIconsRegular.arrowUpRight : PhosphorIconsRegular.caretRight),
         onTap: onTap,
       );
 }
@@ -39,9 +40,9 @@ class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
   @override
   Widget build(BuildContext context) => _page('Settings', [
-        _Row(Icons.person_outline, 'Your account', 'View all relevant information on your account', () => context.push('/settings/account')),
-        _Row(Icons.notifications_none, 'Notification', 'Choose your desired preferences about your activities, interests etc', () => context.push('/settings/notifications')),
-        _Row(Icons.folder_shared_outlined, 'Privacy and Safety', 'Manage what information you see and share', () => context.push('/settings/privacy')),
+        _Row(PhosphorIconsRegular.user, 'Your account', 'View all relevant information on your account', () => context.push('/settings/account')),
+        _Row(PhosphorIconsRegular.bell, 'Notification', 'Choose your desired preferences about your activities, interests etc', () => context.push('/settings/notifications')),
+        _Row(PhosphorIconsRegular.folderUser, 'Privacy and Safety', 'Manage what information you see and share', () => context.push('/settings/privacy')),
         _Row(null, 'Terms & Conditions', 'English (UK)', () => openLegal(AppConfig.termsUrl), external: true),
       ]);
 }
@@ -53,13 +54,13 @@ class AccountScreen extends StatelessWidget {
     final me = context.session.me!;
     final hasPw = me.json['hasPassword'] == true;
     return _page('Your account', [
-      _Row(Icons.edit_outlined, 'Edit profile', null, () => context.push('/profile/edit')),
+      _Row(PhosphorIconsRegular.pencilSimple, 'Edit profile', null, () => context.push('/profile/edit')),
       hasPw
-          ? _Row(Icons.lock_outline, 'Change password', null, () => context.push('/settings/password'))
-          : _Row(Icons.lock_outline, 'Create password', 'Keep access to your account secured', () => context.push('/settings/password/create')),
-      _Row(Icons.no_accounts_outlined, 'Deactivate account', null, () => context.push('/settings/deactivate')),
+          ? _Row(PhosphorIconsRegular.lock, 'Change password', null, () => context.push('/settings/password'))
+          : _Row(PhosphorIconsRegular.lock, 'Create password', 'Keep access to your account secured', () => context.push('/settings/password/create')),
+      _Row(PhosphorIconsRegular.userCircleMinus, 'Deactivate account', null, () => context.push('/settings/deactivate')),
       ListTile(
-        leading: const Icon(Icons.logout, color: KColors.error),
+        leading: const Icon(PhosphorIconsRegular.signOut, color: KColors.error),
         title: Text('Log out', style: KText.paragraphMediumLarge.copyWith(color: KColors.error)),
         onTap: () async {
           // PRF-17.1 (design copy "our account" corrected).
@@ -131,8 +132,8 @@ class PrivacyScreen extends StatelessWidget {
   const PrivacyScreen({super.key});
   @override
   Widget build(BuildContext context) => _page('Privacy and Safety', [
-        _Row(Icons.block, 'Blocked accounts', "Manage all accounts you've blocked", () => context.push('/settings/blocked')),
-        _Row(Icons.volume_off_outlined, 'Muted accounts', "Manage all accounts you've muted", () => context.push('/settings/muted')),
+        _Row(PhosphorIconsRegular.prohibit, 'Blocked accounts', "Manage all accounts you've blocked", () => context.push('/settings/blocked')),
+        _Row(PhosphorIconsRegular.speakerSimpleSlash, 'Muted accounts', "Manage all accounts you've muted", () => context.push('/settings/muted')),
       ]);
 }
 

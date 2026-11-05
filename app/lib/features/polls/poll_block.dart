@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:keys_lite/theme/phosphor.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/api.dart';
 import '../../core/feed_models.dart';
@@ -56,7 +57,7 @@ class _PollBlockState extends State<PollBlock> with Busy {
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Row(children: [
                 Expanded(child: Text('Poll promise', style: KText.paragraphMediumSmall.copyWith(color: kPromiseText, fontSize: 13))),
-                Icon(_promiseOpen ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, color: kPromiseText),
+                Icon(_promiseOpen ? PhosphorIconsRegular.caretUp : PhosphorIconsRegular.caretDown, color: kPromiseText),
               ]),
               if (_promiseOpen) Padding(padding: const EdgeInsets.only(top: 6), child: Text(p.promise!, style: KText.paragraphMedium)),
             ]),
@@ -65,7 +66,7 @@ class _PollBlockState extends State<PollBlock> with Busy {
       ],
       const SizedBox(height: 12),
       Row(children: [
-        const Icon(Icons.check_circle, size: 14),
+        const Icon(PhosphorIconsFill.checkCircle, size: 14),
         const SizedBox(width: 6),
         Text(p.multi ? 'Select one or more' : 'Select one', style: KText.paragraphSmall.copyWith(fontSize: 13)),
         const Spacer(),
@@ -130,7 +131,7 @@ class _ChoiceRow extends StatelessWidget {
             decoration: BoxDecoration(borderRadius: BorderRadius.circular(KRadius.sm), border: Border.all(color: selected ? KColors.textPrimary : KColors.borderDefault)),
             child: Row(children: [
               Icon(
-                multi ? (selected ? Icons.check_box : Icons.check_box_outline_blank) : (selected ? Icons.radio_button_checked : Icons.radio_button_unchecked),
+                multi ? (selected ? PhosphorIconsFill.checkSquare : PhosphorIconsRegular.square) : (selected ? PhosphorIconsFill.radioButton : PhosphorIconsRegular.circle),
                 color: enabled ? KColors.textPrimary : KColors.textTertiary,
               ),
               const SizedBox(width: 12),
@@ -174,7 +175,7 @@ class _ResultRow extends StatelessWidget {
                   Text(o.text, style: KText.paragraphMedium.copyWith(fontSize: 15)),
                   Row(children: [
                     Text(plural(o.votes ?? 0, 'vote'), style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
-                    if (mine) ...[const SizedBox(width: 4), const Icon(Icons.check_circle, size: 14)],
+                    if (mine) ...[const SizedBox(width: 4), const Icon(PhosphorIconsFill.checkCircle, size: 14)],
                   ]),
                 ]),
               ),

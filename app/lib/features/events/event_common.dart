@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:keys_lite/theme/phosphor.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../core/api.dart';
@@ -52,7 +53,7 @@ class EventDateBlock extends StatelessWidget {
       decoration: BoxDecoration(color: draft ? KColors.brand : KColors.selected, borderRadius: BorderRadius.circular(KRadius.sm)),
       alignment: Alignment.center,
       child: d == null
-          ? Icon(Icons.edit_calendar_outlined, color: draft ? KColors.textPrimary : Colors.white)
+          ? Icon(PhosphorIconsRegular.calendarPlus, color: draft ? KColors.textPrimary : Colors.white)
           : Column(mainAxisSize: MainAxisSize.min, children: [
               Text('${d.day}', style: KText.headingXSmall.copyWith(color: draft ? KColors.textPrimary : Colors.white, height: 1.1)),
               Text(DateFormat('MMM').format(d), style: KText.paragraphMediumSmall.copyWith(color: draft ? KColors.textPrimary : Colors.white)),
@@ -71,7 +72,7 @@ class StarRow extends StatelessWidget {
         child: ExcludeSemantics(
           child: Row(mainAxisSize: MainAxisSize.min, children: [
             for (var i = 1; i <= 5; i++)
-              Icon(value >= i ? Icons.star_rounded : value >= i - 0.5 ? Icons.star_half_rounded : Icons.star_outline_rounded, size: size, color: const Color(0xFFFFC21A)),
+              Icon(value >= i ? PhosphorIconsFill.star : value >= i - 0.5 ? PhosphorIconsFill.starHalf : PhosphorIconsRegular.star, size: size, color: const Color(0xFFFFC21A)),
           ]),
         ),
       );
@@ -107,7 +108,7 @@ class EventCard extends StatelessWidget {
                 width: double.infinity,
                 child: Stack(fit: StackFit.expand, children: [
                   cover == null
-                      ? Container(color: KColors.surfaceSubtle, child: const Icon(Icons.event_outlined, size: 40, color: KColors.textTertiary))
+                      ? Container(color: KColors.surfaceSubtle, child: const Icon(PhosphorIconsRegular.calendarDots, size: 40, color: KColors.textTertiary))
                       : Image.network(context.api.absolute(cover), fit: BoxFit.cover, errorBuilder: (_, _, _) => Container(color: KColors.surfaceSubtle)),
                   Positioned(left: 8, top: 8, child: EventDateBlock(e.startAt, draft: e.isDraft)),
                   if (e.status == 'cancelled' || e.soldOut)
@@ -122,9 +123,9 @@ class EventCard extends StatelessWidget {
                     const _Badge('Free'),
                   ]),
                   const SizedBox(height: 6),
-                  _Line(Icons.schedule, eventTimes(e)),
+                  _Line(PhosphorIconsRegular.clock, eventTimes(e)),
                   const SizedBox(height: 4),
-                  _Line(e.format == 'online' ? Icons.videocam_outlined : Icons.place_outlined, e.where),
+                  _Line(e.format == 'online' ? PhosphorIconsRegular.videoCamera : PhosphorIconsRegular.mapPin, e.where),
                   const SizedBox(height: 8),
                   if (e.status == 'completed' && r != null && r['average'] != null)
                     Row(children: [
@@ -209,9 +210,9 @@ class EventRow extends StatelessWidget {
                       Text('Free', style: KText.paragraphMediumSmall.copyWith(color: KColors.success)),
                     ]),
                     const SizedBox(height: 4),
-                    _Line(Icons.schedule, eventTimes(e)),
+                    _Line(PhosphorIconsRegular.clock, eventTimes(e)),
                     const SizedBox(height: 2),
-                    _Line(e.format == 'online' ? Icons.videocam_outlined : Icons.place_outlined, e.where),
+                    _Line(e.format == 'online' ? PhosphorIconsRegular.videoCamera : PhosphorIconsRegular.mapPin, e.where),
                     if (e.going > 0) ...[const SizedBox(height: 4), Text('+${e.going} going', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary))],
                   ]),
                 ),
@@ -266,7 +267,7 @@ class _CategorySheetState extends State<_CategorySheet> {
             padding: const EdgeInsets.fromLTRB(20, 4, 8, 4),
             child: Row(children: [
               Expanded(child: Text('Category', style: KText.headingXSmall)),
-              IconButton(tooltip: 'Close', icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context)),
+              IconButton(tooltip: 'Close', icon: const Icon(PhosphorIconsRegular.x), onPressed: () => Navigator.pop(context)),
             ]),
           ),
           const Divider(height: 1),

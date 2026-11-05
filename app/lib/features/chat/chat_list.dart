@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:keys_lite/theme/phosphor.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/api.dart';
 import '../../core/feed_models.dart';
@@ -92,7 +93,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
         backgroundColor: KColors.surfaceDefault,
         surfaceTintColor: Colors.transparent,
         titleSpacing: 0,
-        leading: IconButton(tooltip: 'Back', icon: const Icon(Icons.chevron_left, size: 30), onPressed: () => context.pop()),
+        leading: IconButton(tooltip: 'Back', icon: const Icon(PhosphorIconsRegular.caretLeft, size: 30), onPressed: () => context.pop()),
         title: Text('Chat', style: KText.headingXSmall),
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -104,7 +105,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
           await context.push('/chats/new');
           _load();
         },
-        icon: const Icon(Icons.add),
+        icon: const Icon(PhosphorIconsRegular.plus),
         label: Text('New Chat', style: KText.labelSemibold.copyWith(fontSize: 15)),
       ),
       body: Column(children: [
@@ -248,7 +249,7 @@ class ChatRow extends StatelessWidget {
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Row(children: [
                   Flexible(child: Text(c.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: KText.paragraphLarge.copyWith(fontWeight: bold ? FontWeight.w600 : FontWeight.w400))),
-                  if (c.pinned) const Padding(padding: EdgeInsets.only(left: 4), child: Icon(Icons.push_pin, size: 14, color: KColors.textTertiary, semanticLabel: 'Pinned')),
+                  if (c.pinned) const Padding(padding: EdgeInsets.only(left: 4), child: Icon(PhosphorIconsFill.pushPin, size: 14, color: KColors.textTertiary, semanticLabel: 'Pinned')),
                 ]),
                 const SizedBox(height: 2),
                 ExcludeSemantics(excluding: false, child: preview),
@@ -268,7 +269,7 @@ class ChatRow extends StatelessWidget {
                   child: Text('${c.unread}', style: KText.paragraphMediumSmall),
                 )
               else if (c.muted)
-                const Icon(Icons.volume_off_outlined, size: 18, color: KColors.textTertiary, semanticLabel: 'Muted')
+                const Icon(PhosphorIconsRegular.speakerSimpleSlash, size: 18, color: KColors.textTertiary, semanticLabel: 'Muted')
               else
                 const SizedBox(height: 20),
             ]),

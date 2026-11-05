@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:keys_lite/theme/phosphor.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/api.dart';
 import '../../core/scope.dart';
@@ -12,16 +13,16 @@ import 'event_common.dart';
 import 'event_detail.dart' show showRatingSheet;
 
 const kTagIcons = <String, IconData>{
-  'All': Icons.grid_view_rounded,
-  'Music': Icons.music_note_outlined,
-  'Culture': Icons.theater_comedy_outlined,
-  'Networking': Icons.lan_outlined,
-  'Food & Drink': Icons.restaurant_outlined,
-  'Fashion': Icons.checkroom_outlined,
-  'Education': Icons.school_outlined,
-  'Tech': Icons.computer_outlined,
-  'Social': Icons.groups_outlined,
-  'Others': Icons.more_horiz,
+  'All': PhosphorIconsRegular.squaresFour,
+  'Music': PhosphorIconsRegular.musicNotes,
+  'Culture': PhosphorIconsRegular.maskHappy,
+  'Networking': PhosphorIconsRegular.treeStructure,
+  'Food & Drink': PhosphorIconsRegular.forkKnife,
+  'Fashion': PhosphorIconsRegular.tShirt,
+  'Education': PhosphorIconsRegular.graduationCap,
+  'Tech': PhosphorIconsRegular.desktop,
+  'Social': PhosphorIconsRegular.usersThree,
+  'Others': PhosphorIconsRegular.dotsThree,
 };
 
 /// EVT-04 / EVT-11: create from scratch or from a template.
@@ -95,7 +96,7 @@ class _EventsTabState extends State<EventsTab> with SingleTickerProviderStateMix
                 tabs: const [Tab(text: 'Discover'), Tab(text: 'My events')],
               ),
             ),
-            IconButton(tooltip: 'Search events', icon: const Icon(Icons.search), onPressed: () => context.push('/events/search')),
+            IconButton(tooltip: 'Search events', icon: const Icon(PhosphorIconsRegular.magnifyingGlass), onPressed: () => context.push('/events/search')),
           ]),
           Expanded(child: TabBarView(controller: _tabs, children: [_Discover(key: _discover), const _MyEvents()])),
         ]),
@@ -112,7 +113,7 @@ class _EventsTabState extends State<EventsTab> with SingleTickerProviderStateMix
               await startEvent(context);
               _discover.currentState?._load();
             },
-            child: const Icon(Icons.add, size: 28),
+            child: const Icon(PhosphorIconsRegular.plus, size: 28),
           ),
         ),
       ]);
@@ -214,7 +215,7 @@ class _DiscoverState extends State<_Discover> {
                     width: 76,
                     child: ExcludeSemantics(
                       child: Column(children: [
-                        CircleAvatar(radius: 22, backgroundColor: _tag == t ? KColors.brand : KColors.surfaceSubtle, child: Icon(kTagIcons[t] ?? Icons.label_outline, color: KColors.textPrimary)),
+                        CircleAvatar(radius: 22, backgroundColor: _tag == t ? KColors.brand : KColors.surfaceSubtle, child: Icon(kTagIcons[t] ?? PhosphorIconsRegular.tag, color: KColors.textPrimary)),
                         const SizedBox(height: 6),
                         Text(t, style: KText.paragraphSmall, maxLines: 1, overflow: TextOverflow.ellipsis),
                       ]),
@@ -229,7 +230,7 @@ class _DiscoverState extends State<_Discover> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
             child: Column(children: [
-              const CircleAvatar(radius: 56, backgroundColor: KColors.surfaceSubtle, child: Icon(Icons.calendar_month_outlined, size: 48, color: KColors.textPrimary)),
+              const CircleAvatar(radius: 56, backgroundColor: KColors.surfaceSubtle, child: Icon(PhosphorIconsRegular.calendarDots, size: 48, color: KColors.textPrimary)),
               const SizedBox(height: 16),
               Text('No events yet', style: KText.headingXSmall),
               const SizedBox(height: 6),

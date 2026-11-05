@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:keys_lite/theme/phosphor.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -99,9 +100,9 @@ class _VerifyMethodScreenState extends State<VerifyMethodScreen> with Busy {
       };
 
   IconData _icon(VerifyMethod m) => switch (m) {
-        VerifyMethod.card => Icons.credit_card,
-        VerifyMethod.applePay => Icons.apple,
-        VerifyMethod.googlePay => Icons.g_mobiledata,
+        VerifyMethod.card => PhosphorIconsRegular.creditCard,
+        VerifyMethod.applePay => PhosphorIconsFill.appleLogo,
+        VerifyMethod.googlePay => PhosphorIconsBold.googleLogo,
       };
 
   Future<void> _verify() async {
@@ -289,7 +290,7 @@ class VerifySuccessScreen extends StatelessWidget {
   Widget build(BuildContext context) => KeysScaffold(
         body: Column(children: [
           const SizedBox(height: 120),
-          const CircleAvatar(radius: 40, backgroundColor: KColors.success, child: Icon(Icons.check_rounded, color: Colors.white, size: 44)),
+          const CircleAvatar(radius: 40, backgroundColor: KColors.success, child: Icon(PhosphorIconsRegular.check, color: Colors.white, size: 44)),
           const SizedBox(height: 24),
           const Intro(center: true, title: 'Successful', body: 'Congratulations, your account has been verified.'),
         ]),
@@ -322,7 +323,7 @@ class VerifyMismatchScreen extends StatelessWidget {
     return KeysScaffold(
       header: const KeysHeader(),
       body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Center(child: CircleAvatar(radius: 32, backgroundColor: Color(0xFFFDECEA), child: Icon(Icons.close_rounded, color: KColors.error, size: 36))),
+        const Center(child: CircleAvatar(radius: 32, backgroundColor: Color(0xFFFDECEA), child: Icon(PhosphorIconsRegular.x, color: KColors.error, size: 36))),
         const SizedBox(height: 20),
         const Intro(center: true, title: "We couldn't verify your address", body: 'The address linked to your card does not match your home address on Keys.'),
         const SizedBox(height: 20),
@@ -396,7 +397,7 @@ class _ContestScreenState extends State<ContestScreen> with Busy {
           for (final d in docs)
             Padding(
               padding: const EdgeInsets.only(bottom: 6),
-              child: Row(children: [const Icon(Icons.check, size: 16, color: KColors.success), const SizedBox(width: 8), Text(d, style: KText.paragraphMedium)]),
+              child: Row(children: [const Icon(PhosphorIconsRegular.check, size: 16, color: KColors.success), const SizedBox(width: 8), Text(d, style: KText.paragraphMedium)]),
             ),
           const SizedBox(height: 4),
           Text('* Documents must be dated within the last 3 months, except tenancy agreements.', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
@@ -410,13 +411,13 @@ class _ContestScreenState extends State<ContestScreen> with Busy {
               decoration: BoxDecoration(color: KColors.surfaceSubtle, borderRadius: BorderRadius.circular(KRadius.md), border: Border.all(color: _error != null ? KColors.error : KColors.borderDefault)),
               child: _file == null
                   ? Column(children: [
-                      const Icon(Icons.upload_file_outlined, size: 32),
+                      const Icon(PhosphorIconsRegular.fileArrowUp, size: 32),
                       const SizedBox(height: 8),
                       Text('Tap to upload document', style: KText.paragraphMediumLarge),
                       Text('Supports PDF, JPG, PNG up to 10MB', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
                     ])
                   : Row(children: [
-                      const Icon(Icons.description_outlined),
+                      const Icon(PhosphorIconsRegular.fileText),
                       const SizedBox(width: 12),
                       Expanded(child: Text(_file!.name, style: KText.paragraphMediumLarge, overflow: TextOverflow.ellipsis)),
                       Text('${(_file!.size / 1024 / 1024).toStringAsFixed(1)} MB', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
@@ -426,7 +427,7 @@ class _ContestScreenState extends State<ContestScreen> with Busy {
           if (_error != null) Padding(padding: const EdgeInsets.only(top: 8), child: ErrorLine(_error!)),
           const SizedBox(height: 12),
           Row(children: [
-            const Icon(Icons.lock_outline, size: 14, color: KColors.textSecondary),
+            const Icon(PhosphorIconsRegular.lock, size: 14, color: KColors.textSecondary),
             const SizedBox(width: 6),
             Text('Your documents are encrypted and securely stored.', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
           ]),
@@ -454,11 +455,11 @@ class UnderReviewScreen extends StatelessWidget {
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text('Submitted Document', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
             const SizedBox(height: 4),
-            Row(children: [const Icon(Icons.description_outlined, size: 20), const SizedBox(width: 8), Expanded(child: Text(reviewCase['documentName'] ?? '', style: KText.paragraphMediumLarge))]),
+            Row(children: [const Icon(PhosphorIconsRegular.fileText, size: 20), const SizedBox(width: 8), Expanded(child: Text(reviewCase['documentName'] ?? '', style: KText.paragraphMediumLarge))]),
             if (submitted != null) ...[const SizedBox(height: 4), Text('Submitted ${DateFormat('d MMM yyyy').format(submitted)}', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary))],
             const Divider(height: 28, color: KColors.borderDefault),
             Row(children: [
-              const Icon(Icons.hourglass_top_rounded, size: 18, color: KColors.progressStart),
+              const Icon(PhosphorIconsRegular.hourglassHigh, size: 18, color: KColors.progressStart),
               const SizedBox(width: 8),
               Expanded(child: Text('Keys review in progress', style: KText.paragraphMediumLarge.copyWith(fontSize: 14))),
               Text(reviewCase['estimate'] ?? 'Est. 1-2 business days', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),

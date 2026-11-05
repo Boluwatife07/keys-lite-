@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:keys_lite/theme/phosphor.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/models.dart';
 import '../../core/scope.dart';
@@ -64,8 +65,8 @@ class _HomeShellState extends State<HomeShell> {
         context: context,
         builder: (c) => SafeArea(
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            ListTile(leading: const Icon(Icons.edit_outlined), title: const Text('Post'), onTap: () => Navigator.pop(c, 'post')),
-            ListTile(leading: const Icon(Icons.poll_outlined), title: const Text('Poll'), onTap: () => Navigator.pop(c, 'poll')),
+            ListTile(leading: const Icon(PhosphorIconsRegular.pencilSimple), title: const Text('Post'), onTap: () => Navigator.pop(c, 'post')),
+            ListTile(leading: const Icon(PhosphorIconsRegular.chartBar), title: const Text('Poll'), onTap: () => Navigator.pop(c, 'poll')),
           ]),
         ),
       );
@@ -146,7 +147,7 @@ class _HomeShellState extends State<HomeShell> {
                   radius: 18,
                   backgroundColor: KColors.surfaceSubtle,
                   backgroundImage: me?.photoUrl == null ? null : NetworkImage(context.api.absolute(me!.photoUrl!)),
-                  child: me?.photoUrl == null ? const Icon(Icons.person_outline, size: 18) : null,
+                  child: me?.photoUrl == null ? const Icon(PhosphorIconsRegular.user, size: 18) : null,
                 ),
               ),
             ),
@@ -155,10 +156,10 @@ class _HomeShellState extends State<HomeShell> {
           actions: [
             IconButton(
               tooltip: _unreadChats > 0 ? 'Chats, $_unreadChats unread' : 'Chats',
-              icon: Badge(isLabelVisible: _unreadChats > 0, label: Text('$_unreadChats'), backgroundColor: KColors.error, child: const Icon(Icons.chat_bubble_outline)),
+              icon: Badge(isLabelVisible: _unreadChats > 0, label: Text('$_unreadChats'), backgroundColor: KColors.error, child: const Icon(PhosphorIconsRegular.chatCircle)),
               onPressed: _openChats,
             ),
-            IconButton(tooltip: 'Notifications', icon: const Icon(Icons.notifications_none), onPressed: () => context.push('/notifications')),
+            IconButton(tooltip: 'Notifications', icon: const Icon(PhosphorIconsRegular.bell), onPressed: () => context.push('/notifications')),
             const SizedBox(width: 4),
           ],
         ),
@@ -171,7 +172,7 @@ class _HomeShellState extends State<HomeShell> {
                 foregroundColor: KColors.textPrimary,
                 shape: const CircleBorder(),
                 onPressed: _create,
-                child: const Icon(Icons.add, size: 28),
+                child: const Icon(PhosphorIconsRegular.plus, size: 28),
               )
             : null,
         bottomNavigationBar: NavigationBar(
@@ -180,11 +181,11 @@ class _HomeShellState extends State<HomeShell> {
           indicatorColor: KColors.brandSubtle,
           onDestinationSelected: (i) => setState(() => _tab = i),
           destinations: [
-            const NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'Home'),
-            NavigationDestination(icon: Icon(Icons.apartment_outlined, key: keys.community), selectedIcon: const Icon(Icons.apartment), label: 'Community'),
-            NavigationDestination(icon: Icon(Icons.handyman_outlined, key: keys.services), selectedIcon: const Icon(Icons.handyman), label: 'Services'),
-            NavigationDestination(icon: Icon(Icons.event_outlined, key: keys.events), selectedIcon: const Icon(Icons.event), label: 'Events'),
-            NavigationDestination(icon: Icon(Icons.interests_outlined, key: keys.clubs), selectedIcon: const Icon(Icons.interests), label: 'Clubs'),
+            const NavigationDestination(icon: Icon(PhosphorIconsRegular.house), selectedIcon: Icon(PhosphorIconsFill.house), label: 'Home'),
+            NavigationDestination(icon: Icon(PhosphorIconsRegular.buildings, key: keys.community), selectedIcon: const Icon(PhosphorIconsFill.buildings), label: 'Community'),
+            NavigationDestination(icon: Icon(PhosphorIconsRegular.wrench, key: keys.services), selectedIcon: const Icon(PhosphorIconsFill.wrench), label: 'Services'),
+            NavigationDestination(icon: Icon(PhosphorIconsRegular.calendarDots, key: keys.events), selectedIcon: const Icon(PhosphorIconsFill.calendarDots), label: 'Events'),
+            NavigationDestination(icon: Icon(PhosphorIconsRegular.shapes, key: keys.clubs), selectedIcon: const Icon(PhosphorIconsFill.shapes), label: 'Clubs'),
           ],
         ),
       ),
@@ -287,7 +288,7 @@ Future<void> showWelcomePrompt(BuildContext context, Me me) async {
       child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
           Expanded(child: Text('Welcome to ${t['community']}', style: KText.headingSmall)),
-          IconButton(tooltip: 'Close', icon: const Icon(Icons.close), onPressed: () => Navigator.pop(c, false)),
+          IconButton(tooltip: 'Close', icon: const Icon(PhosphorIconsRegular.x), onPressed: () => Navigator.pop(c, false)),
         ]),
         const SizedBox(height: 8),
         Text('Say hello with a quick intro post. You can edit it first.', style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),

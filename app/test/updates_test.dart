@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:keys_lite/theme/phosphor.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keys_lite/core/api.dart';
 import 'package:keys_lite/features/updates/update_detail.dart';
@@ -60,8 +61,8 @@ void main() {
     var unseen = -1;
     await h.pump(t, Scaffold(body: UpdatesTab(onUnseen: (n) => unseen = n)));
     expect(find.byTooltip('Create update'), findsNothing);
-    expect(find.byIcon(Icons.push_pin), findsOneWidget);
-    expect(find.byIcon(Icons.volume_off_outlined), findsOneWidget);
+    expect(find.byIcon(PhosphorIconsFill.pushPin), findsOneWidget);
+    expect(find.byIcon(PhosphorIconsRegular.speakerSimpleSlash), findsOneWidget);
     expect(find.text('+4 new additional updates'), findsOneWidget);
     expect(unseen, 1);
     expect(find.text('View resolved updates'), findsOneWidget);

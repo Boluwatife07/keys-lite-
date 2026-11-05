@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:keys_lite/theme/phosphor.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keys_lite/core/api.dart';
 import 'package:keys_lite/features/chat/chat_list.dart';
@@ -50,7 +51,7 @@ void main() {
     h.fake.on('GET /chats/people', (_, _) => {'people': []});
     await h.pump(t, const ChatListScreen());
     expect(find.text('4'), findsOneWidget);
-    expect(find.byIcon(Icons.volume_off_outlined), findsOneWidget);
+    expect(find.byIcon(PhosphorIconsRegular.speakerSimpleSlash), findsOneWidget);
     expect(find.text('You blocked this user'), findsOneWidget);
     expect(find.text('Recently active'), findsOneWidget);
     for (final tab in ['All', 'Primary', 'Groups']) {

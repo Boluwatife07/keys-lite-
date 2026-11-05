@@ -54,7 +54,6 @@ dependencies:
   qr_flutter: ^4.1.0
   mobile_scanner: ^7.5.0
   pdf: ^3.13.1
-
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -96,6 +95,15 @@ flutter:
           weight: 600
         - asset: assets/fonts/Geist-Bold.ttf
           weight: 700
+    - family: PhosphorRegular
+      fonts:
+        - asset: assets/fonts/phosphor/Phosphor.ttf
+    - family: PhosphorFill
+      fonts:
+        - asset: assets/fonts/phosphor/Phosphor-Fill.ttf
+    - family: PhosphorBold
+      fonts:
+        - asset: assets/fonts/phosphor/Phosphor-Bold.ttf
 
   # To add assets to your application, add an assets section, like this:
   # assets:

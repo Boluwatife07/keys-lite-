@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:keys_lite/theme/phosphor.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/api.dart';
 import '../../core/scope.dart';
@@ -208,7 +209,7 @@ class _UpdateFormScreenState extends State<UpdateFormScreen> with Busy {
         child: Row(mainAxisSize: MainAxisSize.min, children: [
           Text(text, style: KText.paragraphMedium.copyWith(color: KColors.textInverse)),
           if (onRemove != null)
-            InkWell(onTap: onRemove, child: Semantics(label: 'Remove $text', button: true, child: const Padding(padding: EdgeInsets.only(left: 4), child: Icon(Icons.close, size: 16, color: Colors.white)))),
+            InkWell(onTap: onRemove, child: Semantics(label: 'Remove $text', button: true, child: const Padding(padding: EdgeInsets.only(left: 4), child: Icon(PhosphorIconsRegular.x, size: 16, color: Colors.white)))),
         ]),
       );
 
@@ -229,7 +230,7 @@ class _UpdateFormScreenState extends State<UpdateFormScreen> with Busy {
           surfaceTintColor: Colors.transparent,
           titleSpacing: 0,
           title: Text(_editing ? 'Edit Update' : 'Create Update', style: KText.headingXSmall),
-          leading: IconButton(tooltip: 'Back', icon: const Icon(Icons.chevron_left, size: 30), onPressed: () => Navigator.of(context).maybePop()),
+          leading: IconButton(tooltip: 'Back', icon: const Icon(PhosphorIconsRegular.caretLeft, size: 30), onPressed: () => Navigator.of(context).maybePop()),
         ),
         body: ListView(padding: const EdgeInsets.fromLTRB(16, 8, 16, 24), children: [
           _label('Title of your update', required: true),
@@ -287,7 +288,7 @@ class _UpdateFormScreenState extends State<UpdateFormScreen> with Busy {
                         child: Semantics(
                           button: true,
                           label: 'Remove image ${i + 1}',
-                          child: Container(decoration: const BoxDecoration(color: Colors.black54, shape: BoxShape.circle), padding: const EdgeInsets.all(2), child: const Icon(Icons.close, size: 16, color: Colors.white)),
+                          child: Container(decoration: const BoxDecoration(color: Colors.black54, shape: BoxShape.circle), padding: const EdgeInsets.all(2), child: const Icon(PhosphorIconsRegular.x, size: 16, color: Colors.white)),
                         ),
                       ),
                     ),
@@ -297,7 +298,7 @@ class _UpdateFormScreenState extends State<UpdateFormScreen> with Busy {
             ),
             const SizedBox(height: 8),
           ],
-          _pillButton('Upload image', Icons.upload_outlined, _images.length < kUpdateImagesMax ? _addImage : null),
+          _pillButton('Upload image', PhosphorIconsRegular.uploadSimple, _images.length < kUpdateImagesMax ? _addImage : null),
           const SizedBox(height: 24),
           _label('Relevant documents'),
           if (_docName != null)
@@ -306,12 +307,12 @@ class _UpdateFormScreenState extends State<UpdateFormScreen> with Busy {
               padding: const EdgeInsets.fromLTRB(12, 4, 4, 4),
               decoration: BoxDecoration(color: KColors.surfaceSubtle, borderRadius: BorderRadius.circular(KRadius.md)),
               child: Row(children: [
-                const Icon(Icons.description_outlined, size: 20),
+                const Icon(PhosphorIconsRegular.fileText, size: 20),
                 const SizedBox(width: 8),
                 Expanded(child: Text(_docName!, style: KText.paragraphMedium, overflow: TextOverflow.ellipsis)),
                 IconButton(
                   tooltip: 'Remove document',
-                  icon: const Icon(Icons.close, size: 18),
+                  icon: const Icon(PhosphorIconsRegular.x, size: 18),
                   onPressed: () => setState(() {
                     _doc = null;
                     _docId = null;
@@ -321,7 +322,7 @@ class _UpdateFormScreenState extends State<UpdateFormScreen> with Busy {
               ]),
             )
           else
-            _pillButton('Upload document', Icons.upload_outlined, _addDocument),
+            _pillButton('Upload document', PhosphorIconsRegular.uploadSimple, _addDocument),
           const SizedBox(height: 24),
           _label('Audience'),
           Wrap(spacing: 8, runSpacing: 8, crossAxisAlignment: WrapCrossAlignment.center, children: [
@@ -417,7 +418,7 @@ class _AudienceSheetState extends State<_AudienceSheet> {
         activeColor: KColors.surfaceInverted,
         title: Text(title, style: KText.paragraphMediumLarge),
         subtitle: Text(subtitle, style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
-        secondary: kind == 'sub' ? const Icon(Icons.chevron_right) : null,
+        secondary: kind == 'sub' ? const Icon(PhosphorIconsRegular.caretRight) : null,
       );
 
   Widget _check(Map<String, dynamic> o, Map<String, String> into) => CheckboxListTile(
@@ -466,7 +467,7 @@ class _AudienceSheetState extends State<_AudienceSheet> {
           Padding(
             padding: const EdgeInsets.fromLTRB(8, 0, 20, 8),
             child: Row(children: [
-              IconButton(tooltip: 'Back', icon: const Icon(Icons.arrow_back), onPressed: () => setState(() => _picking = false)),
+              IconButton(tooltip: 'Back', icon: const Icon(PhosphorIconsRegular.arrowLeft), onPressed: () => setState(() => _picking = false)),
               const SizedBox(width: 4),
               Expanded(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

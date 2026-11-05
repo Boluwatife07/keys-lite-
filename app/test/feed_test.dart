@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:keys_lite/theme/phosphor.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keys_lite/core/api.dart';
 import 'package:keys_lite/core/feed_models.dart';
@@ -154,10 +155,10 @@ void main() {
     await t.tap(find.byTooltip('Add photos'));
     await t.pumpAndSettle();
     expect(find.bySemanticsLabel('Remove photo 1'), findsOneWidget);
-    expect(t.widget<IconButton>(find.widgetWithIcon(IconButton, Icons.videocam_outlined)).onPressed, isNull);
-    expect(t.widget<IconButton>(find.widgetWithIcon(IconButton, Icons.attach_file)).onPressed, isNull);
-    expect(t.widget<IconButton>(find.widgetWithIcon(IconButton, Icons.link)).onPressed, isNull);
-    expect(t.widget<IconButton>(find.widgetWithIcon(IconButton, Icons.image_outlined)).onPressed, isNotNull);
+    expect(t.widget<IconButton>(find.widgetWithIcon(IconButton, PhosphorIconsRegular.videoCamera)).onPressed, isNull);
+    expect(t.widget<IconButton>(find.widgetWithIcon(IconButton, PhosphorIconsRegular.paperclip)).onPressed, isNull);
+    expect(t.widget<IconButton>(find.widgetWithIcon(IconButton, PhosphorIconsRegular.link)).onPressed, isNull);
+    expect(t.widget<IconButton>(find.widgetWithIcon(IconButton, PhosphorIconsRegular.image)).onPressed, isNotNull);
   });
 
   testWidgets('FED-05.2 failed post keeps the text and offers Retry', (t) async {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:keys_lite/theme/phosphor.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/api.dart';
 import '../../core/feed_models.dart';
@@ -51,10 +52,10 @@ class CommunityTabState extends State<CommunityTab> {
     final showProposals = c['proposalsTab'] == true;
     return Column(children: [
       ListTile(
-        leading: const CircleAvatar(backgroundColor: KColors.surfaceSubtle, child: Icon(Icons.apartment_outlined, color: KColors.selected)),
+        leading: const CircleAvatar(backgroundColor: KColors.surfaceSubtle, child: Icon(PhosphorIconsRegular.buildings, color: KColors.selected)),
         title: Text(com['name'], style: KText.paragraphMediumLarge),
         subtitle: Text(com['location'], style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
-        trailing: IconButton(tooltip: 'Share community', icon: const Icon(Icons.share_outlined), onPressed: () => showShareCommunity(context, com['code'], c['shareLink'])),
+        trailing: IconButton(tooltip: 'Share community', icon: const Icon(PhosphorIconsRegular.shareNetwork), onPressed: () => showShareCommunity(context, com['code'], c['shareLink'])),
       ),
       // VOT-01.5: Proposals tab for committee members only.
       if (showProposals)
@@ -282,7 +283,7 @@ Future<void> showMilestoneSheet(BuildContext context, Map<String, dynamic> m) as
               SizedBox(
                 width: 36,
                 height: 36,
-                child: IconButton(padding: EdgeInsets.zero, tooltip: 'Close', icon: const Icon(Icons.close, size: 22, color: KColors.iconDefault), onPressed: () => Navigator.of(c).pop(false)),
+                child: IconButton(padding: EdgeInsets.zero, tooltip: 'Close', icon: const Icon(PhosphorIconsRegular.x, size: 22, color: KColors.iconDefault), onPressed: () => Navigator.of(c).pop(false)),
               ),
             ]),
           ),

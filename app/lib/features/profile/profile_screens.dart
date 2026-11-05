@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:keys_lite/theme/phosphor.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../core/api.dart';
@@ -23,8 +24,8 @@ class _Meta extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = KText.paragraphSmall.copyWith(color: KColors.textSecondary);
     return Wrap(spacing: 16, runSpacing: 4, children: [
-      Row(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.apartment_outlined, size: 14, color: KColors.textSecondary), const SizedBox(width: 4), Text(community, style: s)]),
-      if (joinedAt != null) Row(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.calendar_today_outlined, size: 13, color: KColors.textSecondary), const SizedBox(width: 4), Text(joined(joinedAt), style: s)]),
+      Row(mainAxisSize: MainAxisSize.min, children: [const Icon(PhosphorIconsRegular.buildings, size: 14, color: KColors.textSecondary), const SizedBox(width: 4), Text(community, style: s)]),
+      if (joinedAt != null) Row(mainAxisSize: MainAxisSize.min, children: [const Icon(PhosphorIconsRegular.calendarBlank, size: 13, color: KColors.textSecondary), const SizedBox(width: 4), Text(joined(joinedAt), style: s)]),
     ]);
   }
 }
@@ -74,8 +75,8 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
             surfaceTintColor: Colors.transparent,
             title: Text('Profile', style: KText.headingXSmall),
             actions: [
-              IconButton(tooltip: 'Settings', icon: const Icon(Icons.settings_outlined), onPressed: () => context.push('/settings')),
-              IconButton(tooltip: 'Share profile', icon: const Icon(Icons.share_outlined), onPressed: () => context.deps.sharer.share(p?['shareLink'] ?? '')),
+              IconButton(tooltip: 'Settings', icon: const Icon(PhosphorIconsRegular.gear), onPressed: () => context.push('/settings')),
+              IconButton(tooltip: 'Share profile', icon: const Icon(PhosphorIconsRegular.shareNetwork), onPressed: () => context.deps.sharer.share(p?['shareLink'] ?? '')),
             ],
           ),
           body: PostList(
@@ -229,13 +230,13 @@ class _OtherProfileScreenState extends State<OtherProfileScreen> {
                   ),
                   Container(height: 8, color: KColors.surfaceSubtle),
                   if (p['isBlocked'] != true) ...[
-                    ListTile(leading: const Icon(Icons.share_outlined), title: const Text('Share profile'), onTap: () => context.deps.sharer.share(p['shareLink'])),
-                    ListTile(leading: Icon(p['isMuted'] == true ? Icons.volume_up_outlined : Icons.volume_off_outlined), title: Text('${p['isMuted'] == true ? 'Unmute' : 'Mute'} ${PersonRef(p).firstName}'), onTap: _mute),
-                    ListTile(leading: const Icon(Icons.block), title: Text('Block ${PersonRef(p).firstName}'), onTap: () async {
+                    ListTile(leading: const Icon(PhosphorIconsRegular.shareNetwork), title: const Text('Share profile'), onTap: () => context.deps.sharer.share(p['shareLink'])),
+                    ListTile(leading: Icon(p['isMuted'] == true ? PhosphorIconsRegular.speakerSimpleHigh : PhosphorIconsRegular.speakerSimpleSlash), title: Text('${p['isMuted'] == true ? 'Unmute' : 'Mute'} ${PersonRef(p).firstName}'), onTap: _mute),
+                    ListTile(leading: const Icon(PhosphorIconsRegular.prohibit), title: Text('Block ${PersonRef(p).firstName}'), onTap: () async {
                       if (await blockPerson(context, PersonRef(p))) _load();
                     }),
                     ListTile(
-                      leading: const Icon(Icons.flag_outlined),
+                      leading: const Icon(PhosphorIconsRegular.flag),
                       title: Text('Report ${PersonRef(p).firstName}'),
                       onTap: () => showReportSheet(context, itemType: 'user', itemId: widget.id, title: 'Report ${p['name']}', intro: "Tell us why you are reporting this user. They won't be notified that you reported them."),
                     ),
@@ -260,8 +261,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       context: context,
       builder: (c) => SafeArea(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          ListTile(leading: const Icon(Icons.photo_camera_outlined), title: const Text('Take Photo'), onTap: () => Navigator.pop(c, true)),
-          ListTile(leading: const Icon(Icons.photo_library_outlined), title: const Text('Choose Photo'), onTap: () => Navigator.pop(c, false)),
+          ListTile(leading: const Icon(PhosphorIconsRegular.camera), title: const Text('Take Photo'), onTap: () => Navigator.pop(c, true)),
+          ListTile(leading: const Icon(PhosphorIconsRegular.images), title: const Text('Choose Photo'), onTap: () => Navigator.pop(c, false)),
         ]),
       ),
     );
@@ -338,7 +339,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               onTap: onTap,
               title: Text(label, style: KText.paragraphMediumLarge),
               subtitle: Text(value, style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
-              trailing: onTap == null ? null : const Icon(Icons.chevron_right),
+              trailing: onTap == null ? null : const Icon(PhosphorIconsRegular.caretRight),
             );
         return Scaffold(
           backgroundColor: KColors.surfaceDefault,
@@ -354,7 +355,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   onTap: _photo,
                   child: Stack(children: [
                     Avatar(me.photoUrl, size: 116),
-                    const Positioned(right: 0, bottom: 4, child: CircleAvatar(radius: 16, backgroundColor: KColors.surfaceMuted, child: Icon(Icons.edit_outlined, size: 16, color: KColors.textPrimary))),
+                    const Positioned(right: 0, bottom: 4, child: CircleAvatar(radius: 16, backgroundColor: KColors.surfaceMuted, child: Icon(PhosphorIconsRegular.pencilSimple, size: 16, color: KColors.textPrimary))),
                   ]),
                 ),
               ),
@@ -366,7 +367,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             row('Bio', (me.bio ?? '').isEmpty ? 'Add a bio' : me.bio!, onTap: _bio),
             row('Email address', me.email, onTap: _email),
             row('Home address', me.address?['formatted'] ?? '', onTap: () => context.push('/profile/address')),
-            if (!me.isVerified) ListTile(leading: const Icon(Icons.verified_outlined), title: Text(me.underReview ? 'Verification under review' : 'Verify your home address'), trailing: const Icon(Icons.chevron_right), onTap: () => context.push('/verify')),
+            if (!me.isVerified) ListTile(leading: const Icon(PhosphorIconsRegular.sealCheck), title: Text(me.underReview ? 'Verification under review' : 'Verify your home address'), trailing: const Icon(PhosphorIconsRegular.caretRight), onTap: () => context.push('/verify')),
           ]),
         );
       },
@@ -487,7 +488,7 @@ class _ChangeAddressScreenState extends State<ChangeAddressScreen> with Busy {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    const Padding(padding: EdgeInsets.only(top: 2), child: Icon(Icons.info_outline, size: 18, color: KColors.textSecondary)),
+                    const Padding(padding: EdgeInsets.only(top: 2), child: Icon(PhosphorIconsRegular.info, size: 18, color: KColors.textSecondary)),
                     const SizedBox(width: 10),
                     Expanded(child: Text(w['message'], style: KText.paragraphMedium)),
                   ]),

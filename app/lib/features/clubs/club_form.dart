@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:keys_lite/theme/phosphor.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/api.dart';
@@ -161,7 +162,7 @@ class _ClubFormScreenState extends State<ClubFormScreen> with Busy {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(color: KColors.brandSubtle, borderRadius: BorderRadius.circular(KRadius.sm)),
             child: Row(children: [
-              const Icon(Icons.info_outline, size: 20),
+              const Icon(PhosphorIconsRegular.info, size: 20),
               const SizedBox(width: 10),
               Expanded(child: Text('Free clubs are not eligible for monetization via subscriptions or event ticket sales.', style: KText.paragraphSmall)),
             ]),
@@ -200,7 +201,7 @@ class _ClubFormScreenState extends State<ClubFormScreen> with Busy {
                   : existing != null
                       ? Image.network(context.api.absolute(existing), fit: BoxFit.cover)
                       : Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                          const Icon(Icons.photo_camera_outlined, size: 40),
+                          const Icon(PhosphorIconsRegular.camera, size: 40),
                           const SizedBox(height: 8),
                           Text('Upload cover image', style: KText.paragraphMediumLarge),
                         ]),
@@ -320,7 +321,7 @@ class ClubCreatedScreen extends StatelessWidget {
     return KeysScaffold(
       body: Column(children: [
         const SizedBox(height: 48),
-        const CircleAvatar(radius: 48, backgroundColor: KColors.brandSubtle, child: Icon(Icons.celebration_outlined, size: 48, color: KColors.textPrimary)),
+        const CircleAvatar(radius: 48, backgroundColor: KColors.brandSubtle, child: Icon(PhosphorIconsRegular.confetti, size: 48, color: KColors.textPrimary)),
         const SizedBox(height: 20),
         Text(result['title'] ?? 'Club created!', style: KText.headingMedium),
         const SizedBox(height: 8),
@@ -339,7 +340,7 @@ class ClubCreatedScreen extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(bottom: 6),
                 child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  const Icon(Icons.check_circle, size: 18, color: KColors.success),
+                  const Icon(PhosphorIconsFill.checkCircle, size: 18, color: KColors.success),
                   const SizedBox(width: 8),
                   Expanded(child: Text(w, style: KText.paragraphMedium)),
                 ]),

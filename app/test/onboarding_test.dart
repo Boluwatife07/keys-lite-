@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:keys_lite/theme/phosphor.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keys_lite/core/api.dart';
 import 'package:keys_lite/core/models.dart';
@@ -147,7 +148,7 @@ void main() {
       await t.pump();
     }
     expect(find.text('Maximum of 5 streets can be linked'), findsOneWidget);
-    expect(t.widget<IconButton>(find.widgetWithIcon(IconButton, Icons.add_circle_outline)).onPressed, isNull);
+    expect(t.widget<IconButton>(find.widgetWithIcon(IconButton, PhosphorIconsRegular.plusCircle)).onPressed, isNull);
     await t.tap(find.text('Create development'));
     await t.pumpAndSettle();
     expect(h.fake.lastBody('POST /onboarding/development')['streetKeys'], ['A', 'B', 'C', 'D', 'E']);

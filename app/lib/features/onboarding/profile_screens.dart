@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:keys_lite/theme/phosphor.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image/image.dart' as img;
 import '../../core/api.dart';
@@ -200,8 +201,8 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> with Busy {
                 context: context,
                 builder: (c) => SafeArea(
                   child: Column(mainAxisSize: MainAxisSize.min, children: [
-                    ListTile(leading: const Icon(Icons.photo_library_outlined), title: const Text('Choose from library'), onTap: () { Navigator.pop(c); _pick(); }),
-                    ListTile(leading: const Icon(Icons.photo_camera_outlined), title: const Text('Take photo'), onTap: () { Navigator.pop(c); _pick(camera: true); }),
+                    ListTile(leading: const Icon(PhosphorIconsRegular.images), title: const Text('Choose from library'), onTap: () { Navigator.pop(c); _pick(); }),
+                    ListTile(leading: const Icon(PhosphorIconsRegular.camera), title: const Text('Take photo'), onTap: () { Navigator.pop(c); _pick(camera: true); }),
                   ]),
                 ),
               ),
@@ -210,7 +211,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> with Busy {
                   radius: 60,
                   backgroundColor: KColors.surfaceSubtle,
                   backgroundImage: _photo == null ? null : MemoryImage(_photo!.bytes),
-                  child: _photo == null ? const Icon(Icons.person_outline, size: 48, color: KColors.textTertiary) : null,
+                  child: _photo == null ? const Icon(PhosphorIconsRegular.user, size: 48, color: KColors.textTertiary) : null,
                 ),
                 Positioned(
                   right: 0,
@@ -218,7 +219,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> with Busy {
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(color: KColors.surfaceInverted, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 2)),
-                    child: const Icon(Icons.camera_alt_outlined, color: Colors.white, size: 18),
+                    child: const Icon(PhosphorIconsRegular.camera, color: Colors.white, size: 18),
                   ),
                 ),
               ]),
@@ -320,7 +321,7 @@ class _InviteScreenState extends State<InviteScreen> {
               ),
               IconButton(
                 tooltip: 'Copy link',
-                icon: const Icon(Icons.copy_rounded),
+                icon: const Icon(PhosphorIconsRegular.copy),
                 onPressed: () async {
                   await sharer.copy(inv['link']);
                   if (context.mounted) showToast(context, 'Link copied');

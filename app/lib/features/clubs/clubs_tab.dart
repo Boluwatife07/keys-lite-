@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:keys_lite/theme/phosphor.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/api.dart';
 import '../../core/feed_models.dart';
@@ -66,7 +67,7 @@ class _ClubsTabState extends State<ClubsTab> with SingleTickerProviderStateMixin
                 tabs: const [Tab(text: 'Home'), Tab(text: 'Discover')],
               ),
             ),
-            IconButton(tooltip: 'Search clubs', icon: const Icon(Icons.search), onPressed: () => context.push('/clubs/search')),
+            IconButton(tooltip: 'Search clubs', icon: const Icon(PhosphorIconsRegular.magnifyingGlass), onPressed: () => context.push('/clubs/search')),
           ]),
           Expanded(child: TabBarView(controller: _tabs, children: [_ClubsHome(key: _home), const _Discover()])),
         ]),
@@ -83,7 +84,7 @@ class _ClubsTabState extends State<ClubsTab> with SingleTickerProviderStateMixin
               await startClub(context);
               _home.currentState?._load();
             },
-            child: const Icon(Icons.add, size: 28),
+            child: const Icon(PhosphorIconsRegular.plus, size: 28),
           ),
         ),
       ]);
@@ -206,7 +207,7 @@ class _Cover extends StatelessWidget {
   final double height;
   @override
   Widget build(BuildContext context) => url == null
-      ? Container(height: height, width: double.infinity, color: KColors.surfaceSubtle, child: const Icon(Icons.groups_outlined, color: KColors.textTertiary))
+      ? Container(height: height, width: double.infinity, color: KColors.surfaceSubtle, child: const Icon(PhosphorIconsRegular.usersThree, color: KColors.textTertiary))
       : Image.network(context.api.absolute(url!), height: height, width: double.infinity, fit: BoxFit.cover, errorBuilder: (_, _, _) => Container(height: height, color: KColors.surfaceSubtle));
 }
 

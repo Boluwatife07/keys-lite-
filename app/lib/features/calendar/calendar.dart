@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:keys_lite/theme/phosphor.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../core/api.dart';
@@ -102,15 +103,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
         backgroundColor: KColors.surfaceDefault,
         surfaceTintColor: Colors.transparent,
         titleSpacing: 0,
-        leading: IconButton(tooltip: 'Back', icon: const Icon(Icons.chevron_left, size: 30), onPressed: () => Navigator.of(context).maybePop()),
+        leading: IconButton(tooltip: 'Back', icon: const Icon(PhosphorIconsRegular.caretLeft, size: 30), onPressed: () => Navigator.of(context).maybePop()),
         title: Text(widget.eventsOnly ? 'Event calendar' : 'Calendar', style: KText.headingXSmall),
         actions: [TextButton(onPressed: () => _go(today, today), style: TextButton.styleFrom(foregroundColor: KColors.textPrimary), child: const Text('Today'))],
       ),
       body: ListView(padding: const EdgeInsets.symmetric(horizontal: 16), children: [
         Row(children: [
-          IconButton(tooltip: 'Previous month', icon: const Icon(Icons.chevron_left), onPressed: () => _go(DateTime(_month.year, _month.month - 1))),
+          IconButton(tooltip: 'Previous month', icon: const Icon(PhosphorIconsRegular.caretLeft), onPressed: () => _go(DateTime(_month.year, _month.month - 1))),
           Expanded(child: Text(DateFormat('MMMM y').format(_month), textAlign: TextAlign.center, style: KText.paragraphMediumLarge.copyWith(fontWeight: FontWeight.w600))),
-          IconButton(tooltip: 'Next month', icon: const Icon(Icons.chevron_right), onPressed: () => _go(DateTime(_month.year, _month.month + 1))),
+          IconButton(tooltip: 'Next month', icon: const Icon(PhosphorIconsRegular.caretRight), onPressed: () => _go(DateTime(_month.year, _month.month + 1))),
         ]),
         Row(children: [
           for (final w in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'])

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:keys_lite/theme/phosphor.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/flow.dart';
 import '../../core/scope.dart';
@@ -160,7 +161,7 @@ class ChooseAccountScreen extends StatelessWidget {
                     Text(body, style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
                   ]),
                 ),
-                const Icon(Icons.chevron_right, color: KColors.textSecondary),
+                const Icon(PhosphorIconsRegular.caretRight, color: KColors.textSecondary),
               ]),
             ),
           ),

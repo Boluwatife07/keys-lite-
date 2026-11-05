@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:keys_lite/theme/phosphor.dart';
 import '../../core/api.dart';
 import '../../core/feed_models.dart';
 import '../../core/scope.dart';
@@ -15,7 +16,7 @@ class Avatar extends StatelessWidget {
         radius: size / 2,
         backgroundColor: KColors.surfaceSubtle,
         backgroundImage: url == null ? null : NetworkImage(context.api.absolute(url!)),
-        child: url == null ? Icon(Icons.person_outline, size: size * 0.5, color: KColors.textTertiary) : null,
+        child: url == null ? Icon(PhosphorIconsRegular.user, size: size * 0.5, color: KColors.textTertiary) : null,
       );
 }
 
@@ -30,7 +31,7 @@ class CommitteeMark extends StatelessWidget {
           width: size,
           height: size,
           decoration: const BoxDecoration(color: KColors.brand, shape: BoxShape.circle),
-          child: Icon(Icons.star_rounded, size: size * 0.7, color: KColors.textPrimary),
+          child: Icon(PhosphorIconsFill.star, size: size * 0.7, color: KColors.textPrimary),
         ),
       );
 }
@@ -263,11 +264,11 @@ Future<bool> blockPerson(BuildContext context, PersonRef p) async {
 
 /// FED-16: copy link or the phone's share sheet.
 Future<void> showShareSheet(BuildContext context, String link) => showActionSheet(context, [
-      SheetAction(Icons.link, 'Copy link', () async {
+      SheetAction(PhosphorIconsRegular.link, 'Copy link', () async {
         await context.deps.sharer.copy(link);
         if (context.mounted) showToast(context, 'Link copied');
       }),
-      SheetAction(Icons.ios_share, 'Share via', () => context.deps.sharer.share(link)),
+      SheetAction(PhosphorIconsRegular.shareFat, 'Share via', () => context.deps.sharer.share(link)),
     ]);
 
 const kMuteDurations = {'1h': 'For 1 hour', '24h': 'For 24 hours', '1w': 'For 1 week', 'forever': 'Until I turn it back on'};
@@ -380,7 +381,7 @@ class DocumentTile extends StatelessWidget {
                     Text(meta, style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
                   ]),
                 ),
-                const Icon(Icons.download_outlined),
+                const Icon(PhosphorIconsRegular.downloadSimple),
               ]),
             ),
           ),

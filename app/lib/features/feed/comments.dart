@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:keys_lite/theme/phosphor.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/api.dart';
@@ -119,7 +120,7 @@ Future<void> showCommentsSheet(BuildContext context, Post post) => showModalBott
             padding: const EdgeInsets.fromLTRB(20, 0, 8, 0),
             child: Row(children: [
               Expanded(child: Text('Comments', style: KText.headingSmall)),
-              IconButton(tooltip: 'Close', icon: const Icon(Icons.close), onPressed: () => Navigator.pop(c)),
+              IconButton(tooltip: 'Close', icon: const Icon(PhosphorIconsRegular.x), onPressed: () => Navigator.pop(c)),
             ]),
           ),
           const Divider(height: 1, color: KColors.borderDefault),
@@ -220,7 +221,7 @@ class _CommentsThreadState extends State<CommentsThread> with Busy {
     final what = c.parentId == null ? 'comment' : 'reply';
     if (c.isMine) {
       await showActionSheet(context, [
-        SheetAction(Icons.edit_outlined, 'Edit $what', () {
+        SheetAction(PhosphorIconsRegular.pencilSimple, 'Edit $what', () {
           setState(() {
             _editing = c;
             _replyTo = null;
@@ -229,7 +230,7 @@ class _CommentsThreadState extends State<CommentsThread> with Busy {
           });
           _focus.requestFocus();
         }),
-        SheetAction(Icons.delete_outline, 'Delete $what', () async {
+        SheetAction(PhosphorIconsRegular.trash, 'Delete $what', () async {
           if (!await confirmSheet(context, title: 'Delete $what?', body: 'This $what will be removed for everyone.', confirm: 'Delete', destructive: true)) return;
           if (!mounted) return;
           final r = await context.api.delete('/comments/${c.id}');
@@ -240,11 +241,11 @@ class _CommentsThreadState extends State<CommentsThread> with Busy {
       ]);
     } else {
       await showActionSheet(context, [
-        SheetAction(Icons.copy, 'Copy', () async {
+        SheetAction(PhosphorIconsRegular.copy, 'Copy', () async {
           await Clipboard.setData(ClipboardData(text: c.text));
           if (mounted) showToast(context, what == 'comment' ? 'Comment copied.' : 'Reply copied.');
         }),
-        SheetAction(Icons.flag_outlined, 'Report $what', () => showReportSheet(context, itemType: what, itemId: c.id, title: 'Report $what')),
+        SheetAction(PhosphorIconsRegular.flag, 'Report $what', () => showReportSheet(context, itemType: what, itemId: c.id, title: 'Report $what')),
       ]);
     }
   }
@@ -295,7 +296,7 @@ class _CommentsThreadState extends State<CommentsThread> with Busy {
                 TextButton.icon(
                   onPressed: () => _like(c),
                   style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: const Size(48, 36), foregroundColor: KColors.textSecondary),
-                  icon: Icon(c.likedByMe ? Icons.favorite : Icons.favorite_border, size: 18, color: c.likedByMe ? KColors.error : null),
+                  icon: Icon(c.likedByMe ? PhosphorIconsFill.heart : PhosphorIconsRegular.heart, size: 18, color: c.likedByMe ? KColors.error : null),
                   label: Text(c.likeCount > 0 ? '${c.likeCount}' : '', style: KText.paragraphSmall.copyWith(color: c.likedByMe ? KColors.error : KColors.textSecondary)),
                 ),
                 const SizedBox(width: 8),
@@ -308,7 +309,7 @@ class _CommentsThreadState extends State<CommentsThread> with Busy {
                     _focus.requestFocus();
                   },
                   style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: const Size(48, 36), foregroundColor: KColors.textSecondary),
-                  icon: const Icon(Icons.chat_bubble_outline, size: 16),
+                  icon: const Icon(PhosphorIconsRegular.chatCircle, size: 16),
                   label: Text('Reply', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
                 ),
               ]),
@@ -370,7 +371,7 @@ class _CommentsThreadState extends State<CommentsThread> with Busy {
                 ),
                 IconButton(
                   tooltip: 'Cancel',
-                  icon: const Icon(Icons.close, size: 16),
+                  icon: const Icon(PhosphorIconsRegular.x, size: 16),
                   onPressed: () => setState(() {
                     _replyTo = null;
                     if (_editing != null) _input.clear();
@@ -383,7 +384,7 @@ class _CommentsThreadState extends State<CommentsThread> with Busy {
                 alignment: Alignment.centerLeft,
                 child: Stack(children: [
                   ClipRRect(borderRadius: BorderRadius.circular(KRadius.sm), child: Image.memory(_image!.bytes, height: 72, width: 72, fit: BoxFit.cover)),
-                  Positioned(right: 0, top: 0, child: InkWell(onTap: () => setState(() => _image = null), child: const CircleAvatar(radius: 10, backgroundColor: Colors.black54, child: Icon(Icons.close, size: 12, color: Colors.white)))),
+                  Positioned(right: 0, top: 0, child: InkWell(onTap: () => setState(() => _image = null), child: const CircleAvatar(radius: 10, backgroundColor: Colors.black54, child: Icon(PhosphorIconsRegular.x, size: 12, color: Colors.white)))),
                 ]),
               ),
             if (_imageError != null) ErrorLine(_imageError!),
@@ -405,15 +406,15 @@ class _CommentsThreadState extends State<CommentsThread> with Busy {
                   ),
                 ),
               ),
-              if (_editing == null) IconButton(tooltip: 'Add image', icon: const Icon(Icons.image_outlined), onPressed: _image != null ? null : _pickImage),
+              if (_editing == null) IconButton(tooltip: 'Add image', icon: const Icon(PhosphorIconsRegular.image), onPressed: _image != null ? null : _pickImage),
               if (_input.text.trim().isEmpty && _image == null)
-                IconButton(tooltip: 'Tag someone', icon: const Icon(Icons.alternate_email), onPressed: () {
+                IconButton(tooltip: 'Tag someone', icon: const Icon(PhosphorIconsRegular.at), onPressed: () {
                   final t = _input.text;
                   _input.value = TextEditingValue(text: '$t${t.isEmpty || t.endsWith(' ') ? '' : ' '}@', selection: TextSelection.collapsed(offset: t.length + (t.isEmpty || t.endsWith(' ') ? 1 : 2)));
                   _focus.requestFocus();
                 })
               else
-                IconButton(tooltip: 'Send', icon: busy ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.send_rounded), onPressed: busy ? null : _send),
+                IconButton(tooltip: 'Send', icon: busy ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(PhosphorIconsFill.paperPlaneRight), onPressed: busy ? null : _send),
             ]),
           ]),
         ),
