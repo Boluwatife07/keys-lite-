@@ -15,6 +15,7 @@
   "dependencies": {
     "@fastify/cors": "^11.4.0",
     "@fastify/multipart": "^10.1.7",
+    "@fastify/websocket": "^11.3.7",
     "bcryptjs": "^3.0.3",
     "fastify": "^5.12.8",
     "pg": "^8.23.1",
@@ -24,8 +25,10 @@
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^26.6.6",
     "@types/pg": "^8.23.1",
+    "@types/ws": "^8.18.2",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
-    "vitest": "^5.1.0"
+    "vitest": "^5.1.0",
+    "ws": "^8.22.1"
   }
 }

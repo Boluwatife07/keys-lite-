@@ -1,6 +1,7 @@
 import Fastify, { type FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
 import multipart from '@fastify/multipart';
+import websocket from '@fastify/websocket';
 import { ZodError } from 'zod';
 import { AppError } from './lib/errors.js';
 import { loadUser } from './lib/auth.js';
@@ -16,11 +17,14 @@ import { profileRoutes } from './modules/profile/routes.js';
 import { feedRoutes } from './modules/feed/routes.js';
 import { pollRoutes } from './modules/feed/polls.js';
 import { boardRoutes } from './modules/board/routes.js';
+import { chatRoutes } from './modules/chat/routes.js';
+import { updateRoutes } from './modules/updates/routes.js';
 
 export async function buildApp(): Promise<FastifyInstance> {
   const app = Fastify({ logger: process.env.NODE_ENV === 'test' ? false : { level: 'info' }, bodyLimit: 2 * MB });
   await app.register(cors, { origin: true });
   await app.register(multipart, { limits: { fileSize: 101 * MB, files: 1 } });
+  await app.register(websocket);
   // Clients send "content-type: application/json" on DELETE and bodiless POSTs; treat empty as {}.
   app.addContentTypeParser('application/json', { parseAs: 'string' }, (_req, body, done) => {
     const text = String(body ?? '').trim();
@@ -66,5 +70,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   await app.register(feedRoutes);
   await app.register(pollRoutes);
   await app.register(boardRoutes);
+  await app.register(chatRoutes);
+  await app.register(updateRoutes);
   return app;
 }

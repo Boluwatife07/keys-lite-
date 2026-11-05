@@ -36,7 +36,17 @@ export async function videoSeconds(buf: Buffer): Promise<number> {
   }
 }
 
-export type Kind = 'photo' | 'video' | 'document' | 'verificationDoc';
+export type Kind = 'photo' | 'video' | 'document' | 'audio' | 'verificationDoc';
+
+function sniffAudio(buf: Buffer): string | undefined {
+  const h = buf.subarray(0, 12);
+  if (h.subarray(4, 8).toString() === 'ftyp') return 'audio/mp4';
+  if (h.subarray(0, 3).toString() === 'ID3' || (h[0] === 0xff && (h[1] & 0xe0) === 0xe0)) return 'audio/mpeg';
+  if (h.subarray(0, 4).toString() === 'OggS') return 'audio/ogg';
+  if (h[0] === 0x1a && h[1] === 0x45 && h[2] === 0xdf && h[3] === 0xa3) return 'audio/webm';
+  if (h.subarray(0, 4).toString() === 'RIFF' && h.subarray(8, 12).toString() === 'WAVE') return 'audio/wav';
+  return undefined;
+}
 
 // XFR-01.4: the server re-checks type, size and video length.
 export async function validateUpload(kind: Kind, buf: Buffer, declaredMime: string, filename: string) {
@@ -48,6 +58,10 @@ export async function validateUpload(kind: Kind, buf: Buffer, declaredMime: stri
     const okBytes = sniffed === 'application/pdf' || sniffed === 'application/zip' || sniffed === 'application/x-ole' || declaredMime === 'text/plain';
     if (!okByName || !okBytes) throw badRequest('FILE_TYPE', 'This file type is not supported.');
     mime = sniffed === 'application/pdf' ? 'application/pdf' : declaredMime;
+  } else if (kind === 'audio') {
+    const a = sniffAudio(buf);
+    if (!a) throw badRequest('FILE_TYPE', 'This voice note could not be read.');
+    mime = a;
   } else {
     if (!sniffed || !(rule.mimes as readonly string[]).includes(sniffed)) {
       throw badRequest('FILE_TYPE', kind === 'photo' ? 'Please choose a JPG or PNG image.' : kind === 'video' ? 'Please choose an MP4 or MOV video.' : 'Please upload a PDF, JPG or PNG file.');
@@ -59,6 +73,10 @@ export async function validateUpload(kind: Kind, buf: Buffer, declaredMime: stri
   if (kind === 'video') {
     duration = await videoSeconds(buf);
     if (duration > MEDIA.video.maxSeconds + 0.5) throw badRequest('VIDEO_TOO_LONG', MEDIA.video.tooLong);
+  }
+  if (kind === 'audio') {
+    duration = await videoSeconds(buf);
+    if (duration > MEDIA.audio.maxSeconds) throw badRequest('AUDIO_TOO_LONG', 'Voice notes can be up to 10 minutes long.');
   }
   return { mime, duration };
 }

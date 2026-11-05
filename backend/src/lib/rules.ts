@@ -4,6 +4,7 @@ export const MEDIA = {
   photo: { maxBytes: 15 * MB, mimes: ['image/jpeg', 'image/png'], tooLarge: 'The image you selected is too large. Please choose a different image.' },
   video: { maxBytes: 100 * MB, maxSeconds: 60, mimes: ['video/mp4', 'video/quicktime'], tooLarge: 'The video you selected is too large. Please choose a video of 100 MB or less.', tooLong: 'Videos can be up to 60 seconds long. Please trim your video.' },
   document: { maxBytes: 25 * MB, mimes: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'text/plain'], tooLarge: 'The document you selected is too large. Please choose a file of 25 MB or less.' },
+  audio: { maxBytes: 25 * MB, maxSeconds: 600, mimes: ['audio/mp4', 'audio/mpeg', 'audio/aac', 'audio/ogg', 'audio/webm', 'audio/wav'], tooLarge: 'This voice note is too large.' },
   // Address verification documents: design says "PDF, JPG, PNG up to 10MB" (AVW-Q4, decided: follow design).
   verificationDoc: { maxBytes: 10 * MB, mimes: ['application/pdf', 'image/jpeg', 'image/png'], tooLarge: 'The file you selected is too large. Please choose a file of 10 MB or less.' },
 } as const;

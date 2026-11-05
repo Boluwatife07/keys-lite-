@@ -15,6 +15,8 @@ export const NOTIFICATION_TOGGLES: Record<string, string> = {
   proposal_result: 'committee',
   board_announcement: 'committee',
   tier_up: 'committee',
+  update_new: 'updates',
+  update_additional: 'updates',
 };
 
 /** In-app toggles shown in Settings > Notification (Phase 1 features only). */

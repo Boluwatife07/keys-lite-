@@ -8,14 +8,14 @@ import { getObject, publicUrl, putObject } from '../../services/storage.js';
 import { validateUpload } from './validate.js';
 
 const EXT: Record<string, string> = {
-  'image/jpeg': 'jpg', 'image/png': 'png', 'video/mp4': 'mp4', 'video/quicktime': 'mov', 'application/pdf': 'pdf',
+  'image/jpeg': 'jpg', 'image/png': 'png', 'video/mp4': 'mp4', 'video/quicktime': 'mov', 'application/pdf': 'pdf', 'audio/mp4': 'm4a', 'audio/mpeg': 'mp3', 'audio/ogg': 'ogg', 'audio/webm': 'webm', 'audio/wav': 'wav', 'audio/aac': 'aac',
 };
 
 // BE-90.1: one upload endpoint for every feature.
 export async function mediaRoutes(app: FastifyInstance) {
   app.post('/media', async (req) => {
     const u = requireUser(req);
-    const { kind } = z.object({ kind: z.enum(['photo', 'video', 'document']) }).parse(req.query);
+    const { kind } = z.object({ kind: z.enum(['photo', 'video', 'document', 'audio']) }).parse(req.query);
     const file = await req.file();
     if (!file) throw badRequest('FILE_REQUIRED', 'Choose a file to upload.');
     const buf = await file.toBuffer();
@@ -35,7 +35,7 @@ export async function mediaRoutes(app: FastifyInstance) {
   // Local-disk file serving. Production serves media from a CDN.
   app.get('/media/files/*', async (req, reply) => {
     const key = (req.params as any)['*'] as string;
-    if (!/^(photo|video|document)\/[0-9a-f-]+\.[a-z0-9]+$/.test(key)) throw notFound();
+    if (!/^(photo|video|document|audio)\/[0-9a-f-]+\.[a-z0-9]+$/.test(key)) throw notFound();
     const row = await one<{ mime: string }>('select mime from media where storage_key = $1', [key]);
     if (!row) throw notFound();
     return reply.type(row.mime).send(await getObject(key));

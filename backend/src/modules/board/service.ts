@@ -3,6 +3,7 @@ import { one, q, tx, type Db } from '../../db/pool.js';
 import { clock, DAY } from '../../lib/clock.js';
 import { notify } from '../../lib/notify.js';
 import { person } from '../../lib/people.js';
+import { leaveUpdateChats } from '../chat/service.js';
 
 export const PRESET_ROLES = [
   'Chair', 'Vice Chair', 'Treasurer', 'Secretary', 'Projects Lead', 'Events Lead', 'Clubs Lead', 'Communications Lead',
@@ -162,6 +163,9 @@ export async function leaveBoard(userId: string, opts: { reason?: string; why: '
     return { board, notes, seat };
   });
   if (out.board) await broadcast(out.board, out.notes);
+  // UCH-04.2: leaving the board (or the community) also leaves update chats.
+  const community = out.board?.community_id ?? (await one<{ community_id: string }>('select community_id from memberships where user_id = $1', [userId]))?.community_id;
+  if (community) await leaveUpdateChats(userId, community);
   return out;
 }
 
