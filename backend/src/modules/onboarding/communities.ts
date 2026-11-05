@@ -62,6 +62,7 @@ export async function card(c: CommunityRow, opts: { alwaysCounts?: boolean; db?:
     type: c.type,
     typeLabel: TYPE_LABEL[c.type],
     name: c.name,
+    code: c.code,
     parentName,
     residents: show ? n.residents : undefined,
     committeeMembers: show ? n.committee : undefined,

@@ -47,7 +47,7 @@ async function match(c: Ctx, code?: string) {
     if (!coded) throw badRequest('INVALID_COMMUNITY_CODE', INVALID_CODE, { field: 'communityCode' });
     const covering = await communitiesForStreet(c.street.id);
     if (coded.type === 'building') {
-      if (coded.anchor_street_id !== c.street.id) return { kind: 'code_ineligible' as const, codedName: coded.name };
+      if (coded.anchor_street_id !== c.street.id) return { kind: 'code_ineligible' as const, codedName: coded.name, communities: [await card(coded)] };
       const parent = (await one<CommunityRow>('select * from communities where id = $1', [coded.parent_id]))!;
       if (coded.building_premise && coded.building_premise === c.premise) {
         return { kind: 'code_match' as const, communities: [await card(coded)] };
@@ -56,7 +56,7 @@ async function match(c: Ctx, code?: string) {
       return { kind: 'code_parent' as const, communities: [await card(parent)], codedName: coded.name };
     }
     if (covering.some((x) => x.id === coded.id)) return { kind: 'code_match' as const, communities: [await card(coded)] };
-    return { kind: 'code_ineligible' as const, codedName: coded.name };
+    return { kind: 'code_ineligible' as const, codedName: coded.name, communities: [await card(coded)] };
   }
   const covering = await communitiesForStreet(c.street.id);
   if (covering.length === 0) return { kind: 'none' as const, communities: [] };
