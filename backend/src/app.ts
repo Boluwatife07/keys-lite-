@@ -20,6 +20,16 @@ export async function buildApp(): Promise<FastifyInstance> {
   const app = Fastify({ logger: process.env.NODE_ENV === 'test' ? false : { level: 'info' }, bodyLimit: 2 * MB });
   await app.register(cors, { origin: true });
   await app.register(multipart, { limits: { fileSize: 101 * MB, files: 1 } });
+  // Clients send "content-type: application/json" on DELETE and bodiless POSTs; treat empty as {}.
+  app.addContentTypeParser('application/json', { parseAs: 'string' }, (_req, body, done) => {
+    const text = String(body ?? '').trim();
+    if (!text) return done(null, {});
+    try {
+      done(null, JSON.parse(text));
+    } catch {
+      done(Object.assign(new Error('Invalid JSON body'), { statusCode: 400 }), undefined);
+    }
+  });
 
   app.addHook('preHandler', async (req) => {
     req.authUser = await loadUser(req);

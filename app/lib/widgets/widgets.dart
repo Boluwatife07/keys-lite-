@@ -23,7 +23,8 @@ class KeysScaffold extends StatelessWidget {
       resizeToAvoidBottomInset: true,
       body: DecoratedBox(
         decoration: BoxDecoration(gradient: gradient ? kPageGradient : null, color: gradient ? null : KColors.surfaceDefault),
-        child: SafeArea(
+        // Transparent Material so list rows and buttons keep their ink ripple.
+        child: Material(type: MaterialType.transparency, child: SafeArea(
           child: Column(
             children: [
               ?header,
@@ -31,7 +32,7 @@ class KeysScaffold extends StatelessWidget {
               if (bottom != null) Padding(padding: const EdgeInsets.fromLTRB(16, 8, 16, 16), child: bottom!),
             ],
           ),
-        ),
+        )),
       ),
     );
   }

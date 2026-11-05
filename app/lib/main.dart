@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:video_player/video_player.dart';
+import 'dart:io';
 import 'core/api.dart';
 import 'core/config.dart';
 import 'core/scope.dart';
@@ -23,8 +25,22 @@ void main() {
     cards: MockCardVerifier(),
     sharer: DeviceSharer(),
     store: store,
+    videoLength: _videoLength,
   );
   runApp(KeysApp(deps: deps));
+}
+
+Future<Duration?> _videoLength(PickedFile f) async {
+  if (f.path == null) return null;
+  final c = VideoPlayerController.file(File(f.path!));
+  try {
+    await c.initialize();
+    return c.value.duration;
+  } catch (_) {
+    return null;
+  } finally {
+    await c.dispose();
+  }
 }
 
 class KeysApp extends StatefulWidget {

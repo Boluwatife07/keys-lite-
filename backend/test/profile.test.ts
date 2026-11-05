@@ -31,6 +31,18 @@ describe('PRF-02 / PRF-03 other profiles', () => {
   });
 });
 
+describe('PRF-01 / PRF-19 posts by one resident', () => {
+  it('lists only that author, with a total', async () => {
+    for (let i = 0; i < 3; i++) await call('POST', '/posts', { token: ben, body: { text: `ben ${i}` } });
+    const mine = (await call('GET', `/users/${benId}/posts`, { token: ben })).body;
+    expect(mine.total).toBe(3);
+    expect(mine.posts.map((p: any) => p.text)).toEqual(['ben 2', 'ben 1', 'ben 0']);
+    const theirs = (await call('GET', `/users/${benId}/posts`, { token: amy })).body;
+    expect(theirs.posts).toHaveLength(3);
+    expect((await call('GET', `/users/${benId}/posts`, { token: outsider })).status).toBe(404);
+  });
+});
+
 describe('PRF-04 mute', () => {
   it('mutes for 30 days, hides posts, then ends by itself', async () => {
     await call('POST', '/posts', { token: cat, body: { text: 'Cat here' } });

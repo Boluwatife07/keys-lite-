@@ -7,10 +7,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class PickedFile {
-  PickedFile({required this.bytes, required this.name, required this.mime});
+  PickedFile({required this.bytes, required this.name, required this.mime, this.path});
   final Uint8List bytes;
   final String name;
   final String mime;
+  final String? path;
   int get size => bytes.length;
 }
 
@@ -27,6 +28,7 @@ String mimeFor(String name) {
 /// Photo and document picking.
 abstract class MediaPicker {
   Future<PickedFile?> pickPhoto({bool camera = false});
+  Future<PickedFile?> pickVideo();
   Future<PickedFile?> pickDocument({List<String> extensions = const ['pdf', 'jpg', 'jpeg', 'png']});
 }
 
@@ -37,6 +39,13 @@ class DeviceMediaPicker implements MediaPicker {
     final x = await _picker.pickImage(source: camera ? ImageSource.camera : ImageSource.gallery);
     if (x == null) return null;
     return PickedFile(bytes: await x.readAsBytes(), name: x.name, mime: mimeFor(x.name));
+  }
+
+  @override
+  Future<PickedFile?> pickVideo() async {
+    final x = await _picker.pickVideo(source: ImageSource.gallery, maxDuration: const Duration(seconds: 60));
+    if (x == null) return null;
+    return PickedFile(bytes: await x.readAsBytes(), name: x.name, mime: mimeFor(x.name), path: x.path);
   }
 
   @override

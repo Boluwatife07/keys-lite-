@@ -89,6 +89,18 @@ describe('FED-03 tags', () => {
   });
 });
 
+it('accepts an empty JSON body on DELETE (what the app sends)', async () => {
+  const p = (await call('POST', '/posts', { token: ben, body: { text: 'x' } })).body.post;
+  await call('POST', `/posts/${p.id}/like`, { token: cat });
+  const { buildApp } = await import('../src/app.js');
+  const a = await buildApp();
+  const r = await a.inject({ method: 'DELETE', url: `/posts/${p.id}/like`, headers: { authorization: `Bearer ${cat}`, 'content-type': 'application/json' } });
+  expect(r.statusCode).toBe(200);
+  const bad = await a.inject({ method: 'POST', url: '/posts', headers: { authorization: `Bearer ${cat}`, 'content-type': 'application/json' }, payload: '{nope' });
+  expect(bad.statusCode).toBe(400);
+  await a.close();
+});
+
 describe('FED-11 likes', () => {
   it('toggles, counts, lists, notifies the author but not for own posts', async () => {
     const p = (await call('POST', '/posts', { token: ben, body: { text: 'Like me' } })).body.post;

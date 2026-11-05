@@ -44,6 +44,7 @@ Answers from Dorcas (5 Nov 2026) and defaults chosen where the sheet says
 
 | Topic | Default | Why |
 | --- | --- | --- |
+| Poll option limit | 40 characters (sheet). Design counter shows /50 | Sheet row POL-03.1 |
 | POL-D3: poll promise limit | 200 characters | Filled design state shows 116/200; the 0/50 counter looks out of date |
 | POL-Q3: poll notifications | None on creation (same as Feed posts); creator and voters are told when it closes | Keeps notification volume low |
 | Poll results before voting | Hidden until you vote, the poll closes, or you created it | Avoids results swaying votes |

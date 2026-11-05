@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/models.dart';
 import '../../core/scope.dart';
+import '../feed/feed_screens.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/widgets.dart';
 import 'learning_tour.dart';
@@ -18,7 +19,32 @@ class _HomeShellState extends State<HomeShell> {
   int _tab = 0; // bottom navigation
   int _homeTab = 0; // Feed | Updates
   final keys = TourKeys();
+  final _feedKey = GlobalKey<PostListState>();
   bool _touring = false;
+
+  /// POL-01.1: committee members choose Post or Poll; everyone else goes straight to a post.
+  Future<void> _create() async {
+    var poll = false;
+    try {
+      poll = (await context.api.get('/polls/can-create'))['canCreate'] == true;
+    } catch (_) {}
+    if (!mounted) return;
+    String? kind = 'post';
+    if (poll) {
+      kind = await showModalBottomSheet<String>(
+        context: context,
+        builder: (c) => SafeArea(
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            ListTile(leading: const Icon(Icons.edit_outlined), title: const Text('Post'), onTap: () => Navigator.pop(c, 'post')),
+            ListTile(leading: const Icon(Icons.poll_outlined), title: const Text('Poll'), onTap: () => Navigator.pop(c, 'poll')),
+          ]),
+        ),
+      );
+    }
+    if (kind == null || !mounted) return;
+    final r = await context.push(kind == 'poll' ? '/polls/create' : '/feed/compose');
+    if (r != null) _feedKey.currentState?.refresh();
+  }
 
   @override
   void initState() {
@@ -48,11 +74,11 @@ class _HomeShellState extends State<HomeShell> {
   Widget build(BuildContext context) {
     final me = context.session.me;
     final pages = [
-      _HomeTab(keys: keys, tab: _homeTab, onTab: (i) => setState(() => _homeTab = i)),
+      _HomeTab(keys: keys, feedKey: _feedKey, tab: _homeTab, onTab: (i) => setState(() => _homeTab = i), onCreate: _create),
       const _Placeholder(title: 'Community', body: 'Your committee board and community hub.'),
-      const _Placeholder(title: 'Clubs', body: 'Join an existing group, create your own, or use a template.'),
       const _Placeholder(title: 'Services', body: 'Recommended vendors and bookings arrive with the Keys services release.'),
       const _Placeholder(title: 'Events', body: 'Browse community events, track the ones you have joined, or create something new.'),
+      const _Placeholder(title: 'Clubs', body: 'Join an existing group, create your own, or use a template.'),
     ];
     return Stack(children: [
       Scaffold(
@@ -76,12 +102,11 @@ class _HomeShellState extends State<HomeShell> {
                 ),
               ),
             ),
-            const SizedBox(width: 12),
-            Expanded(child: Text(me?.communityName ?? '', style: KText.headingXSmall, overflow: TextOverflow.ellipsis)),
+            const Spacer(),
           ]),
           actions: [
-            IconButton(key: keys.calendar, tooltip: 'Calendar', icon: const Icon(Icons.calendar_today_outlined), onPressed: () {}),
             IconButton(tooltip: 'Chats', icon: const Icon(Icons.chat_bubble_outline), onPressed: () {}),
+            IconButton(tooltip: 'Notifications', icon: const Icon(Icons.notifications_none), onPressed: () => context.push('/notifications')),
             const SizedBox(width: 4),
           ],
         ),
@@ -90,11 +115,11 @@ class _HomeShellState extends State<HomeShell> {
             ? FloatingActionButton(
                 key: keys.compose,
                 tooltip: 'Create post',
-                backgroundColor: KColors.surfaceInverted,
-                foregroundColor: Colors.white,
+                backgroundColor: KColors.brand,
+                foregroundColor: KColors.textPrimary,
                 shape: const CircleBorder(),
-                onPressed: () => context.push('/feed/compose'),
-                child: const Icon(Icons.edit_outlined),
+                onPressed: _create,
+                child: const Icon(Icons.add, size: 28),
               )
             : null,
         bottomNavigationBar: NavigationBar(
@@ -104,10 +129,10 @@ class _HomeShellState extends State<HomeShell> {
           onDestinationSelected: (i) => setState(() => _tab = i),
           destinations: [
             const NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'Home'),
-            NavigationDestination(icon: Icon(Icons.groups_outlined, key: keys.community), selectedIcon: const Icon(Icons.groups), label: 'Community'),
-            NavigationDestination(icon: Icon(Icons.interests_outlined, key: keys.clubs), selectedIcon: const Icon(Icons.interests), label: 'Clubs'),
+            NavigationDestination(icon: Icon(Icons.apartment_outlined, key: keys.community), selectedIcon: const Icon(Icons.apartment), label: 'Community'),
             NavigationDestination(icon: Icon(Icons.handyman_outlined, key: keys.services), selectedIcon: const Icon(Icons.handyman), label: 'Services'),
             NavigationDestination(icon: Icon(Icons.event_outlined, key: keys.events), selectedIcon: const Icon(Icons.event), label: 'Events'),
+            NavigationDestination(icon: Icon(Icons.interests_outlined, key: keys.clubs), selectedIcon: const Icon(Icons.interests), label: 'Clubs'),
           ],
         ),
       ),
@@ -117,10 +142,12 @@ class _HomeShellState extends State<HomeShell> {
 }
 
 class _HomeTab extends StatelessWidget {
-  const _HomeTab({required this.keys, required this.tab, required this.onTab});
+  const _HomeTab({required this.keys, required this.feedKey, required this.tab, required this.onTab, required this.onCreate});
   final TourKeys keys;
+  final GlobalKey<PostListState> feedKey;
   final int tab;
   final ValueChanged<int> onTab;
+  final VoidCallback onCreate;
   @override
   Widget build(BuildContext context) {
     Widget tabButton(String label, int i) => Expanded(
@@ -135,10 +162,31 @@ class _HomeTab extends StatelessWidget {
           ),
         );
     return Column(children: [
+      // FED-01.1: Calendar preview above the tabs (calendar items arrive with the Calendar milestone).
+      Padding(
+        key: keys.calendar,
+        padding: const EdgeInsets.fromLTRB(16, 4, 8, 4),
+        child: Row(children: [
+          Text('Upcoming', style: KText.headingXSmall),
+          const Spacer(),
+          TextButton(onPressed: () {}, style: TextButton.styleFrom(foregroundColor: KColors.textPrimary), child: const Text('Calendar →')),
+        ]),
+      ),
       Row(key: keys.tabs, children: [tabButton('Feed', 0), tabButton('Updates', 1)]),
       Expanded(
         child: tab == 0
-            ? const _Placeholder(title: 'No posts yet', body: 'Be the first to say hello to your neighbours.')
+            ? Container(
+                color: KColors.surfaceSubtle,
+                child: PostList(
+                  key: feedKey,
+                  path: '/feed',
+                  empty: EmptyState(
+                    title: 'No posts yet',
+                    body: 'Posts and activities of your neighbors would be shown here',
+                    action: KeysButton('Create post', onPressed: onCreate),
+                  ),
+                ),
+              )
             : const _Placeholder(title: 'No updates yet', body: 'Official updates from your committee will show here.'),
       ),
     ]);

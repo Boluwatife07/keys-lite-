@@ -43,6 +43,9 @@ class FakeApi {
 class FakeMedia implements MediaPicker {
   PickedFile? photo;
   PickedFile? document;
+  PickedFile? video;
+  @override
+  Future<PickedFile?> pickVideo() async => video;
   @override
   Future<PickedFile?> pickPhoto({bool camera = false}) async => photo;
   @override
@@ -104,9 +107,11 @@ class Harness {
   String get location => router.routerDelegate.currentConfiguration.uri.path;
 }
 
+// A real 1x1 PNG, padded with zeros to the size a test needs.
+final _png = base64Decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==');
 PickedFile fakePng(int bytes) {
-  final b = Uint8List(bytes);
-  b.setAll(0, [0x89, 0x50, 0x4e, 0x47]);
+  final b = Uint8List(bytes < _png.length ? _png.length : bytes);
+  b.setAll(0, _png);
   return PickedFile(bytes: b, name: 'me.png', mime: 'image/png');
 }
 

@@ -2,9 +2,15 @@ import 'package:go_router/go_router.dart';
 import 'core/models.dart';
 import 'features/auth/auth_screens.dart';
 import 'features/entry/entry_screens.dart';
-import 'features/home/compose_placeholder.dart';
+import 'core/feed_models.dart';
+import 'features/feed/compose.dart';
+import 'features/feed/feed_screens.dart';
+import 'features/feed/post_card.dart';
 import 'features/home/home_shell.dart';
-import 'features/home/profile_screen.dart';
+import 'features/home/notifications_screen.dart';
+import 'features/polls/create_poll.dart';
+import 'features/profile/profile_screens.dart';
+import 'features/profile/settings_screens.dart';
 import 'features/onboarding/community_screens.dart';
 import 'features/onboarding/profile_screens.dart';
 import 'features/verification/verification_screens.dart';
@@ -51,6 +57,26 @@ GoRouter buildRouter({String initial = '/', List<RouteBase> extraRoutes = const 
         GoRoute(path: '/verify/why', builder: (_, _) => const VerifyExplainerScreen()),
         GoRoute(path: '/home', builder: (_, _) => const HomeShell()),
         GoRoute(path: '/profile', builder: (_, _) => const MyProfileScreen()),
-        GoRoute(path: '/feed/compose', builder: (_, s) => ComposePlaceholder(text: _m(s)['text'])),
+        GoRoute(path: '/profile/edit', builder: (_, _) => const EditProfileScreen()),
+        GoRoute(path: '/profile/email', builder: (_, _) => const ChangeEmailScreen()),
+        GoRoute(path: '/profile/address', builder: (_, _) => const ChangeAddressScreen()),
+        GoRoute(path: '/users/:id', builder: (_, s) => OtherProfileScreen(id: s.pathParameters['id']!)),
+        GoRoute(path: '/settings', builder: (_, _) => const SettingsScreen()),
+        GoRoute(path: '/settings/account', builder: (_, _) => const AccountScreen()),
+        GoRoute(path: '/settings/notifications', builder: (_, _) => const NotificationSettingsScreen()),
+        GoRoute(path: '/settings/privacy', builder: (_, _) => const PrivacyScreen()),
+        GoRoute(path: '/settings/blocked', builder: (_, _) => const PeopleListScreen(blocked: true)),
+        GoRoute(path: '/settings/muted', builder: (_, _) => const PeopleListScreen(blocked: false)),
+        GoRoute(path: '/settings/password', builder: (_, _) => const PasswordScreen(create: false)),
+        GoRoute(path: '/settings/password/create', builder: (_, _) => const PasswordScreen(create: true)),
+        GoRoute(path: '/settings/deactivate', builder: (_, _) => const DeactivateScreen()),
+        GoRoute(path: '/feed/compose', builder: (_, s) => ComposeScreen(initialText: _m(s)['text'], edit: _m(s)['edit'] as Post?, welcomeImage: _m(s)['welcomeImage'] == true)),
+        GoRoute(path: '/posts/:id', builder: (_, s) => PostDetailScreen(id: s.pathParameters['id']!, initial: s.extra is Post ? s.extra as Post : null)),
+        GoRoute(path: '/posts/:id/likes', builder: (_, s) => LikesScreen(path: '/posts/${s.pathParameters['id']}/likes')),
+        GoRoute(path: '/polls/create', builder: (_, _) => const CreatePollScreen()),
+        GoRoute(path: '/polls/preview', builder: (_, s) => PollPreviewScreen(draft: _m(s))),
+        GoRoute(path: '/media', builder: (_, s) => MediaViewer(urls: List<String>.from(_m(s)['urls']), index: _m(s)['index'] ?? 0, caption: _m(s)['caption'])),
+        GoRoute(path: '/video', builder: (_, s) => VideoScreen(url: s.extra as String)),
+        GoRoute(path: '/notifications', builder: (_, _) => const NotificationsScreen()),
       ],
     );

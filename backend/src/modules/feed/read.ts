@@ -96,16 +96,17 @@ export async function postsFor(viewer: string, opts: { authorId?: string; cursor
   const c = await communityOf(viewer);
   if (!c) return { posts: [], nextCursor: null };
   const cur = dec(opts.cursor);
-  const params: unknown[] = [c, viewer, clock.now(), cur?.t ?? null, cur?.id ?? null, PAGE + 1];
+  const params: unknown[] = [c, viewer, cur?.t ?? null, cur?.id ?? null, PAGE + 1];
   let where = `p.community_id = $1 and p.status = 'live' and not ${hiddenAuthorSql('p.author_id', '$2')}
-    and ($4::timestamptz is null or (p.created_at, p.id) < ($4, $5::uuid))`;
+    and ($3::timestamptz is null or (p.created_at, p.id) < ($3::timestamptz, $4::uuid))`;
   if (opts.authorId) {
     params.push(opts.authorId);
-    where += ` and p.author_id = $7`;
+    where += ` and p.author_id = $${params.length}`;
   } else {
-    where += ` and not ${mutedAuthorSql('p.author_id', '$2', '$3')}`;
+    params.push(clock.now());
+    where += ` and not ${mutedAuthorSql('p.author_id', '$2', `$${params.length}`)}`;
   }
-  const rows = await q<any>(`select p.* from posts p where ${where} order by p.created_at desc, p.id desc limit $6`, params);
+  const rows = await q<any>(`select p.* from posts p where ${where} order by p.created_at desc, p.id desc limit $5`, params);
   const page = rows.slice(0, PAGE);
   return {
     posts: await Promise.all(page.map((r) => postView(r, viewer))),
