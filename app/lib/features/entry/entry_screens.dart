@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:keys_lite/theme/phosphor.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../core/flow.dart';
 import '../../core/scope.dart';
 import '../../theme/tokens.dart';
@@ -40,12 +41,20 @@ class _SplashScreenState extends State<SplashScreen> {
     return Scaffold(
       backgroundColor: KColors.brand,
       body: SafeArea(
-        child: SizedBox(width: double.infinity, child: Column(children: [
-          Spacer(),
-          KeysLogo(height: 44),
-          Spacer(),
-          Padding(padding: EdgeInsets.only(bottom: 24), child: Text('Unlock your community', style: KText.paragraphMediumSmall)),
-        ])),
+        child: SizedBox(
+          width: double.infinity,
+          child: Column(
+            children: [
+              Spacer(),
+              KeysLogo(height: 44),
+              Spacer(),
+              Padding(
+                padding: EdgeInsets.only(bottom: 24),
+                child: Text('Unlock your community', style: KText.paragraphMediumSmall),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -91,47 +100,74 @@ class _IntroCarouselState extends State<IntroCarousel> {
   @override
   Widget build(BuildContext context) {
     const slides = IntroCarousel.slides;
+    // Figma 1300:188993 and siblings. The photos carry the top fade.
+    const grey50 = Color(0xFFF3F3F3);
     return Scaffold(
-      backgroundColor: const Color(0xFF1B1F23),
-      body: Stack(children: [
-        PageView.builder(
-          controller: _page,
-          itemCount: slides.length,
-          onPageChanged: (i) => setState(() => _i = i),
-          itemBuilder: (_, i) => Stack(fit: StackFit.expand, children: [
-            Positioned.fill(top: MediaQuery.sizeOf(context).height * 0.3, child: Image.asset(slides[i].image, fit: BoxFit.cover, alignment: Alignment.topCenter)),
-            const DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, stops: [0.31, 0.5], colors: [Color(0xFF1B1F23), Color(0x001B1F23)]),
-              ),
-            ),
-          ]),
-        ),
-        SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Row(children: List.generate(slides.length, (i) => Expanded(
-                    child: Container(
-                      height: 3,
-                      margin: const EdgeInsets.symmetric(horizontal: 2),
-                      decoration: BoxDecoration(color: i <= _i ? Colors.white : Colors.white24, borderRadius: BorderRadius.circular(2)),
-                    ),
-                  ))),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(onPressed: _done, child: const Text('Skip', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600))),
-              ),
-              const SizedBox(height: 32),
-              Text(slides[_i].title, style: KText.headingMedium.copyWith(color: Colors.white)),
-              const SizedBox(height: 12),
-              Text(slides[_i].body, style: KText.paragraphLarge.copyWith(color: Colors.white)),
-              const Spacer(),
-              KeysButton(_i == slides.length - 1 ? 'Done' : 'Next', variant: ButtonVariant.light, onPressed: _next),
-            ]),
+      backgroundColor: const Color(0xFF171717),
+      body: Stack(
+        children: [
+          PageView.builder(
+            controller: _page,
+            itemCount: slides.length,
+            onPageChanged: (i) => setState(() => _i = i),
+            itemBuilder: (_, i) => Image.asset(slides[i].image, fit: BoxFit.cover, alignment: Alignment.topCenter, width: double.infinity, height: double.infinity),
           ),
-        ),
-      ]),
+          SafeArea(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Row(
+                    children: [
+                      for (var i = 0; i < slides.length; i++) ...[
+                        if (i > 0) const SizedBox(width: 4),
+                        Expanded(child: Container(height: 3, color: i <= _i ? Colors.white : const Color(0xFF4B4B4B))),
+                      ],
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Semantics(
+                      button: true,
+                      child: InkWell(
+                        onTap: _done,
+                        borderRadius: BorderRadius.circular(KRadius.pill),
+                        child: const SizedBox(
+                          height: 36,
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 16),
+                            child: Center(widthFactor: 1, child: Text('Skip', style: TextStyle(fontFamily: 'Inter', fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white))),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 28, 20, 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ConstrainedBox(constraints: const BoxConstraints(maxWidth: 257), child: Text(slides[_i].title, style: KText.headingMedium.copyWith(color: grey50))),
+                      const SizedBox(height: 7),
+                      ConstrainedBox(constraints: const BoxConstraints(maxWidth: 297), child: Text(slides[_i].body, style: KText.paragraphLarge.copyWith(color: grey50))),
+                    ],
+                  ),
+                ),
+                const Spacer(),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 20, 16, 14),
+                  child: KeysButton(_i == slides.length - 1 ? 'Done' : 'Next', variant: ButtonVariant.light, onPressed: _next),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -142,41 +178,87 @@ class ChooseAccountScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget option(String asset, String title, String body, VoidCallback onTap) => Semantics(
-          container: true,
-          button: true,
-          label: title,
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(KRadius.md),
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(color: KColors.surfaceDefault, borderRadius: BorderRadius.circular(KRadius.md), border: Border.all(color: KColors.borderDefault)),
-              child: Row(children: [
-                CircleImage(asset, size: 80),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text(title, style: KText.paragraphMediumLarge),
-                    const SizedBox(height: 4),
-                    Text(body, style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
-                  ]),
+      container: true,
+      button: true,
+      label: title,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(KRadius.md),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: KColors.surfaceDefault,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: KColors.borderDefault),
+          ),
+          child: Row(
+            children: [
+              CircleImage(asset, size: 80),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(title, style: KText.paragraphMediumLarge),
+                      const SizedBox(height: 2),
+                      Text(body, style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
+                    ],
+                  ),
                 ),
-                Icon(PhosphorIconsRegular.caretRight, color: KColors.textSecondary),
-              ]),
+              ),
+              const SizedBox(width: 16),
+              Icon(PhosphorIconsRegular.caretRight, size: 24, color: KColors.textPrimary),
+            ],
+          ),
+        ),
+      ),
+    );
+    return Scaffold(
+      body: DecoratedBox(
+        decoration: BoxDecoration(gradient: kPageGradient),
+        child: Material(
+          type: MaterialType.transparency,
+          child: SafeArea(
+            child: LayoutBuilder(
+              builder: (context, c) => SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: c.maxHeight),
+                  child: IntrinsicHeight(
+                    child: Column(
+                      children: [
+                        // Figma 4479:15581: header row for the language picker (not in Phase 1).
+                        const SizedBox(height: 72),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const KeysLogo(height: 48),
+                                const SizedBox(height: 48),
+                                Text('Unlock your community', style: KText.headingMedium),
+                                const SizedBox(height: 8),
+                                Text('Choose how you will use the Keys app.', style: KText.paragraphLarge.copyWith(color: KColors.textSecondary)),
+                                const SizedBox(height: 28),
+                                option('assets/images/choose_resident.png', 'I’m a resident', 'Get closer with your neighbourhood and manage your community.', () => context.go('/auth/email')),
+                                const SizedBox(height: 16),
+                                option('assets/images/choose_vendor.png', 'I’m a vendor', 'Manage your bookings and connect with the communities you serve.', () => context.push('/vendor')),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
-        );
-    return KeysScaffold(
-      body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const SizedBox(height: 72),
-        const KeysLogo(height: 40),
-        const SizedBox(height: 40),
-        const Intro(title: 'Unlock your community', body: 'Choose how you will use the Keys app.'),
-        const SizedBox(height: 24),
-        option('assets/images/choose_resident.png', 'I\'m a resident', 'Get closer with your neighbourhood and manage your community.', () => context.go('/auth/email')),
-        const SizedBox(height: 16),
-        option('assets/images/choose_vendor.png', 'I\'m a vendor', 'Manage your bookings and connect with the communities you serve.', () => context.push('/vendor')),
-      ]),
+        ),
+      ),
     );
   }
 }
@@ -186,7 +268,7 @@ class VendorEntryScreen extends StatelessWidget {
   const VendorEntryScreen({super.key});
   @override
   Widget build(BuildContext context) => const KeysScaffold(
-        header: KeysHeader(),
-        body: Intro(title: 'Vendor accounts are coming soon', body: 'Vendor sign-up opens with the Keys services release. For now, Keys is open to residents.'),
-      );
+    header: KeysHeader(),
+    body: Intro(title: 'Vendor accounts are coming soon', body: 'Vendor sign-up opens with the Keys services release. For now, Keys is open to residents.'),
+  );
 }

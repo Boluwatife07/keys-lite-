@@ -63,7 +63,7 @@ class KPalette {
     brandMuted: Color(0xFFFFF4CC), // brand/muted
     success: Color(0xFF21AE48), // status/success/default
     successSubtle: Color(0xFFE6F6EA), // status/success/subtle
-    error: Color(0xFFD92D20),
+    error: Color(0xFFDE1135), // status/error (Figma input error)
     errorSubtle: Color(0xFFFDECEA), // status/error/subtle
     warningSubtle: Color(0xFFFFEDB0),
     selected: Color(0xFF1C8C86), // selected card outline (teal)
@@ -116,6 +116,9 @@ class KColors {
   static Color get textTertiary => palette.textTertiary;
   static Color get textInverse => palette.textInverse;
   static Color get textLink => palette.textLink;
+  /// text/placeholder: #727272 light; the dark set has no own value, so it
+  /// uses the dark tertiary grey.
+  static Color get textPlaceholder => palette.brightness == Brightness.light ? const Color(0xFF727272) : palette.textTertiary;
   static Color get iconDefault => palette.iconDefault;
   static Color get borderDefault => palette.borderDefault;
   static Color get borderSubtle => palette.borderSubtle;
@@ -138,6 +141,8 @@ class KColors {
   static Color get dashed => palette.dashed;
   static Color get iconMuted => palette.iconMuted;
   static Color get iconDisabled => palette.iconDisabled;
+  /// text/disabled shares the icon/disabled value in both themes.
+  static Color get textDisabled => palette.iconDisabled;
 
   // The same in both modes.
   static const progressStart = Color(0xFFF7931E);
@@ -170,7 +175,7 @@ class KRadius {
 /// Type styles named as in Figma. Colour follows the current palette.
 class KText {
   static const _headingMedium = TextStyle(fontFamily: 'Geist', fontSize: 28, fontWeight: FontWeight.w600, height: 36 / 28, letterSpacing: -0.5);
-  static const _headingSmall = TextStyle(fontFamily: 'Geist', fontSize: 22, fontWeight: FontWeight.w600, height: 28 / 22, letterSpacing: -0.4);
+  static const _headingSmall = TextStyle(fontFamily: 'Geist', fontSize: 24, fontWeight: FontWeight.w600, height: 32 / 24, letterSpacing: -0.5);
   static const _headingXSmall = TextStyle(fontFamily: 'Geist', fontSize: 18, fontWeight: FontWeight.w600, height: 24 / 18, letterSpacing: -0.3);
   static const _paragraphLarge = TextStyle(fontFamily: 'Inter', fontSize: 16, fontWeight: FontWeight.w400, height: 24 / 16, letterSpacing: -0.2);
   static const _paragraphMediumLarge = TextStyle(fontFamily: 'Inter', fontSize: 16, fontWeight: FontWeight.w500, height: 24 / 16, letterSpacing: -0.2);
@@ -178,7 +183,7 @@ class KText {
   static const _paragraphSmall = TextStyle(fontFamily: 'Inter', fontSize: 12, fontWeight: FontWeight.w400, height: 16 / 12);
   static const _paragraphMediumSmall = TextStyle(fontFamily: 'Inter', fontSize: 12, fontWeight: FontWeight.w500, height: 16 / 12);
   static const _labelSemibold = TextStyle(fontFamily: 'Inter', fontSize: 14, fontWeight: FontWeight.w600, height: 1, letterSpacing: -0.1);
-  static const _overline = TextStyle(fontFamily: 'Inter', fontSize: 11, fontWeight: FontWeight.w500, height: 16 / 11, letterSpacing: 1.0);
+  static const _overline = TextStyle(fontFamily: 'Inter', fontSize: 10, fontWeight: FontWeight.w500, height: 16 / 10, letterSpacing: 1.0);
 
   static TextStyle get headingMedium => _headingMedium.copyWith(color: KColors.textPrimary);
   static TextStyle get headingSmall => _headingSmall.copyWith(color: KColors.textPrimary);

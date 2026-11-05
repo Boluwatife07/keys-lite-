@@ -59,19 +59,23 @@ class _EmailScreenState extends State<EmailScreen> with Busy {
   @override
   Widget build(BuildContext context) {
     final linkStyle = KText.paragraphSmall.copyWith(color: KColors.textLink);
+    // Figma 4677:79874.
     return KeysScaffold(
       header: const _LogoNav(),
+      padding: const EdgeInsets.fromLTRB(16, 28, 16, 16),
       body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const SizedBox(height: 16),
+        BackRow(onBack: () => context.canPop() ? context.pop() : context.go('/choose')),
+        const SizedBox(height: 8),
         const Intro(
           title: 'Get closer with your neighbourhood.',
           body: 'Connect with your neighbours, access local services, manage your clubs and events all in one place. Enter your email to get started.',
         ),
         const SizedBox(height: 28),
         KeysTextField(
-          label: 'Email address',
+          label: 'Email',
           controller: _email,
-          hint: 'name@example.com',
+          hint: 'Enter email address',
+          hintColor: KColors.textSecondary,
           keyboardType: TextInputType.emailAddress,
           autofillHints: const [AutofillHints.email],
           error: _error,
@@ -80,30 +84,26 @@ class _EmailScreenState extends State<EmailScreen> with Busy {
         const SizedBox(height: 28),
         // ONB-05.1: inactive until an email is typed.
         KeysButton('Continue', loading: busy, onPressed: _email.text.trim().isEmpty ? null : _continue),
-        const SizedBox(height: 32),
-        Row(children: [
-          Expanded(child: Divider(color: KColors.borderDefault)),
-          Padding(padding: const EdgeInsets.symmetric(horizontal: 12), child: Text('or', style: KText.paragraphMediumSmall)),
-          Expanded(child: Divider(color: KColors.borderDefault)),
-        ]),
-        const SizedBox(height: 32),
+        const SizedBox(height: 39),
+        const OrDivider(),
+        const SizedBox(height: 39),
         KeysButton('Continue with Apple', variant: ButtonVariant.outline, icon: Icon(PhosphorIconsFill.appleLogo, size: 24, color: KColors.textPrimary), onPressed: busy ? null : () => _social(SocialProvider.apple)),
         const SizedBox(height: 16),
-        KeysButton('Continue with Google', variant: ButtonVariant.outline, icon: const GoogleMark(), onPressed: busy ? null : () => _social(SocialProvider.google)),
-        const SizedBox(height: 32),
-        // ONB-05.5: consent line with links to the current documents.
-        Center(
-          child: Text.rich(
-            TextSpan(style: KText.paragraphSmall, children: [
-              const TextSpan(text: 'By continuing you agree to our '),
-              TextSpan(text: 'Terms of Use', style: linkStyle, recognizer: TapGestureRecognizer()..onTap = () => openLegal(AppConfig.termsUrl)),
-              const TextSpan(text: ' and '),
-              TextSpan(text: 'Privacy Policy', style: linkStyle, recognizer: TapGestureRecognizer()..onTap = () => openLegal(AppConfig.privacyUrl)),
-            ]),
-            textAlign: TextAlign.center,
-          ),
-        ),
+        KeysButton('Continue with Google', variant: ButtonVariant.outline, icon: const SizedBox.square(dimension: 24, child: Center(child: GoogleMark(size: 18))), onPressed: busy ? null : () => _social(SocialProvider.google)),
       ]),
+      // ONB-05.5: consent line with links to the current documents.
+      bottom: Padding(
+        padding: const EdgeInsets.only(bottom: 24),
+        child: Text.rich(
+          TextSpan(style: KText.paragraphSmall, children: [
+            const TextSpan(text: 'By continuing you agree to our '),
+            TextSpan(text: 'Terms of Use', style: linkStyle, recognizer: TapGestureRecognizer()..onTap = () => openLegal(AppConfig.termsUrl)),
+            const TextSpan(text: ' and '),
+            TextSpan(text: 'Privacy Policy', style: linkStyle, recognizer: TapGestureRecognizer()..onTap = () => openLegal(AppConfig.privacyUrl)),
+          ]),
+          textAlign: TextAlign.center,
+        ),
+      ),
     );
   }
 }
@@ -189,12 +189,15 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> with Busy {
     return KeysScaffold(
       gradient: false,
       header: const KeysHeader(),
+      // Figma 1300:185376.
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
       body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(signup ? 'Verify email address' : 'Check your email', style: KText.headingSmall),
         const SizedBox(height: 12),
         Text('Enter the 6-digit verification code sent to', style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
+        const SizedBox(height: 2),
         Text(widget.email, style: KText.paragraphMedium),
-        const SizedBox(height: 32),
+        const SizedBox(height: 36),
         CodeInput(controller: _code, error: _error, onCompleted: _verify),
         const SizedBox(height: 20),
         Center(
@@ -205,7 +208,7 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> with Busy {
                 : LinkText('Resend code', onTap: busy ? null : _resend),
           ]),
         ),
-        const SizedBox(height: 28),
+        const SizedBox(height: 36),
         ValueListenableBuilder(
           valueListenable: _code,
           builder: (_, v, _) => KeysButton('Continue', loading: busy, onPressed: v.text.length == 6 ? () => _verify(v.text) : null),
@@ -265,20 +268,22 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> with Busy {
   @override
   Widget build(BuildContext context) {
     void changed(_) => setState(() {});
+    // Figma 1300:185441 (empty) and 1300:185485 (errors).
     return KeysScaffold(
       gradient: false,
-      header: const KeysHeader(),
+      header: const KeysHeader(progress: 0.05),
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 36),
       body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Intro(overline: 'Account setup', title: "Let's get to know you", body: 'Use your legal name. It is shown to your neighbours and cannot be changed later.'),
-        const SizedBox(height: 24),
-        KeysTextField(label: 'First name', controller: _first, textCapitalization: TextCapitalization.words, error: _errors['firstName'], onChanged: changed, autofillHints: const [AutofillHints.givenName]),
-        const SizedBox(height: 16),
-        KeysTextField(label: 'Last name', controller: _last, textCapitalization: TextCapitalization.words, error: _errors['lastName'], onChanged: changed, autofillHints: const [AutofillHints.familyName]),
-        const SizedBox(height: 16),
-        KeysTextField(label: 'Password', controller: _pw, obscure: true, onChanged: changed, autofillHints: const [AutofillHints.newPassword]),
-        PasswordRules(password: _pw.text),
-        const SizedBox(height: 16),
-        KeysTextField(label: 'Confirm password', controller: _pw2, obscure: true, error: _errors['confirmPassword'], onChanged: changed),
+        const Intro(small: true, overline: 'Account setup', title: 'Let’s get to know you', body: 'Provide your full legal name to set up your account and secure it with a password'),
+        const SizedBox(height: 36),
+        KeysTextField(label: 'First name', hint: 'Enter your first name', controller: _first, textCapitalization: TextCapitalization.words, error: _errors['firstName'], onChanged: changed, autofillHints: const [AutofillHints.givenName]),
+        const SizedBox(height: 32),
+        KeysTextField(label: 'Last name', hint: 'Enter your last name', controller: _last, textCapitalization: TextCapitalization.words, error: _errors['lastName'], onChanged: changed, autofillHints: const [AutofillHints.familyName]),
+        const SizedBox(height: 32),
+        KeysTextField(label: 'Create password', hint: 'Enter password', controller: _pw, obscure: true, onChanged: changed, autofillHints: const [AutofillHints.newPassword]),
+        PasswordRules(password: _pw.text, showErrors: _errors.isNotEmpty),
+        const SizedBox(height: 32),
+        KeysTextField(label: 'Confirm password', hint: 'Enter your password again', controller: _pw2, obscure: true, error: _errors['confirmPassword'], onChanged: changed),
       ]),
       bottom: KeysButton('Continue', loading: busy, onPressed: _valid ? _submit : null),
     );

@@ -4,6 +4,7 @@ import 'package:keys_lite/theme/phosphor.dart';
 import 'package:flutter/services.dart';
 import '../core/api.dart';
 import '../theme/tokens.dart';
+export 'keys_logo.dart';
 
 // ---------------------------------------------------------------- layout
 
@@ -30,7 +31,9 @@ class KeysScaffold extends StatelessWidget {
             children: [
               ?header,
               Expanded(child: SingleChildScrollView(padding: padding, child: body)),
-              if (bottom != null) Padding(padding: const EdgeInsets.fromLTRB(16, 8, 16, 16), child: bottom!),
+              // Figma pins the bottom action 12 below the content and right on the
+              // home indicator; without a bottom inset keep a 16 margin.
+              if (bottom != null) Padding(padding: EdgeInsets.fromLTRB(16, 12, 16, MediaQuery.viewPaddingOf(context).bottom > 0 ? 0 : 16), child: bottom!),
             ],
           ),
         )),
@@ -48,26 +51,31 @@ class KeysHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Figma "Page Header": 48 high, 16 side padding, 26pt back caret.
     return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 4, 16, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            height: 44,
+            height: 48,
             child: Row(children: [
               if (showBack)
-                IconButton(
-                  key: const Key('back'),
-                  tooltip: 'Back',
-                  icon: Icon(PhosphorIconsRegular.caretLeft, size: 30, color: KColors.iconDefault),
-                  onPressed: onBack ?? () => Navigator.of(context).maybePop(),
+                Semantics(
+                  button: true,
+                  label: 'Back',
+                  child: InkResponse(
+                    key: const Key('back'),
+                    radius: 22,
+                    onTap: onBack ?? () => Navigator.of(context).maybePop(),
+                    child: Icon(PhosphorIconsRegular.caretLeft, size: 26, color: KColors.iconDefault),
+                  ),
                 ),
               const Spacer(),
               ?trailing,
             ]),
           ),
-          if (progress != null) Padding(padding: const EdgeInsets.fromLTRB(8, 8, 0, 8), child: ProgressBar(value: progress!)),
+          if (progress != null) Padding(padding: const EdgeInsets.fromLTRB(0, 12, 0, 13), child: ProgressBar(value: progress!)),
         ],
       ),
     );
@@ -121,7 +129,42 @@ class PageHeader extends StatelessWidget implements PreferredSizeWidget {
       );
 }
 
-/// Onboarding progress: orange to yellow gradient on a light track.
+/// In-page back caret (26) in an 8pt vertical band, as on the auth screens.
+class BackRow extends StatelessWidget {
+  const BackRow({super.key, this.onBack});
+  final VoidCallback? onBack;
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Semantics(
+          button: true,
+          label: 'Back',
+          child: InkResponse(
+            key: const Key('back'),
+            radius: 22,
+            onTap: onBack ?? () => Navigator.of(context).maybePop(),
+            child: Icon(PhosphorIconsRegular.caretLeft, size: 26, color: KColors.iconDefault),
+          ),
+        ),
+      );
+}
+
+/// "or" between two 1pt rules, inset 16 from the content edges.
+class OrDivider extends StatelessWidget {
+  const OrDivider({super.key});
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Row(children: [
+          Expanded(child: Container(height: 1, color: KColors.borderDefault)),
+          Padding(padding: const EdgeInsets.symmetric(horizontal: 12), child: Text('or', style: KText.paragraphMediumSmall)),
+          Expanded(child: Container(height: 1, color: KColors.borderDefault)),
+        ]),
+      );
+}
+
+/// Figma "Onboaring progress": 8pt bar on a surface/subtle track; the fill
+/// runs orange 500 to orange 200 to brand subtle to brand.
 class ProgressBar extends StatelessWidget {
   const ProgressBar({super.key, required this.value});
   final double value;
@@ -130,26 +173,31 @@ class ProgressBar extends StatelessWidget {
     return Semantics(
       label: 'Progress',
       value: '${(value * 100).round()}%',
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(KRadius.pill),
-        child: SizedBox(
-          height: 6,
-          child: Stack(children: [
-            Container(color: KColors.borderDefault),
-            FractionallySizedBox(
-              widthFactor: value.clamp(0, 1),
-              child: Container(decoration: const BoxDecoration(gradient: LinearGradient(colors: [KColors.progressStart, KColors.progressEnd]))),
+      child: Container(
+        height: 8,
+        decoration: BoxDecoration(color: KColors.surfaceSubtle, borderRadius: BorderRadius.circular(KRadius.pill)),
+        alignment: Alignment.centerLeft,
+        child: LayoutBuilder(
+          builder: (_, c) => Container(
+            width: (c.maxWidth * value.clamp(0, 1)).clamp(18, c.maxWidth),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(15),
+              gradient: const LinearGradient(
+                colors: [Color(0xFFFF8327), Color(0xFFFF8327), Color(0xFFFFC79E), Color(0xFFFFE37F), Color(0xFFFFD12A)],
+                stops: [0, 0.139, 0.404, 0.831, 1],
+              ),
             ),
-          ]),
+          ),
         ),
       ),
     );
   }
 }
 
-/// Overline + heading + description block used at the top of most screens.
 class Intro extends StatelessWidget {
-  const Intro({super.key, this.overline, required this.title, this.body, this.center = false});
+  const Intro({super.key, this.overline, required this.title, this.body, this.center = false, this.small = false});
+  /// Heading/Small with 12pt gaps, as on the onboarding form steps.
+  final bool small;
   final String? overline;
   final String title;
   final String? body;
@@ -160,8 +208,8 @@ class Intro extends StatelessWidget {
     return Column(
       crossAxisAlignment: center ? CrossAxisAlignment.center : CrossAxisAlignment.start,
       children: [
-        if (overline != null) ...[Text(overline!.toUpperCase(), style: KText.overline, textAlign: align), const SizedBox(height: 8)],
-        Text(title, style: KText.headingMedium, textAlign: align),
+        if (overline != null) ...[Text(overline!.toUpperCase(), style: KText.overline, textAlign: align), SizedBox(height: small ? 12 : 8)],
+        Text(title, style: small ? KText.headingSmall : KText.headingMedium, textAlign: align),
         if (body != null) ...[const SizedBox(height: 12), Text(body!, style: KText.paragraphLarge.copyWith(color: KColors.textSecondary), textAlign: align)],
       ],
     );
@@ -184,11 +232,12 @@ class KeysButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final enabled = onPressed != null && !loading;
     final (bg, fg, border) = switch (variant) {
-      ButtonVariant.primary => (enabled ? KColors.surfaceInverted : KColors.surfaceInverted.withValues(alpha: 0.25), KColors.textInverse, null),
+      ButtonVariant.primary => (enabled || loading) ? (KColors.surfaceInverted, KColors.textInverse, null) : (KColors.surfaceSubtle, KColors.textDisabled, null),
       ButtonVariant.secondary => (KColors.surfaceMuted, enabled ? KColors.textPrimary : KColors.textTertiary, null),
       ButtonVariant.outline => (Colors.transparent, enabled ? KColors.textPrimary : KColors.textTertiary, KColors.borderStrong),
       ButtonVariant.ghost => (Colors.transparent, enabled ? KColors.textPrimary : KColors.textTertiary, null),
-      ButtonVariant.light => (KColors.surfaceDefault, KColors.textPrimary, null),
+      // Always white: used on photos and camera views in both themes.
+      ButtonVariant.light => (Colors.white, const Color(0xFF292929), null),
     };
     return Semantics(
       container: true,
@@ -251,6 +300,7 @@ class KeysTextField extends StatefulWidget {
     this.label,
     required this.controller,
     this.hint,
+    this.hintColor,
     this.error,
     this.obscure = false,
     this.maxLength,
@@ -268,6 +318,7 @@ class KeysTextField extends StatefulWidget {
   final String? label;
   final TextEditingController controller;
   final String? hint;
+  final Color? hintColor;
   final String? error;
   final bool obscure;
   final int? maxLength;
@@ -299,7 +350,8 @@ class _KeysTextFieldState extends State<KeysTextField> {
           Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: Row(children: [
-              if (widget.label != null) Expanded(child: Text(widget.label!, style: KText.paragraphMediumLarge)),
+              // Figma "Input element/Heading": a 20pt row whose 24pt text hangs from the bottom.
+              if (widget.label != null) Expanded(child: SizedBox(height: 20, child: OverflowBox(maxHeight: 24, alignment: Alignment.bottomLeft, child: Text(widget.label!, style: KText.paragraphMediumLarge)))),
               if (widget.maxLength != null)
                 ValueListenableBuilder(
                   valueListenable: widget.controller,
@@ -309,10 +361,12 @@ class _KeysTextFieldState extends State<KeysTextField> {
           ),
         Container(
           decoration: BoxDecoration(
-            color: widget.enabled ? KColors.surfaceSubtle : KColors.surfaceMuted,
+            // Figma error state: white fill under a 2pt red border.
+            color: hasError ? KColors.surfaceDefault : widget.enabled ? KColors.surfaceSubtle : KColors.surfaceMuted,
             borderRadius: BorderRadius.circular(KRadius.sm),
-            border: Border.all(color: hasError ? KColors.error : Colors.transparent),
           ),
+          // Drawn on top so the border never changes the 48pt field height.
+          foregroundDecoration: hasError ? BoxDecoration(borderRadius: BorderRadius.circular(KRadius.sm), border: Border.all(color: KColors.error, width: 2)) : null,
           padding: const EdgeInsets.only(left: 12, right: 8),
           constraints: const BoxConstraints(minHeight: 48),
           child: Row(children: [
@@ -338,24 +392,39 @@ class _KeysTextFieldState extends State<KeysTextField> {
                   isDense: true,
                   border: InputBorder.none,
                   hintText: widget.hint,
-                  hintStyle: KText.paragraphLarge.copyWith(color: KColors.textTertiary),
+                  hintStyle: KText.paragraphLarge.copyWith(color: widget.hintColor ?? KColors.textPlaceholder),
                   contentPadding: const EdgeInsets.symmetric(vertical: 12),
                 ),
               ),
             ),
             if (widget.obscure)
-              IconButton(
-                tooltip: _hidden ? 'Show password' : 'Hide password',
-                icon: Icon(_hidden ? PhosphorIconsRegular.eyeSlash : PhosphorIconsRegular.eye, size: 20, color: KColors.textSecondary),
-                onPressed: () => setState(() => _hidden = !_hidden),
+              Semantics(
+                button: true,
+                label: _hidden ? 'Show password' : 'Hide password',
+                child: InkResponse(
+                  radius: 20,
+                  onTap: () => setState(() => _hidden = !_hidden),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Icon(_hidden ? PhosphorIconsRegular.eyeSlash : PhosphorIconsRegular.eye, size: 24, color: KColors.iconDefault),
+                  ),
+                ),
               ),
             if (widget.suffix != null) widget.suffix!,
           ]),
         ),
-        if (hasError) Padding(padding: const EdgeInsets.only(top: 6), child: ErrorLine(widget.error!)),
+        if (hasError) Padding(padding: const EdgeInsets.only(top: 10), child: FieldHint(widget.error!)),
       ],
     );
   }
+}
+
+/// Figma input "Hint" in its error colour: Inter 12/16, no icon.
+class FieldHint extends StatelessWidget {
+  const FieldHint(this.text, {super.key});
+  final String text;
+  @override
+  Widget build(BuildContext context) => Semantics(liveRegion: true, child: Text(text, style: KText.paragraphSmall.copyWith(color: KColors.error)));
 }
 
 class ErrorLine extends StatelessWidget {
@@ -400,7 +469,7 @@ class _CodeInputState extends State<CodeInput> {
     final hasError = widget.error != null;
     return Column(children: [
       SizedBox(
-        height: 52,
+        height: 48,
         child: Stack(children: [
           // The six boxes only draw; the transparent field on top owns the
           // keyboard, paste, one-time-code autofill and screen readers.
@@ -412,15 +481,16 @@ class _CodeInputState extends State<CodeInput> {
                 children: List.generate(widget.length, (i) {
                   final ch = i < v.text.length ? v.text[i] : '';
                   final active = i == v.text.length && _focus.hasFocus;
+                  // Figma "Code input": 48 square, radius 12, surface/subtle.
                   return Container(
-                    width: 46,
-                    height: 52,
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    width: 48,
+                    height: 48,
+                    margin: EdgeInsets.only(left: i == 0 ? 0 : 8),
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: KColors.surfaceDefault,
-                      borderRadius: BorderRadius.circular(KRadius.sm),
-                      border: Border.all(color: hasError ? KColors.error : active ? KColors.borderStrong : KColors.borderDefault),
+                      color: KColors.surfaceSubtle,
+                      borderRadius: BorderRadius.circular(KRadius.md),
+                      border: Border.all(color: hasError ? KColors.error : active ? KColors.borderStrong : Colors.transparent),
                     ),
                     child: Text(ch, style: KText.paragraphMediumLarge.copyWith(fontSize: 18)),
                   );
@@ -460,7 +530,7 @@ class _CodeInputState extends State<CodeInput> {
 
 /// Live password rules (ONB-08.2, ONB-10.3).
 class PasswordRules extends StatelessWidget {
-  const PasswordRules({super.key, required this.password});
+  const PasswordRules({super.key, required this.password, this.showErrors = false});
   final String password;
   static const rules = ['Between 8-15 characters', 'Contain letters and numbers', 'At least one special character'];
   static List<bool> check(String p) => [
@@ -470,22 +540,40 @@ class PasswordRules extends StatelessWidget {
       ];
   static bool ok(String p) => check(p).every((e) => e);
 
+  /// After a failed submit, unmet rules turn red with a cross.
+  final bool showErrors;
+
   @override
   Widget build(BuildContext context) {
     final c = check(password);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: List.generate(rules.length, (i) {
-        final pass = c[i];
-        return Padding(
-          padding: const EdgeInsets.only(top: 6),
-          child: Row(children: [
-            Icon(pass ? PhosphorIconsFill.checkCircle : PhosphorIconsRegular.circle, size: 16, color: pass ? KColors.success : KColors.textTertiary),
-            const SizedBox(width: 8),
-            Text(rules[i], style: KText.paragraphSmall.copyWith(color: pass ? KColors.success : KColors.textSecondary, fontSize: 13)),
-          ]),
-        );
-      }),
+    // Figma "Password requirement": 11pt icon, 5 gap, Inter 12/16.
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: List.generate(rules.length, (i) {
+          final pass = c[i];
+          final fail = showErrors && !pass;
+          final color = pass ? KColors.success : fail ? KColors.error : KColors.textPlaceholder;
+          return Padding(
+            padding: EdgeInsets.only(top: i == 0 ? 0 : 5),
+            child: Row(children: [
+              SizedBox.square(
+                dimension: 11,
+                child: Center(
+                  child: pass
+                      ? Icon(PhosphorIconsBold.check, size: 11, color: color)
+                      : fail
+                          ? Icon(PhosphorIconsRegular.x, size: 11, color: color)
+                          : Container(width: 6, height: 6, decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: color, width: 0.8))),
+                ),
+              ),
+              const SizedBox(width: 5),
+              Text(rules[i], style: KText.paragraphSmall.copyWith(color: color)),
+            ]),
+          );
+        }),
+      ),
     );
   }
 }
@@ -622,13 +710,6 @@ void showToast(BuildContext context, String message, {String? actionLabel, VoidC
 }
 
 /// The KEYS wordmark, exported from Figma.
-class KeysLogo extends StatelessWidget {
-  const KeysLogo({super.key, this.height = 28});
-  final double height;
-  @override
-  Widget build(BuildContext context) => Semantics(label: 'Keys', child: Image.asset('assets/images/keys_logo.png', height: height));
-}
-
 /// Google "G" mark drawn in code (brand asset could not be exported).
 class GoogleMark extends StatelessWidget {
   const GoogleMark({super.key, this.size = 20});

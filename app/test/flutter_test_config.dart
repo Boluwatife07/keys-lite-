@@ -14,5 +14,9 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
 
   await load('Inter', ['Inter-Regular.ttf', 'Inter-Medium.ttf', 'Inter-SemiBold.ttf', 'Inter-Bold.ttf']);
   await load('Geist', ['Geist-Regular.ttf', 'Geist-Medium.ttf', 'Geist-SemiBold.ttf', 'Geist-Bold.ttf']);
+  // Phosphor icons, so icons render in catalogue screenshots.
+  await load('PhosphorRegular', ['phosphor/Phosphor.ttf']);
+  await load('PhosphorFill', ['phosphor/Phosphor-Fill.ttf']);
+  await load('PhosphorBold', ['phosphor/Phosphor-Bold.ttf']);
   await testMain();
 }
