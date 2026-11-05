@@ -37,7 +37,11 @@ function body(t: EmailTemplate, d: Record<string, unknown>): string {
 // through Resend.
 export async function sendEmail(to: string, template: EmailTemplate, data: Record<string, unknown>) {
   await q('insert into email_outbox(to_email, template, data) values ($1,$2,$3)', [to, template, data]);
-  if (config.mocks.email) return;
+  if (config.mocks.email) {
+    // Mock mode: show codes in the server console so you can sign up locally.
+    if (data.code && process.env.NODE_ENV !== 'test') console.log(`[mock email] ${to}: ${body(template, data)}`);
+    return;
+  }
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { Authorization: `Bearer ${config.resendApiKey}`, 'Content-Type': 'application/json' },

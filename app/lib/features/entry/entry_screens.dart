@@ -39,12 +39,12 @@ class _SplashScreenState extends State<SplashScreen> {
     return const Scaffold(
       backgroundColor: KColors.brand,
       body: SafeArea(
-        child: Column(children: [
+        child: SizedBox(width: double.infinity, child: Column(children: [
           Spacer(),
-          KeysLogo(height: 56),
+          KeysLogo(height: 44),
           Spacer(),
           Padding(padding: EdgeInsets.only(bottom: 24), child: Text('Unlock your community', style: KText.paragraphMediumSmall)),
-        ]),
+        ])),
       ),
     );
   }

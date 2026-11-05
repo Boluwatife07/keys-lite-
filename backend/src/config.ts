@@ -1,5 +1,10 @@
 // All settings come from environment variables. Every external service has a
 // mock so the app runs end to end without real keys.
+import { existsSync } from 'node:fs';
+
+// Load backend/.env when present (Node 22 built-in, no extra package).
+if (existsSync('.env') && process.env.NODE_ENV !== 'test') process.loadEnvFile('.env');
+
 const env = process.env;
 
 function bool(v: string | undefined, fallback: boolean) {

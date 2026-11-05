@@ -21,48 +21,80 @@ sheet and the Resident APP Figma files.
 
 Requirement-by-requirement coverage: [`docs/coverage.md`](docs/coverage.md).
 
-## Run the API
+## Run it on your computer
+
+You need: [Node.js 22](https://nodejs.org), [PostgreSQL 14+](https://www.postgresql.org/download/),
+[Flutter 3.47+](https://docs.flutter.dev/get-started/install) (run `flutter upgrade` if yours is older) and Chrome. `ffprobe` (part of
+[ffmpeg](https://ffmpeg.org)) is only needed for video uploads.
+
+**1. Get the code**
 
 ```bash
-cd backend
-npm install
-cp .env.example .env        # works as is: every outside service is mocked
-npm run migrate
-npm run dev                 # http://localhost:3000
+git clone https://github.com/Boluwatife07/keys-lite-.git
+cd keys-lite-
+git checkout claude/hopeful-mccarthy-vdo9v6
 ```
 
-Needs PostgreSQL 14+ with the `pg_trgm`, `citext` and `pgcrypto` extensions
-(all ship with Postgres), and `ffprobe` on the PATH for the video length check.
-
-Tests run against a real database (`TEST_DATABASE_URL`, default
-`postgres://keys@localhost:5433/keys_test`):
+**2. Start the API** (terminal 1)
 
 ```bash
-npm test
+createdb keys
+cd backend
+npm install
+cp .env.example .env
+npm run seed
+npm run dev
+```
+
+`.env.example` expects Postgres on `localhost:5432` with your own user; edit `DATABASE_URL`
+in `.env` if yours is different. Every outside service (email, address lookup, card check,
+Apple/Google) runs as a mock, so no keys are needed. The API runs on http://localhost:3000.
+
+**3. Start the app** (terminal 2)
+
+```bash
+cd app
+flutter pub get
+flutter run -d chrome --dart-define=API_BASE_URL=http://localhost:3000
+```
+
+On a phone simulator use `flutter run` instead (Android emulator: `API_BASE_URL=http://10.0.2.2:3000`).
+
+**4. Log in**
+
+`npm run seed` creates a demo street, Maple Road. The password for every account is `Keys2026!`.
+
+| Email | Who |
+| --- | --- |
+| amy@keys.test | Chair, verified: proposals, voting, manage seats, create polls |
+| ashley@keys.test | Vice Chair (also eric, brianna, ajani, tobias, nadine, omari) |
+| ben@keys.test | Unverified resident: try voting or joining the board |
+| paula@keys.test | Has applied for a Champion seat |
+
+To try sign-up, use any new email: the 6-digit code is printed in the API terminal.
+Mock addresses: `5 Cedar Close` (no community yet), `4 Elm Street` (development with connected
+streets), `2 Maple Road` (joins the demo street). Card check: `4242 4242 4242 4242` passes,
+`4000 0000 0000 0002` fails, any future expiry and CVV.
+
+### Tests
+
+```bash
+cd backend && npm test      # needs TEST_DATABASE_URL, default postgres://keys@localhost:5433/keys_test
+cd app && flutter test
 ```
 
 ### Mock mode
 
 | Service | Mock behaviour | Real service |
 | --- | --- | --- |
-| Email | Codes and emails are written to the `email_outbox` table | Resend |
-| Address lookup | A small fake London neighbourhood (Maple Road, Oak Avenue, Elm Street...) plus one street in Brighton | Google Places (New) |
-| Card address check | Payment method ids `pm_mock_pass_<brand>_<last4>` pass, `pm_mock_fail_...` fail. In the app, card numbers ending `0002` fail | Stripe SetupIntent, `address_line1_check` and `address_postal_code_check` must both pass |
-| Apple / Google sign-in | Tokens `mock:<sub>:<email>` | Identity token checked against Apple / Google keys |
+| Email | Codes print in the API terminal and are saved in `email_outbox` | Resend |
+| Address lookup | A small fake London neighbourhood plus one street in Brighton | Google Places (New) |
+| Card address check | App: cards ending `0002` fail, others pass | Stripe SetupIntent, `address_line1_check` and `address_postal_code_check` must both pass |
+| Apple / Google sign-in | Signs in a demo account | Identity token checked against Apple / Google keys |
 
-## Run the app
-
-```bash
-cd app
-flutter pub get
-flutter run --dart-define=API_BASE_URL=http://localhost:3000
-```
-
-Use `http://10.0.2.2:3000` on the Android emulator. Tests: `flutter test`.
-
-The app uses mock Apple/Google sign-in and a mock Stripe card step until the
-keys exist (see `lib/core/services.dart`). Swapping in `sign_in_with_apple`,
-`google_sign_in` and `flutter_stripe` only touches that file and `main.dart`.
+The app's mocks for Apple/Google sign-in and the Stripe card step live in
+`app/lib/core/services.dart`; swapping in `sign_in_with_apple`, `google_sign_in` and
+`flutter_stripe` only touches that file and `main.dart`.
 
 ## Design assets
 
