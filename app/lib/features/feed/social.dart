@@ -30,8 +30,8 @@ class CommitteeMark extends StatelessWidget {
         child: Container(
           width: size,
           height: size,
-          decoration: const BoxDecoration(color: KColors.brand, shape: BoxShape.circle),
-          child: Icon(PhosphorIconsFill.star, size: size * 0.7, color: KColors.textPrimary),
+          decoration: BoxDecoration(color: KColors.brand, shape: BoxShape.circle),
+          child: Icon(PhosphorIconsFill.star, size: size * 0.7, color: KColors.staticBlack),
         ),
       );
 }
@@ -46,7 +46,7 @@ class UnverifiedChip extends StatelessWidget {
         triggerMode: TooltipTriggerMode.tap,
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-          decoration: BoxDecoration(color: const Color(0xFFDDF2F0), borderRadius: BorderRadius.circular(4)),
+          decoration: BoxDecoration(color: KColors.selectedSubtle, borderRadius: BorderRadius.circular(4)),
           child: Text(text, style: KText.paragraphMediumSmall.copyWith(fontSize: 11, color: KColors.selected)),
         ),
       );
@@ -342,7 +342,7 @@ class DateBlock extends StatelessWidget {
               Positioned(
                 right: -3,
                 top: -3,
-                child: Container(width: 11, height: 11, decoration: BoxDecoration(color: KColors.error, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 1.5))),
+                child: Container(width: 11, height: 11, decoration: BoxDecoration(color: KColors.error, shape: BoxShape.circle, border: Border.all(color: KColors.surfaceDefault, width: 1.5))),
               ),
           ]),
         ),
@@ -370,7 +370,7 @@ class DocumentTile extends StatelessWidget {
               child: Row(children: [
                 Container(
                   width: dense ? 36 : 44, height: dense ? 42 : 52, alignment: Alignment.center,
-                  decoration: BoxDecoration(color: const Color(0xFFFDECEA), borderRadius: BorderRadius.circular(6)),
+                  decoration: BoxDecoration(color: KColors.errorSubtle, borderRadius: BorderRadius.circular(6)),
                   child: Text(fileType, style: KText.paragraphMediumSmall.copyWith(color: KColors.error, fontSize: dense ? 10 : 12)),
                 ),
                 const SizedBox(width: 12),

@@ -321,7 +321,7 @@ class ClubCreatedScreen extends StatelessWidget {
     return KeysScaffold(
       body: Column(children: [
         const SizedBox(height: 48),
-        const CircleAvatar(radius: 48, backgroundColor: KColors.brandSubtle, child: Icon(PhosphorIconsRegular.confetti, size: 48, color: KColors.textPrimary)),
+        CircleAvatar(radius: 48, backgroundColor: KColors.brandSubtle, child: Icon(PhosphorIconsRegular.confetti, size: 48, color: KColors.textPrimary)),
         const SizedBox(height: 20),
         Text(result['title'] ?? 'Club created!', style: KText.headingMedium),
         const SizedBox(height: 8),
@@ -330,7 +330,7 @@ class ClubCreatedScreen extends StatelessWidget {
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(KRadius.md), border: Border.all(color: KColors.borderDefault)),
+          decoration: BoxDecoration(color: KColors.surfaceDefault, borderRadius: BorderRadius.circular(KRadius.md), border: Border.all(color: KColors.borderDefault)),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text('Welcome!', style: KText.headingXSmall),
             const SizedBox(height: 8),
@@ -340,7 +340,7 @@ class ClubCreatedScreen extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(bottom: 6),
                 child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  const Icon(PhosphorIconsFill.checkCircle, size: 18, color: KColors.success),
+                  Icon(PhosphorIconsFill.checkCircle, size: 18, color: KColors.success),
                   const SizedBox(width: 8),
                   Expanded(child: Text(w, style: KText.paragraphMedium)),
                 ]),

@@ -196,7 +196,7 @@ class _UpdateFormScreenState extends State<UpdateFormScreen> with Busy {
           label: Text(label),
           style: OutlinedButton.styleFrom(
             foregroundColor: KColors.textPrimary,
-            side: const BorderSide(color: KColors.borderStrong),
+            side: BorderSide(color: KColors.borderStrong),
             shape: const StadiumBorder(),
             textStyle: KText.labelSemibold.copyWith(fontSize: 13),
           ),
@@ -242,8 +242,8 @@ class _UpdateFormScreenState extends State<UpdateFormScreen> with Busy {
             decoration: InputDecoration(
               hintText: 'Add a title',
               counterText: '${_title.text.length}/$kUpdateTitleMax',
-              enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(color: KColors.borderDefault)),
-              focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: KColors.borderStrong)),
+              enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: KColors.borderDefault)),
+              focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: KColors.borderStrong)),
             ),
           ),
           const SizedBox(height: 16),
@@ -355,7 +355,7 @@ class _UpdateFormScreenState extends State<UpdateFormScreen> with Busy {
         bottomNavigationBar: SafeArea(
           child: Container(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-            decoration: const BoxDecoration(border: Border(top: BorderSide(color: KColors.borderDefault))),
+            decoration: BoxDecoration(border: Border(top: BorderSide(color: KColors.borderDefault))),
             child: KeysButton(_editing ? 'Save changes' : 'Post update', loading: busy, onPressed: _ready ? _submit : null),
           ),
         ),

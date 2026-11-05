@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:video_player/video_player.dart';
 import 'dart:io';
@@ -13,8 +14,10 @@ import 'core/session.dart';
 import 'core/voice.dart';
 import 'router.dart';
 import 'theme/theme.dart';
+import 'theme/theme_controller.dart';
+import 'theme/tokens.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final api = ApiClient(baseUrl: AppConfig.apiBaseUrl);
   final store = DeviceStore();
@@ -31,6 +34,7 @@ void main() {
     recorder: DeviceVoiceRecorder(),
     realtime: SocketRealtime(api),
     cameraScanner: true,
+    theme: KTheme(store: store, initial: await KTheme.load(store)),
   );
   runApp(KeysApp(deps: deps));
 }
@@ -57,13 +61,15 @@ class KeysApp extends StatefulWidget {
   State<KeysApp> createState() => _KeysAppState();
 }
 
-class _KeysAppState extends State<KeysApp> {
+class _KeysAppState extends State<KeysApp> with WidgetsBindingObserver {
   late final GoRouter _router = widget.router ?? buildRouter();
   StreamSubscription<Uri>? _links;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    widget.deps.theme.addListener(_themeChanged);
     if (widget.listenForLinks) _links = AppLinks().uriLinkStream.listen(_onLink, onError: (_) {});
   }
 
@@ -81,7 +87,23 @@ class _KeysAppState extends State<KeysApp> {
   }
 
   @override
+  void didChangePlatformBrightness() => widget.deps.theme.platformChanged();
+
+  /// Colours are read from [KColors] while building, so every element is
+  /// rebuilt when the palette changes (navigation and state are kept).
+  void _themeChanged() {
+    setState(() {});
+    void mark(Element e) {
+      e.markNeedsBuild();
+      e.visitChildren(mark);
+    }
+    (context as Element).visitChildren(mark);
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    widget.deps.theme.removeListener(_themeChanged);
     _links?.cancel();
     super.dispose();
   }
@@ -93,6 +115,11 @@ class _KeysAppState extends State<KeysApp> {
           title: 'Keys',
           debugShowCheckedModeBanner: false,
           theme: buildTheme(),
+          // Status bar icons follow the palette on screens without an app bar.
+          builder: (context, child) => AnnotatedRegion<SystemUiOverlayStyle>(
+            value: KColors.isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+            child: child!,
+          ),
           routerConfig: _router,
           locale: const Locale('en', 'GB'),
         ),

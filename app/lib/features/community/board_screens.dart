@@ -96,8 +96,8 @@ class _BoardScreenState extends State<BoardScreen> {
                 selected: _tab == i,
                 showCheckmark: false,
                 selectedColor: KColors.surfaceInverted,
-                labelStyle: TextStyle(color: _tab == i ? Colors.white : KColors.textPrimary),
-                shape: const StadiumBorder(side: BorderSide(color: KColors.borderDefault)),
+                labelStyle: TextStyle(color: _tab == i ? KColors.textInverse : KColors.textPrimary),
+                shape: StadiumBorder(side: BorderSide(color: KColors.borderDefault)),
                 onSelected: (_) => setState(() => _tab = i),
               ),
           ]),
@@ -108,7 +108,7 @@ class _BoardScreenState extends State<BoardScreen> {
           child: Row(children: [
             Text(_tab == 2 ? plural(counts['champions'], 'Champion') : _tab == 1 ? plural(counts['members'], 'Member') : plural(counts['all'], 'Member'), style: KText.paragraphMediumLarge),
             const Spacer(),
-            IconButton(tooltip: 'Community size and tiers', icon: const Icon(PhosphorIconsFill.info, color: KColors.brand), onPressed: () => context.push('/board/tiers')),
+            IconButton(tooltip: 'Community size and tiers', icon: Icon(PhosphorIconsFill.info, color: KColors.brand), onPressed: () => context.push('/board/tiers')),
           ]),
         ),
         if (b['canManageSeats'] == true)
@@ -144,7 +144,7 @@ class _BoardScreenState extends State<BoardScreen> {
                   trailing: IconButton(tooltip: 'Actions', icon: const Icon(PhosphorIconsRegular.dotsThreeVertical), onPressed: () => _actions(s)),
                 )
               : ListTile(
-                  leading: const CircleAvatar(radius: 22, backgroundColor: KColors.surfaceSubtle, child: Icon(PhosphorIconsFill.user, color: KColors.textTertiary)),
+                  leading: CircleAvatar(radius: 22, backgroundColor: KColors.surfaceSubtle, child: Icon(PhosphorIconsFill.user, color: KColors.textTertiary)),
                   title: Text(s['status'] == 'pending' ? 'Active Application' : 'Unoccupied', style: KText.paragraphMediumLarge),
                   subtitle: Text(s['role'], style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
                   trailing: s['status'] == 'pending'
@@ -274,7 +274,7 @@ class _JoinBoardScreenState extends State<JoinBoardScreen> with Busy {
           RadioGroup<bool>(
             groupValue: _leader,
             onChanged: (v) => setState(() => _leader = v),
-            child: const Column(children: [
+            child: Column(children: [
               RadioListTile<bool>(value: true, title: Text('Yes'), activeColor: KColors.surfaceInverted),
               RadioListTile<bool>(value: false, title: Text('No'), activeColor: KColors.surfaceInverted),
             ]),
@@ -300,7 +300,7 @@ class _JoinBoardScreenState extends State<JoinBoardScreen> with Busy {
                 selected: _role == r['role'],
                 showCheckmark: false,
                 selectedColor: KColors.surfaceInverted,
-                labelStyle: TextStyle(color: _role == r['role'] ? Colors.white : KColors.textPrimary),
+                labelStyle: TextStyle(color: _role == r['role'] ? KColors.textInverse : KColors.textPrimary),
                 onSelected: (_) => setState(() => _role = r['role']),
               ),
           ]),
@@ -541,7 +541,7 @@ class _ProposeScreenState extends State<ProposeScreen> with Busy {
             initialValue: _seat,
             items: [for (final s in targets) DropdownMenuItem(value: s['id'] as String, child: Text('${s['role']} · ${s['occupant']?['name'] ?? 'Vacant'}'))],
             onChanged: (v) => setState(() => _seat = v),
-            decoration: const InputDecoration(filled: true, fillColor: KColors.surfaceSubtle, border: OutlineInputBorder(borderSide: BorderSide.none)),
+            decoration: InputDecoration(filled: true, fillColor: KColors.surfaceSubtle, border: OutlineInputBorder(borderSide: BorderSide.none)),
           ),
           if (target?['occupant'] != null)
             Padding(

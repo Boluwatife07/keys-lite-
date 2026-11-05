@@ -99,14 +99,14 @@ class _ChatListScreenState extends State<ChatListScreen> {
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'new-chat',
         backgroundColor: KColors.brand,
-        foregroundColor: KColors.textPrimary,
+        foregroundColor: KColors.staticBlack,
         shape: const StadiumBorder(),
         onPressed: () async {
           await context.push('/chats/new');
           _load();
         },
         icon: const Icon(PhosphorIconsRegular.plus),
-        label: Text('New Chat', style: KText.labelSemibold.copyWith(fontSize: 15)),
+        label: Text('New Chat', style: KText.labelSemibold.copyWith(fontSize: 15, color: KColors.staticBlack)),
       ),
       body: Column(children: [
         Padding(padding: const EdgeInsets.fromLTRB(16, 4, 16, 8), child: SearchField(controller: _search, hint: 'Search...')),
@@ -249,7 +249,7 @@ class ChatRow extends StatelessWidget {
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Row(children: [
                   Flexible(child: Text(c.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: KText.paragraphLarge.copyWith(fontWeight: bold ? FontWeight.w600 : FontWeight.w400))),
-                  if (c.pinned) const Padding(padding: EdgeInsets.only(left: 4), child: Icon(PhosphorIconsFill.pushPin, size: 14, color: KColors.textTertiary, semanticLabel: 'Pinned')),
+                  if (c.pinned) Padding(padding: EdgeInsets.only(left: 4), child: Icon(PhosphorIconsFill.pushPin, size: 14, color: KColors.textTertiary, semanticLabel: 'Pinned')),
                 ]),
                 const SizedBox(height: 2),
                 ExcludeSemantics(excluding: false, child: preview),
@@ -266,10 +266,10 @@ class ChatRow extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 6),
                   alignment: Alignment.center,
                   decoration: BoxDecoration(color: KColors.brand, borderRadius: BorderRadius.circular(KRadius.pill)),
-                  child: Text('${c.unread}', style: KText.paragraphMediumSmall),
+                  child: Text('${c.unread}', style: KText.paragraphMediumSmall.copyWith(color: KColors.staticBlack)),
                 )
               else if (c.muted)
-                const Icon(PhosphorIconsRegular.speakerSimpleSlash, size: 18, color: KColors.textTertiary, semanticLabel: 'Muted')
+                Icon(PhosphorIconsRegular.speakerSimpleSlash, size: 18, color: KColors.textTertiary, semanticLabel: 'Muted')
               else
                 const SizedBox(height: 20),
             ]),

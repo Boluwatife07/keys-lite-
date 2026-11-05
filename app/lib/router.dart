@@ -81,6 +81,7 @@ GoRouter buildRouter({String initial = '/', List<RouteBase> extraRoutes = const 
         GoRoute(path: '/users/:id', builder: (_, s) => OtherProfileScreen(id: s.pathParameters['id']!)),
         GoRoute(path: '/settings', builder: (_, _) => const SettingsScreen()),
         GoRoute(path: '/settings/account', builder: (_, _) => const AccountScreen()),
+        GoRoute(path: '/settings/display', builder: (_, _) => const DisplayScreen()),
         GoRoute(path: '/settings/notifications', builder: (_, _) => const NotificationSettingsScreen()),
         GoRoute(path: '/settings/privacy', builder: (_, _) => const PrivacyScreen()),
         GoRoute(path: '/settings/blocked', builder: (_, _) => const PeopleListScreen(blocked: true)),

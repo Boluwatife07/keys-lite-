@@ -228,7 +228,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                       trailing: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(color: KColors.brand, borderRadius: BorderRadius.circular(KRadius.pill)),
-                        child: Text('$_requests', style: KText.paragraphMediumSmall),
+                        child: Text('$_requests', style: KText.paragraphMediumSmall.copyWith(color: KColors.staticBlack)),
                       ),
                       onTap: () => context.push('/chats/$_id/requests').then((_) => _load()),
                     ),
@@ -241,7 +241,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                       trailing: m['chatRole'] == 'admin'
                           ? Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                              decoration: BoxDecoration(color: const Color(0xFFDDF2F0), borderRadius: BorderRadius.circular(4)),
+                              decoration: BoxDecoration(color: KColors.selectedSubtle, borderRadius: BorderRadius.circular(4)),
                               child: Text('Admin', style: KText.paragraphMediumSmall.copyWith(color: KColors.selected)),
                             )
                           : null,
@@ -256,9 +256,9 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                         subtitle: Text(m['reason'] == 'removed' ? 'Removed' : 'Left', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
                       ),
                   ],
-                  if (member && c['type'] != 'update') ListTile(leading: const Icon(PhosphorIconsRegular.signOut, color: KColors.error), title: Text('Exit group', style: TextStyle(color: KColors.error)), onTap: _exit),
+                  if (member && c['type'] != 'update') ListTile(leading: Icon(PhosphorIconsRegular.signOut, color: KColors.error), title: Text('Exit group', style: TextStyle(color: KColors.error)), onTap: _exit),
                   ListTile(
-                    leading: const Icon(PhosphorIconsRegular.flag, color: KColors.error),
+                    leading: Icon(PhosphorIconsRegular.flag, color: KColors.error),
                     title: Text('Report group', style: TextStyle(color: KColors.error)),
                     onTap: () => showReportSheet(context, itemType: 'group_chat', itemId: _id, title: 'Report group', intro: 'Tell us why you are reporting this group chat. No one would be notified that you reported.'),
                   ),
@@ -467,8 +467,8 @@ class _JoinRequestsScreenState extends State<JoinRequestsScreen> {
                         trailing: _done[r['person']['id']] != null
                             ? Text(_done[r['person']['id']]!, style: KText.paragraphMediumSmall.copyWith(color: KColors.textSecondary))
                             : Row(mainAxisSize: MainAxisSize.min, children: [
-                                IconButton(tooltip: 'Decline', icon: const Icon(PhosphorIconsRegular.x, color: KColors.error), onPressed: () => _decide(r['person']['id'], 'decline')),
-                                IconButton(tooltip: 'Approve', icon: const Icon(PhosphorIconsRegular.check, color: KColors.success), onPressed: () => _decide(r['person']['id'], 'approve')),
+                                IconButton(tooltip: 'Decline', icon: Icon(PhosphorIconsRegular.x, color: KColors.error), onPressed: () => _decide(r['person']['id'], 'decline')),
+                                IconButton(tooltip: 'Approve', icon: Icon(PhosphorIconsRegular.check, color: KColors.success), onPressed: () => _decide(r['person']['id'], 'approve')),
                               ]),
                       ),
                   ]),

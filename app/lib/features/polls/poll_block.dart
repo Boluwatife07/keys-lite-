@@ -8,10 +8,11 @@ import '../../theme/tokens.dart';
 import '../../widgets/widgets.dart';
 import '../verification/verification_screens.dart';
 
-const kPromiseBg = Color(0xFFEDEAFB);
-const kPromiseText = Color(0xFF6B5BD6);
-const kResultFill = Color(0xFFE6F2DC);
-const kWinner = Color(0xFF5AA02C);
+// Purple promise and green results; dark values from secondary/purple and secondary/green (Dark Mode).
+Color get kPromiseBg => KColors.isDark ? const Color(0xFF201932) : const Color(0xFFEDEAFB);
+Color get kPromiseText => KColors.isDark ? const Color(0xFFAE93FB) : const Color(0xFF6B5BD6);
+Color get kResultFill => KColors.isDark ? const Color(0xFF172406) : const Color(0xFFE6F2DC);
+Color get kWinner => KColors.isDark ? const Color(0xFF8AC042) : const Color(0xFF5AA02C);
 
 /// POL-06 - POL-09: a poll inside a post. Votes are final (POL-Q1).
 class PollBlock extends StatefulWidget {
@@ -103,7 +104,7 @@ class _PollBlockState extends State<PollBlock> with Busy {
             child: FilledButton(
               style: FilledButton.styleFrom(backgroundColor: KColors.surfaceInverted, disabledBackgroundColor: KColors.surfaceSubtle, shape: const StadiumBorder()),
               onPressed: _picked.isEmpty || busy ? null : _submit,
-              child: busy ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : const Text('Submit'),
+              child: busy ? SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: KColors.textInverse)) : const Text('Submit'),
             ),
           ),
       ]),
@@ -166,7 +167,7 @@ class _ResultRow extends StatelessWidget {
                 width: 52,
                 height: 52,
                 alignment: Alignment.center,
-                decoration: BoxDecoration(shape: BoxShape.circle, color: win ? kWinner : Colors.white, border: Border.all(color: win ? kWinner : KColors.borderDefault, width: 3)),
+                decoration: BoxDecoration(shape: BoxShape.circle, color: win ? kWinner : KColors.surfaceDefault, border: Border.all(color: win ? kWinner : KColors.borderDefault, width: 3)),
                 child: Text('${o.percent ?? 0}%', style: KText.paragraphMediumSmall.copyWith(color: win ? Colors.white : KColors.textPrimary)),
               ),
               const SizedBox(width: 12),

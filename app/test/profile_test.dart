@@ -3,6 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:keys_lite/features/profile/profile_screens.dart';
 import 'package:keys_lite/features/profile/settings_screens.dart';
 import 'package:keys_lite/widgets/widgets.dart';
+import 'package:keys_lite/core/services.dart';
+import 'package:keys_lite/theme/theme_controller.dart';
+import 'package:keys_lite/theme/tokens.dart';
 import 'harness.dart';
 
 Map<String, dynamic> profile({bool blocked = false, bool muted = false}) => {
@@ -12,6 +15,35 @@ Map<String, dynamic> profile({bool blocked = false, bool muted = false}) => {
     };
 
 void main() {
+  testWidgets('Settings > Display: one switch on; dark mode recolours the app and is saved', (t) async {
+    final h = Harness();
+    await h.pump(t, const SettingsScreen());
+    expect(find.text('Manage your app theme here'), findsOneWidget);
+    await t.tap(find.text('Display'));
+    await t.pumpAndSettle();
+    final switches = find.byType(KSwitch);
+    expect(switches, findsNWidgets(3));
+    bool on(int i) => t.widget<KSwitch>(switches.at(i)).value;
+    expect([on(0), on(1), on(2)], [true, false, false]); // Light is the default
+    await t.tap(find.text('Dark mode'));
+    await t.pumpAndSettle();
+    expect([on(0), on(1), on(2)], [false, true, false]);
+    expect(KColors.isDark, isTrue);
+    expect(t.widget<Scaffold>(find.byType(Scaffold).last).backgroundColor, KPalette.dark.surfaceDefault);
+    expect((h.deps.store as MemoryStore).theme, 'dark');
+    // Tapping the switch that is on keeps it on.
+    await t.tap(switches.at(1));
+    await t.pumpAndSettle();
+    expect(KColors.isDark, isTrue);
+    await t.tap(find.text('Use device default settings'));
+    await t.pumpAndSettle();
+    expect(h.deps.theme.choice, ThemeChoice.system);
+    expect(KColors.isDark, isFalse); // the test device is light
+    await t.tap(find.text('Light mode'));
+    await t.pumpAndSettle();
+    expect((h.deps.store as MemoryStore).theme, 'light');
+  });
+
   testWidgets('PRF-02 other profile: role, joined, Chat and the actions', (t) async {
     final h = Harness();
     h.fake.on('GET /users/u2', (_, _) => profile());
@@ -63,10 +95,10 @@ void main() {
   testWidgets('PRF-12 settings shows Phase 1 rows only', (t) async {
     final h = Harness();
     await h.pump(t, const SettingsScreen());
-    for (final r in ['Your account', 'Notification', 'Privacy and Safety', 'Terms & Conditions']) {
+    for (final r in ['Your account', 'Notification', 'Privacy and Safety', 'Display', 'Terms & Conditions']) {
       expect(find.text(r), findsOneWidget);
     }
-    for (final r in ['Address book', 'My payment method', 'Security', 'Language & Region', 'Display']) {
+    for (final r in ['Address book', 'My payment method', 'Security', 'Language & Region']) {
       expect(find.text(r), findsNothing);
     }
   });

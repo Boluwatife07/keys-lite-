@@ -190,7 +190,7 @@ class _CreatePollScreenState extends State<CreatePollScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(color: KColors.surfaceInverted, borderRadius: BorderRadius.circular(KRadius.pill)),
-            child: Text('All residents', style: KText.paragraphMediumSmall.copyWith(color: Colors.white, fontSize: 13)),
+            child: Text('All residents', style: KText.paragraphMediumSmall.copyWith(color: KColors.textInverse, fontSize: 13)),
           ),
         ]),
         bottom: KeysButton('Preview poll', onPressed: _question.text.trim().isEmpty ? null : _preview),

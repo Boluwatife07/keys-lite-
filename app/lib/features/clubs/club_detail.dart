@@ -217,7 +217,7 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
     return Scaffold(
       backgroundColor: KColors.surfaceDefault,
       floatingActionButton: _manager && c['status'] == 'active'
-          ? FloatingActionButton(heroTag: 'club-create', tooltip: 'Create in club', backgroundColor: KColors.brand, foregroundColor: KColors.textPrimary, shape: const CircleBorder(), onPressed: _create, child: const Icon(PhosphorIconsRegular.plus, size: 28))
+          ? FloatingActionButton(heroTag: 'club-create', tooltip: 'Create in club', backgroundColor: KColors.brand, foregroundColor: KColors.staticBlack, shape: const CircleBorder(), onPressed: _create, child: const Icon(PhosphorIconsRegular.plus, size: 28))
           : null,
       body: RefreshIndicator(
         onRefresh: _load,
@@ -243,7 +243,7 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
               if (c['status'] == 'closing')
                 Container(
                   width: double.infinity,
-                  color: const Color(0xFFFDECEA),
+                  color: KColors.errorSubtle,
                   padding: const EdgeInsets.all(12),
                   child: Text('This club will be closed permanently on ${DateFormat('d MMM, h:mma').format(DateTime.parse(c['closingAt']).toLocal())}.', style: KText.paragraphMedium.copyWith(color: KColors.error)),
                 ),
@@ -313,11 +313,11 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
                     for (final e in _events) Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: EventCard(e, width: 280)),
                   ]),
                 ),
-              const Divider(height: 24, thickness: 6, color: KColors.surfaceSubtle),
+              Divider(height: 24, thickness: 6, color: KColors.surfaceSubtle),
               Padding(padding: const EdgeInsets.fromLTRB(16, 0, 16, 8), child: Text('Activities', style: KText.paragraphMediumLarge.copyWith(fontWeight: FontWeight.w600))),
               if (_posts.isEmpty && !_hiddenPosts)
                 Padding(padding: const EdgeInsets.all(24), child: Center(child: Text('No activities yet', style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)))),
-              for (final p in _posts) ...[PostCard(post: p, showClub: false, onChanged: (_) => _load()), const Divider(height: 8, thickness: 6, color: KColors.surfaceSubtle)],
+              for (final p in _posts) ...[PostCard(post: p, showClub: false, onChanged: (_) => _load()), Divider(height: 8, thickness: 6, color: KColors.surfaceSubtle)],
               if (_hiddenPosts)
                 Container(
                   margin: const EdgeInsets.all(16),
@@ -513,7 +513,7 @@ class _ClubMembersScreenState extends State<ClubMembersScreen> {
               Padding(padding: const EdgeInsets.fromLTRB(16, 4, 16, 8), child: SearchField(controller: _q, hint: 'Search members')),
               if (d['myRole'] != null)
                 ListTile(
-                  leading: const CircleAvatar(backgroundColor: KColors.brand, child: Icon(PhosphorIconsRegular.link, color: KColors.textPrimary)),
+                  leading: CircleAvatar(backgroundColor: KColors.brand, child: Icon(PhosphorIconsRegular.link, color: KColors.staticBlack)),
                   title: const Text('Invite via link'),
                   onTap: () async {
                     final api = context.api;
@@ -525,7 +525,7 @@ class _ClubMembersScreenState extends State<ClubMembersScreen> {
                 ),
               if (d['myRole'] != null)
                 ListTile(
-                  leading: const CircleAvatar(backgroundColor: KColors.surfaceSubtle, child: Icon(PhosphorIconsRegular.userPlus, color: KColors.textPrimary)),
+                  leading: CircleAvatar(backgroundColor: KColors.surfaceSubtle, child: Icon(PhosphorIconsRegular.userPlus, color: KColors.textPrimary)),
                   title: const Text('Invite members'),
                   onTap: () => context.push('/clubs/${widget.id}/invite'),
                 ),
@@ -582,7 +582,7 @@ class _ClubEventsScreenState extends State<ClubEventsScreen> {
                   selected: _status == s,
                   showCheckmark: false,
                   selectedColor: KColors.surfaceInverted,
-                  labelStyle: KText.paragraphMedium.copyWith(color: _status == s ? Colors.white : KColors.textPrimary),
+                  labelStyle: KText.paragraphMedium.copyWith(color: _status == s ? KColors.textInverse : KColors.textPrimary),
                   onSelected: (_) {
                     _status = s;
                     _load();

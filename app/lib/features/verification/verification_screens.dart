@@ -290,7 +290,7 @@ class VerifySuccessScreen extends StatelessWidget {
   Widget build(BuildContext context) => KeysScaffold(
         body: Column(children: [
           const SizedBox(height: 120),
-          const CircleAvatar(radius: 40, backgroundColor: KColors.success, child: Icon(PhosphorIconsRegular.check, color: Colors.white, size: 44)),
+          CircleAvatar(radius: 40, backgroundColor: KColors.success, child: Icon(PhosphorIconsRegular.check, color: Colors.white, size: 44)),
           const SizedBox(height: 24),
           const Intro(center: true, title: 'Successful', body: 'Congratulations, your account has been verified.'),
         ]),
@@ -323,7 +323,7 @@ class VerifyMismatchScreen extends StatelessWidget {
     return KeysScaffold(
       header: const KeysHeader(),
       body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Center(child: CircleAvatar(radius: 32, backgroundColor: Color(0xFFFDECEA), child: Icon(PhosphorIconsRegular.x, color: KColors.error, size: 36))),
+        Center(child: CircleAvatar(radius: 32, backgroundColor: KColors.errorSubtle, child: Icon(PhosphorIconsRegular.x, color: KColors.error, size: 36))),
         const SizedBox(height: 20),
         const Intro(center: true, title: "We couldn't verify your address", body: 'The address linked to your card does not match your home address on Keys.'),
         const SizedBox(height: 20),
@@ -333,7 +333,7 @@ class VerifyMismatchScreen extends StatelessWidget {
           decoration: BoxDecoration(color: KColors.surfaceDefault, borderRadius: BorderRadius.circular(KRadius.md), border: Border.all(color: KColors.borderDefault)),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             row('Method used', _method),
-            const Divider(height: 1, color: KColors.borderDefault),
+            Divider(height: 1, color: KColors.borderDefault),
             row('Address on Keys', result['homeAddress'] ?? ''),
           ]),
         ),
@@ -397,7 +397,7 @@ class _ContestScreenState extends State<ContestScreen> with Busy {
           for (final d in docs)
             Padding(
               padding: const EdgeInsets.only(bottom: 6),
-              child: Row(children: [const Icon(PhosphorIconsRegular.check, size: 16, color: KColors.success), const SizedBox(width: 8), Text(d, style: KText.paragraphMedium)]),
+              child: Row(children: [Icon(PhosphorIconsRegular.check, size: 16, color: KColors.success), const SizedBox(width: 8), Text(d, style: KText.paragraphMedium)]),
             ),
           const SizedBox(height: 4),
           Text('* Documents must be dated within the last 3 months, except tenancy agreements.', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
@@ -427,7 +427,7 @@ class _ContestScreenState extends State<ContestScreen> with Busy {
           if (_error != null) Padding(padding: const EdgeInsets.only(top: 8), child: ErrorLine(_error!)),
           const SizedBox(height: 12),
           Row(children: [
-            const Icon(PhosphorIconsRegular.lock, size: 14, color: KColors.textSecondary),
+            Icon(PhosphorIconsRegular.lock, size: 14, color: KColors.textSecondary),
             const SizedBox(width: 6),
             Text('Your documents are encrypted and securely stored.', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
           ]),
@@ -457,7 +457,7 @@ class UnderReviewScreen extends StatelessWidget {
             const SizedBox(height: 4),
             Row(children: [const Icon(PhosphorIconsRegular.fileText, size: 20), const SizedBox(width: 8), Expanded(child: Text(reviewCase['documentName'] ?? '', style: KText.paragraphMediumLarge))]),
             if (submitted != null) ...[const SizedBox(height: 4), Text('Submitted ${DateFormat('d MMM yyyy').format(submitted)}', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary))],
-            const Divider(height: 28, color: KColors.borderDefault),
+            Divider(height: 28, color: KColors.borderDefault),
             Row(children: [
               const Icon(PhosphorIconsRegular.hourglassHigh, size: 18, color: KColors.progressStart),
               const SizedBox(width: 8),

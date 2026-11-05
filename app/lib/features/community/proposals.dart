@@ -150,7 +150,7 @@ class ProposalCard extends StatelessWidget {
               ],
               const SizedBox(height: 10),
               Row(children: [
-                const Icon(PhosphorIconsRegular.clock, size: 14, color: KColors.textSecondary),
+                Icon(PhosphorIconsRegular.clock, size: 14, color: KColors.textSecondary),
                 const SizedBox(width: 4),
                 Text(open ? timeLeft(DateTime.parse(p['closesAt']).toLocal()) : statusLabel(p['status']), style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
               ]),

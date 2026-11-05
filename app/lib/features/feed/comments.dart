@@ -94,7 +94,7 @@ class _MentionSuggestionsState extends State<MentionSuggestions> {
     if (_people.isEmpty) return const SizedBox.shrink();
     return Container(
       constraints: const BoxConstraints(maxHeight: 220),
-      decoration: const BoxDecoration(border: Border(top: BorderSide(color: KColors.borderDefault))),
+      decoration: BoxDecoration(border: Border(top: BorderSide(color: KColors.borderDefault))),
       child: Material(color: KColors.surfaceDefault, child: ListView(shrinkWrap: true, padding: EdgeInsets.zero, children: [
         for (final p in _people)
           ListTile(
@@ -123,7 +123,7 @@ Future<void> showCommentsSheet(BuildContext context, Post post) => showModalBott
               IconButton(tooltip: 'Close', icon: const Icon(PhosphorIconsRegular.x), onPressed: () => Navigator.pop(c)),
             ]),
           ),
-          const Divider(height: 1, color: KColors.borderDefault),
+          Divider(height: 1, color: KColors.borderDefault),
           Expanded(child: CommentsThread(post: post)),
         ]),
       ),
@@ -354,7 +354,7 @@ class _CommentsThreadState extends State<CommentsThread> with Busy {
       if (q != null) MentionSuggestions(query: q, onPick: (p) => insertMention(_input, _tags, p)),
       if (_failed != null)
         Container(
-          color: const Color(0xFFFDECEA),
+          color: KColors.errorSubtle,
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(children: [Expanded(child: Text(_failed!, style: KText.paragraphMedium.copyWith(color: KColors.error))), TextButton(onPressed: _send, child: const Text('Retry'))]),
         ),
@@ -362,7 +362,7 @@ class _CommentsThreadState extends State<CommentsThread> with Busy {
         top: false,
         child: Container(
           padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
-          decoration: const BoxDecoration(border: Border(top: BorderSide(color: KColors.borderDefault))),
+          decoration: BoxDecoration(border: Border(top: BorderSide(color: KColors.borderDefault))),
           child: Column(children: [
             if (_replyTo != null || _editing != null)
               Row(children: [
@@ -401,8 +401,8 @@ class _CommentsThreadState extends State<CommentsThread> with Busy {
                     hintText: _replyTo != null ? 'Add a reply...' : 'Add a comment...',
                     isDense: true,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(KRadius.pill), borderSide: const BorderSide(color: KColors.borderDefault)),
-                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(KRadius.pill), borderSide: const BorderSide(color: KColors.borderDefault)),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(KRadius.pill), borderSide: BorderSide(color: KColors.borderDefault)),
+                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(KRadius.pill), borderSide: BorderSide(color: KColors.borderDefault)),
                   ),
                 ),
               ),

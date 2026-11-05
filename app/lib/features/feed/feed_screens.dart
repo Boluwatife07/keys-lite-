@@ -164,7 +164,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                   post: p,
                   header: Column(children: [
                     PostCard(post: p, full: true, onChanged: (n) => n == null ? context.pop() : setState(() => _post = n)),
-                    const Divider(color: KColors.borderDefault),
+                    Divider(color: KColors.borderDefault),
                     Align(alignment: Alignment.centerLeft, child: Padding(padding: const EdgeInsets.only(top: 4), child: Text('Comments', style: KText.paragraphMediumLarge))),
                   ]),
                 ),
@@ -249,7 +249,7 @@ class _VideoScreenState extends State<VideoScreen> {
         child: c.value.isInitialized
             ? Column(mainAxisSize: MainAxisSize.min, children: [
                 Flexible(child: AspectRatio(aspectRatio: c.value.aspectRatio, child: VideoPlayer(c))),
-                VideoProgressIndicator(c, allowScrubbing: true, colors: const VideoProgressColors(playedColor: KColors.brand)),
+                VideoProgressIndicator(c, allowScrubbing: true, colors: VideoProgressColors(playedColor: KColors.brand)),
                 IconButton(
                   tooltip: c.value.isPlaying ? 'Pause' : 'Play',
                   iconSize: 48,

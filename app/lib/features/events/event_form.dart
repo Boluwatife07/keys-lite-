@@ -352,7 +352,7 @@ class _EventFormScreenState extends State<EventFormScreen> with Busy {
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            const CircleAvatar(radius: 32, backgroundColor: KColors.brandSubtle, child: Icon(PhosphorIconsFill.bookmarkSimple, size: 32, color: KColors.textPrimary)),
+            CircleAvatar(radius: 32, backgroundColor: KColors.brandSubtle, child: Icon(PhosphorIconsFill.bookmarkSimple, size: 32, color: KColors.textPrimary)),
             const SizedBox(height: 12),
             Text('Event saved as a draft', style: KText.headingSmall, textAlign: TextAlign.center),
             const SizedBox(height: 8),
@@ -430,7 +430,7 @@ class _EventFormScreenState extends State<EventFormScreen> with Busy {
         decoration: BoxDecoration(color: KColors.surfaceSubtle, borderRadius: BorderRadius.circular(KRadius.sm)),
         child: Row(children: [
           Expanded(child: Text(value, style: KText.paragraphLarge.copyWith(color: KColors.textTertiary))),
-          const Icon(PhosphorIconsRegular.lock, size: 18, color: KColors.textTertiary),
+          Icon(PhosphorIconsRegular.lock, size: 18, color: KColors.textTertiary),
         ]),
       );
 
@@ -453,7 +453,7 @@ class _EventFormScreenState extends State<EventFormScreen> with Busy {
           onPressed: onTap,
           icon: const Icon(PhosphorIconsRegular.plus, size: 18),
           label: Text(label),
-          style: OutlinedButton.styleFrom(foregroundColor: KColors.textPrimary, side: const BorderSide(color: KColors.borderDefault), shape: const StadiumBorder()),
+          style: OutlinedButton.styleFrom(foregroundColor: KColors.textPrimary, side: BorderSide(color: KColors.borderDefault), shape: const StadiumBorder()),
         ),
       );
 
@@ -626,7 +626,7 @@ class _EventFormScreenState extends State<EventFormScreen> with Busy {
                 selected: _tags.contains(t),
                 showCheckmark: false,
                 selectedColor: KColors.surfaceInverted,
-                labelStyle: KText.paragraphMedium.copyWith(color: _tags.contains(t) ? Colors.white : KColors.textPrimary),
+                labelStyle: KText.paragraphMedium.copyWith(color: _tags.contains(t) ? KColors.textInverse : KColors.textPrimary),
                 onSelected: (on) {
                   if (on && _tags.length >= kEventTagsMax) return showToast(context, 'You can add a maximum of 3 tags');
                   _touch(() => on ? _tags.add(t) : _tags.remove(t));
@@ -714,7 +714,7 @@ Future<bool> launchEvent(BuildContext context, String id) async {
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            const CircleAvatar(radius: 32, backgroundColor: Color(0xFFE6F6EA), child: Icon(PhosphorIconsRegular.confetti, size: 32, color: KColors.success)),
+            CircleAvatar(radius: 32, backgroundColor: KColors.successSubtle, child: Icon(PhosphorIconsRegular.confetti, size: 32, color: KColors.success)),
             const SizedBox(height: 12),
             Text(r['title'] ?? 'Your event is live!', style: KText.headingSmall),
             const SizedBox(height: 8),
@@ -961,7 +961,7 @@ class _CohostPickerState extends State<_CohostPicker> {
         body: Column(children: [
           Padding(padding: const EdgeInsets.fromLTRB(16, 4, 16, 8), child: SearchField(controller: _q, hint: 'Search residents')),
           ListTile(
-            leading: const CircleAvatar(backgroundColor: KColors.surfaceSubtle, child: Icon(PhosphorIconsRegular.buildings, color: KColors.textPrimary)),
+            leading: CircleAvatar(backgroundColor: KColors.surfaceSubtle, child: Icon(PhosphorIconsRegular.buildings, color: KColors.textPrimary)),
             title: const Text('Add external co-hosts'),
             subtitle: const Text('Add users or organizations not on KEYS.'),
             onTap: _external,

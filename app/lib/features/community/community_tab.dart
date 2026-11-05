@@ -52,7 +52,7 @@ class CommunityTabState extends State<CommunityTab> {
     final showProposals = c['proposalsTab'] == true;
     return Column(children: [
       ListTile(
-        leading: const CircleAvatar(backgroundColor: KColors.surfaceSubtle, child: Icon(PhosphorIconsRegular.buildings, color: KColors.selected)),
+        leading: CircleAvatar(backgroundColor: KColors.surfaceSubtle, child: Icon(PhosphorIconsRegular.buildings, color: KColors.selected)),
         title: Text(com['name'], style: KText.paragraphMediumLarge),
         subtitle: Text(com['location'], style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
         trailing: IconButton(tooltip: 'Share community', icon: const Icon(PhosphorIconsRegular.shareNetwork), onPressed: () => showShareCommunity(context, com['code'], c['shareLink'])),
@@ -135,7 +135,7 @@ class _Hub extends StatelessWidget {
             TextButton(onPressed: () async {
               await context.push('/board');
               onChanged();
-            }, child: const Text('View all', style: TextStyle(color: KColors.textLink))),
+            }, child: Text('View all', style: TextStyle(color: KColors.textLink))),
           ]),
         ),
         SizedBox(
@@ -191,7 +191,7 @@ class _AnnouncementCard extends StatelessWidget {
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-          decoration: BoxDecoration(color: vacancy ? const Color(0xFFFDECEA) : const Color(0xFFDDF2F0), borderRadius: BorderRadius.circular(4)),
+          decoration: BoxDecoration(color: vacancy ? KColors.errorSubtle : KColors.selectedSubtle, borderRadius: BorderRadius.circular(4)),
           child: Text(a['label'], style: KText.paragraphMediumSmall.copyWith(color: vacancy ? KColors.error : KColors.selected)),
         ),
         const SizedBox(height: 10),
@@ -260,9 +260,9 @@ Future<void> showMilestoneSheet(BuildContext context, Map<String, dynamic> m) as
     showDragHandle: false,
     backgroundColor: Colors.transparent,
     builder: (c) => Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [KColors.brandMuted, KColors.surfaceElevated], stops: [0, 0.79038]),
+        gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [KColors.isDark ? KColors.brandSubtle : KColors.brandMuted, KColors.surfaceElevated], stops: [0, 0.79038]),
       ),
       child: SafeArea(
         top: false,
@@ -283,7 +283,7 @@ Future<void> showMilestoneSheet(BuildContext context, Map<String, dynamic> m) as
               SizedBox(
                 width: 36,
                 height: 36,
-                child: IconButton(padding: EdgeInsets.zero, tooltip: 'Close', icon: const Icon(PhosphorIconsRegular.x, size: 22, color: KColors.iconDefault), onPressed: () => Navigator.of(c).pop(false)),
+                child: IconButton(padding: EdgeInsets.zero, tooltip: 'Close', icon: Icon(PhosphorIconsRegular.x, size: 22, color: KColors.iconDefault), onPressed: () => Navigator.of(c).pop(false)),
               ),
             ]),
           ),
@@ -302,7 +302,7 @@ Future<void> showMilestoneSheet(BuildContext context, Map<String, dynamic> m) as
               SizedBox(
                 width: 323,
                 child: Column(children: [
-                  Text(m['title'], textAlign: TextAlign.center, style: const TextStyle(fontFamily: 'Inter', fontSize: 20, fontWeight: FontWeight.w600, height: 28 / 20, letterSpacing: -0.3, color: KColors.textPrimary)),
+                  Text(m['title'], textAlign: TextAlign.center, style: TextStyle(fontFamily: 'Inter', fontSize: 20, fontWeight: FontWeight.w600, height: 28 / 20, letterSpacing: -0.3, color: KColors.textPrimary)),
                   const SizedBox(height: 8),
                   Text(m['body'], textAlign: TextAlign.center, style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
                 ]),
@@ -325,13 +325,13 @@ Future<void> showMilestoneSheet(BuildContext context, Map<String, dynamic> m) as
 
 /// Dashed 1px line in surface-subtle (#DDD in the design).
 class DashedDivider extends StatelessWidget {
-  const DashedDivider({super.key, this.color = const Color(0xFFDDDDDD)});
-  final Color color;
+  const DashedDivider({super.key, this.color});
+  final Color? color;
   @override
   Widget build(BuildContext context) => LayoutBuilder(builder: (_, box) {
         const dash = 4.0, gap = 4.0;
         final n = (box.maxWidth / (dash + gap)).floor();
-        return Row(children: [for (var i = 0; i < n; i++) Container(width: dash, height: 1, margin: const EdgeInsets.only(right: gap), color: color)]);
+        return Row(children: [for (var i = 0; i < n; i++) Container(width: dash, height: 1, margin: const EdgeInsets.only(right: gap), color: color ?? KColors.dashed)]);
       });
 }
 
@@ -370,10 +370,10 @@ class _NewMembersScreenState extends State<NewMembersScreen> {
                 onTap: () => context.push('/users/${people[i].id}'),
                 child: Container(
                   constraints: const BoxConstraints(minHeight: 80),
-                  decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: KColors.borderSubtle))),
+                  decoration: BoxDecoration(border: Border(bottom: BorderSide(color: KColors.borderSubtle))),
                   child: Row(children: [
                     Padding(padding: const EdgeInsets.fromLTRB(0, 16, 16, 16), child: Avatar(people[i].photoUrl, size: 48)),
-                    Expanded(child: Text(people[i].name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: 'Inter', fontSize: 14, fontWeight: FontWeight.w500, height: 1, letterSpacing: -0.1, color: KColors.textPrimary))),
+                    Expanded(child: Text(people[i].name, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: 'Inter', fontSize: 14, fontWeight: FontWeight.w500, height: 1, letterSpacing: -0.1, color: KColors.textPrimary))),
                   ]),
                 ),
               ),

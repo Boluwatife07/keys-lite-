@@ -274,7 +274,7 @@ class _ComposeScreenState extends State<ComposeScreen> with Busy {
                     key: const Key('post-button'),
                     style: FilledButton.styleFrom(backgroundColor: KColors.surfaceInverted, disabledBackgroundColor: KColors.surfaceInverted.withValues(alpha: 0.25), shape: const StadiumBorder()),
                     onPressed: (_editing ? _text.text.trim().isNotEmpty || widget.edit!.attachment != 'none' : _hasInput) && !busy ? _post : null,
-                    child: busy ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : Text(_editing ? 'Save' : 'Post'),
+                    child: busy ? SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: KColors.textInverse)) : Text(_editing ? 'Save' : 'Post'),
                   ),
                 ),
               ]),
@@ -305,7 +305,7 @@ class _ComposeScreenState extends State<ComposeScreen> with Busy {
             if (q != null) MentionSuggestions(query: q, onPick: (p) => insertMention(_text, _tags, p)),
             if (_failed)
               Container(
-                color: const Color(0xFFFDECEA),
+                color: KColors.errorSubtle,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(children: [
                   Expanded(child: Text('Posting failed.', style: KText.paragraphMedium.copyWith(color: KColors.error))),
@@ -313,7 +313,7 @@ class _ComposeScreenState extends State<ComposeScreen> with Busy {
                 ]),
               ),
             Container(
-              decoration: const BoxDecoration(border: Border(top: BorderSide(color: KColors.borderDefault))),
+              decoration: BoxDecoration(border: Border(top: BorderSide(color: KColors.borderDefault))),
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               child: Row(children: [
                 // FED-04.1: once one attachment type is used, the others are unavailable.

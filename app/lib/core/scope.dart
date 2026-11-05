@@ -3,11 +3,12 @@ import 'api.dart';
 import 'realtime.dart';
 import 'services.dart';
 import 'session.dart';
+import '../theme/theme_controller.dart';
 
 /// Everything screens need, provided once at the top of the tree. Tests
 /// build it with fakes.
 class Deps {
-  Deps({required this.api, required this.session, required this.media, required this.social, required this.cards, required this.sharer, required this.store, this.videoLength, this.recorder, Realtime? realtime, this.cameraScanner = false}) : realtime = realtime ?? NoRealtime();
+  Deps({required this.api, required this.session, required this.media, required this.social, required this.cards, required this.sharer, required this.store, this.videoLength, this.recorder, Realtime? realtime, this.cameraScanner = false, KTheme? theme}) : realtime = realtime ?? NoRealtime(), theme = theme ?? KTheme(store: store);
   final ApiClient api;
   final Session session;
   final MediaPicker media;
@@ -22,6 +23,8 @@ class Deps {
   final Realtime realtime;
   /// Ticket scanning with the camera (EVT-23); off in tests, which type the code.
   final bool cameraScanner;
+  /// Light, dark or device theme (Settings > Display).
+  final KTheme theme;
 }
 
 class AppScope extends InheritedWidget {

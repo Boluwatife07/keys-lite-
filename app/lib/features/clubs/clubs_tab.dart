@@ -78,7 +78,7 @@ class _ClubsTabState extends State<ClubsTab> with SingleTickerProviderStateMixin
             heroTag: 'club-fab',
             tooltip: 'Create club',
             backgroundColor: KColors.brand,
-            foregroundColor: KColors.textPrimary,
+            foregroundColor: KColors.staticBlack,
             shape: const CircleBorder(),
             onPressed: () async {
               await startClub(context);
@@ -189,11 +189,11 @@ class _ClubsHomeState extends State<_ClubsHome> {
                 ),
             ]),
           ),
-        const Divider(height: 24, thickness: 6, color: KColors.surfaceSubtle),
+        Divider(height: 24, thickness: 6, color: KColors.surfaceSubtle),
         if (posts.isEmpty) templates,
         for (var i = 0; i < posts.length; i++) ...[
           PostCard(post: posts[i], onChanged: (_) => _load()),
-          const Divider(height: 8, thickness: 6, color: KColors.surfaceSubtle),
+          Divider(height: 8, thickness: 6, color: KColors.surfaceSubtle),
           if (i == 1 || (posts.length < 2 && i == posts.length - 1)) templates,
         ],
       ]),
@@ -207,7 +207,7 @@ class _Cover extends StatelessWidget {
   final double height;
   @override
   Widget build(BuildContext context) => url == null
-      ? Container(height: height, width: double.infinity, color: KColors.surfaceSubtle, child: const Icon(PhosphorIconsRegular.usersThree, color: KColors.textTertiary))
+      ? Container(height: height, width: double.infinity, color: KColors.surfaceSubtle, child: Icon(PhosphorIconsRegular.usersThree, color: KColors.textTertiary))
       : Image.network(context.api.absolute(url!), height: height, width: double.infinity, fit: BoxFit.cover, errorBuilder: (_, _, _) => Container(height: height, color: KColors.surfaceSubtle));
 }
 
@@ -220,7 +220,7 @@ class ClubTemplateCard extends StatelessWidget {
         width: width,
         child: Container(
           clipBehavior: Clip.antiAlias,
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(KRadius.md), border: Border.all(color: KColors.borderDefault), color: Colors.white),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(KRadius.md), border: Border.all(color: KColors.borderDefault), color: KColors.surfaceDefault),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Image.asset('assets/images/${t['image']}', height: 110, width: double.infinity, fit: BoxFit.cover),
             Padding(
@@ -257,9 +257,9 @@ class ClubCard extends StatelessWidget {
         button: true,
         label: c.name,
         child: Material(
-          color: Colors.white,
+          color: KColors.surfaceDefault,
           clipBehavior: Clip.antiAlias,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(KRadius.md), side: const BorderSide(color: KColors.borderDefault)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(KRadius.md), side: BorderSide(color: KColors.borderDefault)),
           child: InkWell(
             onTap: () => context.push('/clubs/${c.id}').then((_) => onChanged()),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -270,10 +270,10 @@ class ClubCard extends StatelessWidget {
                   Text(c.name, style: KText.paragraphMediumLarge),
                   const SizedBox(height: 4),
                   Row(children: [
-                    const _Tag('Free club', Color(0xFFE6F6EA), KColors.success),
+                    _Tag('Free club', KColors.successSubtle, KColors.success),
                     const SizedBox(width: 6),
-                    _Tag(c.category, const Color(0xFFEDE7FF), const Color(0xFF6941C6)),
-                    if (c.status == 'closing') ...[const SizedBox(width: 6), const _Tag('Closing', Color(0xFFFDECEA), KColors.error)],
+                    _Tag(c.category, KColors.isDark ? const Color(0xFF201932) : const Color(0xFFEDE7FF), KColors.isDark ? const Color(0xFFBEA9FC) : const Color(0xFF6941C6)),
+                    if (c.status == 'closing') ...[const SizedBox(width: 6), _Tag('Closing', KColors.errorSubtle, KColors.error)],
                   ]),
                   const SizedBox(height: 6),
                   Text(c.description, maxLines: 2, overflow: TextOverflow.ellipsis, style: KText.paragraphSmall.copyWith(color: KColors.textSecondary, fontSize: 13)),

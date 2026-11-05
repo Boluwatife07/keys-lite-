@@ -311,7 +311,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
             Navigator.pop(c);
             context.push('/chats/forward', extra: {'messageIds': [m['id']]});
           }),
-          ListTile(leading: const Icon(PhosphorIconsRegular.trash, color: KColors.error), title: Text('Delete', style: TextStyle(color: KColors.error)), onTap: () {
+          ListTile(leading: Icon(PhosphorIconsRegular.trash, color: KColors.error), title: Text('Delete', style: TextStyle(color: KColors.error)), onTap: () {
             Navigator.pop(c);
             _delete(m);
           }),
@@ -533,7 +533,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
         child: Container(
           width: double.infinity,
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
-          decoration: const BoxDecoration(border: Border(top: BorderSide(color: KColors.borderDefault))),
+          decoration: BoxDecoration(border: Border(top: BorderSide(color: KColors.borderDefault))),
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             Text(title, textAlign: TextAlign.center, style: body == null ? KText.paragraphMedium.copyWith(color: KColors.textSecondary) : KText.headingXSmall),
             if (body != null) ...[const SizedBox(height: 8), Text(body, textAlign: TextAlign.center, style: KText.paragraphMedium.copyWith(color: KColors.textSecondary))],
@@ -562,7 +562,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
                 },
                 icon: const Icon(PhosphorIconsRegular.trash),
                 label: const Text('Delete'),
-                style: TextButton.styleFrom(foregroundColor: KColors.error, backgroundColor: const Color(0xFFFDE8EC), shape: const StadiumBorder()),
+                style: TextButton.styleFrom(foregroundColor: KColors.error, backgroundColor: KColors.errorSubtle, shape: const StadiumBorder()),
               ),
             ),
           ),
@@ -574,7 +574,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
                 onPressed: () => _act(() => api.post('/chats/$_id/accept')),
                 icon: const Icon(PhosphorIconsRegular.check),
                 label: const Text('Accept'),
-                style: OutlinedButton.styleFrom(foregroundColor: KColors.textPrimary, side: const BorderSide(color: KColors.borderStrong), shape: const StadiumBorder()),
+                style: OutlinedButton.styleFrom(foregroundColor: KColors.textPrimary, side: BorderSide(color: KColors.borderStrong), shape: const StadiumBorder()),
               ),
             ),
           ),
@@ -753,7 +753,7 @@ class MessageBubble extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.only(bottom: 4),
           child: Row(mainAxisSize: MainAxisSize.min, children: [
-            const Icon(PhosphorIconsRegular.arrowBendUpRight, size: 14, color: KColors.textTertiary),
+            Icon(PhosphorIconsRegular.arrowBendUpRight, size: 14, color: KColors.textTertiary),
             const SizedBox(width: 4),
             Text('Forwarded', style: KText.paragraphSmall.copyWith(color: KColors.textTertiary, fontStyle: FontStyle.italic)),
           ]),
@@ -764,7 +764,7 @@ class MessageBubble extends StatelessWidget {
           child: Container(
             margin: const EdgeInsets.only(bottom: 6),
             padding: const EdgeInsets.fromLTRB(8, 6, 8, 6),
-            decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(8), border: const Border(left: BorderSide(color: KColors.brand, width: 3))),
+            decoration: BoxDecoration(color: KColors.textPrimary.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(8), border: Border(left: BorderSide(color: KColors.brand, width: 3))),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(m['replyTo']['sender'] ?? '', style: KText.paragraphMediumSmall.copyWith(fontSize: 11)),
               Text(m['replyTo']['preview'] ?? '', maxLines: 2, overflow: TextOverflow.ellipsis, style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
@@ -823,7 +823,7 @@ class MessageBubble extends StatelessWidget {
                     onTap: onReactions,
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(KRadius.pill), border: Border.all(color: KColors.borderDefault)),
+                      decoration: BoxDecoration(color: KColors.surfaceDefault, borderRadius: BorderRadius.circular(KRadius.pill), border: Border.all(color: KColors.borderDefault)),
                       child: Text(reactions.map((r) => r['count'] > 1 ? '${r['emoji']} ${r['count']}' : r['emoji']).join(' '), style: const TextStyle(fontSize: 13)),
                     ),
                   ),
@@ -890,7 +890,7 @@ class _LinkCard extends StatelessWidget {
         onTap: () => launchUrl(Uri.parse(l['url']), mode: LaunchMode.externalApplication),
         child: Container(
           clipBehavior: Clip.antiAlias,
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10)),
+          decoration: BoxDecoration(color: KColors.surfaceDefault, borderRadius: BorderRadius.circular(10)),
           child: Row(children: [
             if (l['image'] != null) Image.network(l['image'], width: 64, height: 64, fit: BoxFit.cover, errorBuilder: (_, _, _) => const SizedBox(width: 0)),
             Expanded(
@@ -1123,7 +1123,7 @@ class _ComposerState extends State<Composer> with Busy {
     return SafeArea(
       top: false,
       child: Container(
-        decoration: const BoxDecoration(border: Border(top: BorderSide(color: KColors.borderDefault))),
+        decoration: BoxDecoration(border: Border(top: BorderSide(color: KColors.borderDefault))),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           if (reply != null)
             Container(
@@ -1167,8 +1167,8 @@ class _ComposerState extends State<Composer> with Busy {
             padding: const EdgeInsets.fromLTRB(4, 8, 8, 8),
             child: _recording
                 ? Row(children: [
-                    IconButton(tooltip: 'Cancel voice message', icon: const Icon(PhosphorIconsRegular.trash, color: KColors.error), onPressed: () => _stopVoice(send: false)),
-                    const Icon(PhosphorIconsFill.circle, color: KColors.error, size: 14),
+                    IconButton(tooltip: 'Cancel voice message', icon: Icon(PhosphorIconsRegular.trash, color: KColors.error), onPressed: () => _stopVoice(send: false)),
+                    Icon(PhosphorIconsFill.circle, color: KColors.error, size: 14),
                     const SizedBox(width: 6),
                     Text('${elapsed.inMinutes}:${(elapsed.inSeconds % 60).toString().padLeft(2, '0')}', style: KText.paragraphLarge),
                     const SizedBox(width: 8),

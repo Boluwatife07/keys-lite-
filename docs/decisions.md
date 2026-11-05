@@ -17,6 +17,8 @@ Answers from Dorcas (5 Nov 2026) and defaults chosen where the sheet says
 | AVW-Q1: Stripe pass rule | Engineering's choice: postcode **and** first address line must pass | `backend/src/services/addressCheck.ts` |
 | Admin Panel manual review | Not in this build. The resident can still submit a document and sees "under review"; the decision function exists for the Admin Panel to call | `backend/src/modules/verification/service.ts` |
 | ONB-Q1: resident counts on onboarding cards | Shown only above 500 residents (501+), on matches, similar developments and the building list | `countsVisible` in `backend/src/modules/onboarding/communities.ts` |
+| PRF-Q1: dark mode | Phase 1 (Dorcas). Settings > Display has Light mode, Dark mode and Use device default settings; exactly one is on, Light is the default, the choice is saved on the device. Dark colours are the design system's own Dark Mode values (see `docs/design-tokens.md`) | `app/lib/theme/` |
+| Icons | Phosphor (Regular, Fill, Bold) as named in Figma; fonts bundled because `phosphor_flutter` no longer builds | `app/lib/theme/phosphor.dart` |
 | Legal documents | Placeholder links | `TERMS_URL`, `PRIVACY_URL`, `SAFETY_URL` |
 
 ## Defaults chosen (please confirm)

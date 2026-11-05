@@ -37,7 +37,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       backgroundColor: KColors.brand,
       body: SafeArea(
         child: SizedBox(width: double.infinity, child: Column(children: [
@@ -161,7 +161,7 @@ class ChooseAccountScreen extends StatelessWidget {
                     Text(body, style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
                   ]),
                 ),
-                const Icon(PhosphorIconsRegular.caretRight, color: KColors.textSecondary),
+                Icon(PhosphorIconsRegular.caretRight, color: KColors.textSecondary),
               ]),
             ),
           ),

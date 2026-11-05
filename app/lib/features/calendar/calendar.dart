@@ -149,7 +149,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             color: sel ? KColors.surfaceInverted : null,
                             border: isToday && !sel ? Border.all(color: KColors.surfaceInverted) : null,
                           ),
-                          child: Text('$d', style: KText.paragraphMedium.copyWith(color: sel ? Colors.white : null, fontWeight: isToday ? FontWeight.w600 : null)),
+                          child: Text('$d', style: KText.paragraphMedium.copyWith(color: sel ? KColors.textInverse : null, fontWeight: isToday ? FontWeight.w600 : null)),
                         ),
                         const SizedBox(height: 2),
                         // CAL-03.1: up to 4 markers per day.
@@ -216,7 +216,7 @@ class CalendarCard extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(color: KColors.brand, borderRadius: BorderRadius.circular(4)),
-                            child: Text('today', style: KText.paragraphMediumSmall.copyWith(fontSize: 11)),
+                            child: Text('today', style: KText.paragraphMediumSmall.copyWith(fontSize: 11, color: KColors.staticBlack)),
                           ),
                       ]),
                       const SizedBox(height: 2),

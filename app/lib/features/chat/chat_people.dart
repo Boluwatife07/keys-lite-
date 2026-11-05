@@ -95,7 +95,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
       body: Column(children: [
         Padding(padding: const EdgeInsets.fromLTRB(16, 4, 16, 8), child: SearchField(controller: _q, hint: 'Search residents')),
         ListTile(
-          leading: const CircleAvatar(radius: 22, backgroundColor: KColors.brand, child: Icon(PhosphorIconsRegular.usersThree, color: KColors.textPrimary)),
+          leading: CircleAvatar(radius: 22, backgroundColor: KColors.brand, child: Icon(PhosphorIconsRegular.usersThree, color: KColors.staticBlack)),
           title: Text('New group', style: KText.paragraphMediumLarge),
           onTap: () => context.push('/chats/new/group'),
         ),
@@ -303,7 +303,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with Busy {
                 radius: 44,
                 backgroundColor: KColors.surfaceSubtle,
                 backgroundImage: _icon == null ? null : MemoryImage(_icon!.bytes),
-                child: _icon == null ? const Icon(PhosphorIconsRegular.camera, color: KColors.textSecondary) : null,
+                child: _icon == null ? Icon(PhosphorIconsRegular.camera, color: KColors.textSecondary) : null,
               ),
             ),
           ),

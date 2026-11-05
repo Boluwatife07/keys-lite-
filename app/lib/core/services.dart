@@ -139,6 +139,9 @@ abstract class LocalStore {
   Future<void> writeToken(String? token);
   Future<bool> carouselSeen();
   Future<void> setCarouselSeen();
+  /// Display theme (PRF Display): 'light', 'dark' or 'system'.
+  Future<String?> readTheme();
+  Future<void> writeTheme(String value);
 }
 
 class DeviceStore implements LocalStore {
@@ -151,6 +154,10 @@ class DeviceStore implements LocalStore {
   Future<bool> carouselSeen() async => (await SharedPreferences.getInstance()).getBool('carouselSeen') ?? false;
   @override
   Future<void> setCarouselSeen() async => (await SharedPreferences.getInstance()).setBool('carouselSeen', true);
+  @override
+  Future<String?> readTheme() async => (await SharedPreferences.getInstance()).getString('theme');
+  @override
+  Future<void> writeTheme(String value) async => (await SharedPreferences.getInstance()).setString('theme', value);
 }
 
 class MemoryStore implements LocalStore {
@@ -164,6 +171,11 @@ class MemoryStore implements LocalStore {
   Future<bool> carouselSeen() async => seen;
   @override
   Future<void> setCarouselSeen() async => seen = true;
+  String? theme;
+  @override
+  Future<String?> readTheme() async => theme;
+  @override
+  Future<void> writeTheme(String value) async => theme = value;
 }
 
 bool get isIOS => defaultTargetPlatform == TargetPlatform.iOS;

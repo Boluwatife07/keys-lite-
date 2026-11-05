@@ -82,12 +82,12 @@ class _EmailScreenState extends State<EmailScreen> with Busy {
         KeysButton('Continue', loading: busy, onPressed: _email.text.trim().isEmpty ? null : _continue),
         const SizedBox(height: 32),
         Row(children: [
-          const Expanded(child: Divider(color: KColors.borderDefault)),
+          Expanded(child: Divider(color: KColors.borderDefault)),
           Padding(padding: const EdgeInsets.symmetric(horizontal: 12), child: Text('or', style: KText.paragraphMediumSmall)),
-          const Expanded(child: Divider(color: KColors.borderDefault)),
+          Expanded(child: Divider(color: KColors.borderDefault)),
         ]),
         const SizedBox(height: 32),
-        KeysButton('Continue with Apple', variant: ButtonVariant.outline, icon: const Icon(PhosphorIconsFill.appleLogo, size: 24, color: KColors.textPrimary), onPressed: busy ? null : () => _social(SocialProvider.apple)),
+        KeysButton('Continue with Apple', variant: ButtonVariant.outline, icon: Icon(PhosphorIconsFill.appleLogo, size: 24, color: KColors.textPrimary), onPressed: busy ? null : () => _social(SocialProvider.apple)),
         const SizedBox(height: 16),
         KeysButton('Continue with Google', variant: ButtonVariant.outline, icon: const GoogleMark(), onPressed: busy ? null : () => _social(SocialProvider.google)),
         const SizedBox(height: 32),
@@ -114,7 +114,7 @@ class _LogoNav extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         height: 60,
         alignment: Alignment.center,
-        decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: KColors.borderDefault))),
+        decoration: BoxDecoration(border: Border(bottom: BorderSide(color: KColors.borderDefault))),
         child: const KeysLogo(height: 28),
       );
 }
@@ -412,7 +412,7 @@ class PasswordResetDoneScreen extends StatelessWidget {
   Widget build(BuildContext context) => KeysScaffold(
         body: Column(children: [
           const SizedBox(height: 120),
-          const CircleAvatar(radius: 36, backgroundColor: KColors.success, child: Icon(PhosphorIconsRegular.check, color: Colors.white, size: 40)),
+          CircleAvatar(radius: 36, backgroundColor: KColors.success, child: Icon(PhosphorIconsRegular.check, color: Colors.white, size: 40)),
           const SizedBox(height: 24),
           const Intro(center: true, title: 'Password reset', body: 'Your password has been changed. For your security, you have been signed out on all devices.'),
         ]),

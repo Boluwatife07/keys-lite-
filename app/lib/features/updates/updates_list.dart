@@ -138,7 +138,7 @@ class UpdatesTabState extends State<UpdatesTab> {
             heroTag: 'update-fab',
             tooltip: 'Create update',
             backgroundColor: KColors.brand,
-            foregroundColor: KColors.textPrimary,
+            foregroundColor: KColors.staticBlack,
             shape: const CircleBorder(),
             onPressed: _create,
             child: const Icon(PhosphorIconsRegular.plus, size: 28),
@@ -165,14 +165,14 @@ class SearchField extends StatelessWidget {
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: KText.paragraphLarge.copyWith(color: KColors.textTertiary),
-          prefixIcon: const Icon(PhosphorIconsRegular.magnifyingGlass, color: KColors.textPrimary),
+          prefixIcon: Icon(PhosphorIconsRegular.magnifyingGlass, color: KColors.textPrimary),
           suffixIcon: controller.text.isEmpty ? null : IconButton(tooltip: 'Clear search', icon: const Icon(PhosphorIconsRegular.x, size: 20), onPressed: controller.clear),
           filled: true,
           fillColor: KColors.surfaceSubtle,
           contentPadding: const EdgeInsets.symmetric(vertical: 12),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(KRadius.pill), borderSide: BorderSide.none),
           enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(KRadius.pill), borderSide: BorderSide.none),
-          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(KRadius.pill), borderSide: const BorderSide(color: KColors.borderStrong)),
+          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(KRadius.pill), borderSide: BorderSide(color: KColors.borderStrong)),
         ),
       );
 }
@@ -193,7 +193,7 @@ class UpdateCard extends StatelessWidget {
       label: u.title,
       child: Material(
         color: fresh ? KColors.brandSubtle : KColors.surfaceDefault,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(KRadius.md), side: BorderSide(color: fresh ? const Color(0xFFFFEDB0) : KColors.borderDefault)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(KRadius.md), side: BorderSide(color: fresh ? KColors.warningSubtle : KColors.borderDefault)),
         child: InkWell(
           borderRadius: BorderRadius.circular(KRadius.md),
           onTap: onTap,
@@ -226,7 +226,7 @@ class UpdateCard extends StatelessWidget {
                 if (u.resolved) ...[
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(color: const Color(0xFFE6F6EA), borderRadius: BorderRadius.circular(KRadius.pill)),
+                    decoration: BoxDecoration(color: KColors.successSubtle, borderRadius: BorderRadius.circular(KRadius.pill)),
                     child: Text('Resolved', style: KText.paragraphMediumSmall.copyWith(color: KColors.success)),
                   ),
                   const SizedBox(width: 8),

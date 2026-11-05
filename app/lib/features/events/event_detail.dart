@@ -87,7 +87,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
           child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
             child: Column(mainAxisSize: MainAxisSize.min, children: [
-              const CircleAvatar(radius: 32, backgroundColor: Color(0xFFE6F6EA), child: Icon(PhosphorIconsRegular.ticket, size: 32, color: KColors.success)),
+              CircleAvatar(radius: 32, backgroundColor: KColors.successSubtle, child: Icon(PhosphorIconsRegular.ticket, size: 32, color: KColors.success)),
               const SizedBox(height: 12),
               Text(r['title'] ?? "You're going", style: KText.headingSmall),
               const SizedBox(height: 8),
@@ -187,7 +187,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
           Padding(padding: const EdgeInsets.fromLTRB(20, 0, 20, 8), child: Text('Hosts', style: KText.headingSmall)),
           for (final h in hosts)
             ListTile(
-              leading: h['external'] == true ? const CircleAvatar(backgroundColor: KColors.surfaceSubtle, child: Icon(PhosphorIconsRegular.buildings)) : Avatar(h['person']?['photoUrl'], size: 40),
+              leading: h['external'] == true ? CircleAvatar(backgroundColor: KColors.surfaceSubtle, child: Icon(PhosphorIconsRegular.buildings)) : Avatar(h['person']?['photoUrl'], size: 40),
               title: Text(h['name']),
               subtitle: Text(h['external'] == true ? 'External • This co-host is not on Keys.' : '${h['role']}${h['status'] == 'invited' ? ' (invited)' : ''}'),
               onTap: h['person'] == null ? null : () {
@@ -258,7 +258,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     final hostNames = hosts.take(2).map((h) => h['name'] as String).toList();
 
     Widget section(String title, Widget child, {String? action, VoidCallback? onAction}) => Container(
-          decoration: const BoxDecoration(border: Border(top: BorderSide(color: KColors.surfaceSubtle, width: 6))),
+          decoration: BoxDecoration(border: Border(top: BorderSide(color: KColors.surfaceSubtle, width: 6))),
           padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(children: [
@@ -286,7 +286,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               heroTag: 'scan',
               tooltip: 'QR Scan',
               backgroundColor: KColors.brand,
-              foregroundColor: KColors.textPrimary,
+              foregroundColor: KColors.staticBlack,
               shape: const CircleBorder(),
               onPressed: () => context.push('/events/${widget.id}/scan'),
               child: const Icon(PhosphorIconsRegular.scan),
@@ -332,7 +332,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
           if (status != 'live')
             Container(
               width: double.infinity,
-              color: status == 'cancelled' ? const Color(0xFFFDECEA) : status == 'draft' ? KColors.brandSubtle : const Color(0xFFE6F6EA),
+              color: status == 'cancelled' ? KColors.errorSubtle : status == 'draft' ? KColors.brandSubtle : KColors.successSubtle,
               padding: const EdgeInsets.all(12),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text(switch (status) { 'cancelled' => 'Cancelled', 'draft' => 'Draft: only you and your co-hosts can see this', _ => 'Completed' },
@@ -568,7 +568,7 @@ class _CohostInvite extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(color: KColors.brandSubtle, borderRadius: BorderRadius.circular(KRadius.md), border: Border.all(color: const Color(0xFFFFEDB0))),
+      decoration: BoxDecoration(color: KColors.brandSubtle, borderRadius: BorderRadius.circular(KRadius.md), border: Border.all(color: KColors.warningSubtle)),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text('You have been added as a co-host!', style: KText.paragraphMediumLarge),
         const SizedBox(height: 4),
@@ -808,14 +808,14 @@ class _TicketScreenState extends State<TicketScreen> {
           : ListView(padding: const EdgeInsets.all(20), children: [
               Container(
                 padding: const EdgeInsets.all(18),
-                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(KRadius.lg), border: Border.all(color: KColors.borderDefault)),
+                decoration: BoxDecoration(color: KColors.surfaceDefault, borderRadius: BorderRadius.circular(KRadius.lg), border: Border.all(color: KColors.borderDefault)),
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   if (!active)
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(12),
                       margin: const EdgeInsets.only(bottom: 12),
-                      decoration: BoxDecoration(color: const Color(0xFFFDECEA), borderRadius: BorderRadius.circular(KRadius.sm)),
+                      decoration: BoxDecoration(color: KColors.errorSubtle, borderRadius: BorderRadius.circular(KRadius.sm)),
                       child: Column(children: [
                         Text(t['status'] == 'void' ? 'EVENT CANCELLED' : 'TICKET CANCELLED', style: KText.paragraphMediumLarge.copyWith(color: KColors.error)),
                         Text(t['status'] == 'void' ? 'This event has been cancelled by the host.' : 'Your ticket has been cancelled.', style: KText.paragraphSmall.copyWith(color: KColors.error)),
@@ -849,7 +849,7 @@ class _TicketScreenState extends State<TicketScreen> {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                 child: Row(children: [
-                  Expanded(child: KeysButton('Download', icon: const Icon(PhosphorIconsRegular.downloadSimple, color: Colors.white, size: 18), onPressed: _download)),
+                  Expanded(child: KeysButton('Download', icon: Icon(PhosphorIconsRegular.downloadSimple, color: KColors.textInverse, size: 18), onPressed: _download)),
                   const SizedBox(width: 12),
                   Expanded(child: KeysButton('Share', variant: ButtonVariant.outline, onPressed: () => showShareSheet(context, t!['shareLink']))),
                 ]),

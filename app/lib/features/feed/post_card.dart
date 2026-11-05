@@ -105,7 +105,7 @@ class _PostCardState extends State<PostCard> {
             child: InkWell(
               onTap: () => context.push('/clubs/${p.club!['id']}'),
               child: Row(children: [
-                const Icon(PhosphorIconsRegular.usersThree, size: 16, color: KColors.textSecondary),
+                Icon(PhosphorIconsRegular.usersThree, size: 16, color: KColors.textSecondary),
                 const SizedBox(width: 6),
                 Flexible(child: Text(p.club!['name'] ?? '', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary), overflow: TextOverflow.ellipsis)),
               ]),
@@ -166,7 +166,7 @@ class _PostCardState extends State<PostCard> {
             ],
           ]),
         ),
-        const Divider(height: 16, indent: 16, endIndent: 16, color: KColors.borderDefault),
+        Divider(height: 16, indent: 16, endIndent: 16, color: KColors.borderDefault),
         Padding(
           padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
           child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
@@ -291,7 +291,7 @@ class _Attachment extends StatelessWidget {
             child: Row(children: [
               Container(
                 width: 44, height: 52, alignment: Alignment.center,
-                decoration: BoxDecoration(color: const Color(0xFFFDECEA), borderRadius: BorderRadius.circular(6)),
+                decoration: BoxDecoration(color: KColors.errorSubtle, borderRadius: BorderRadius.circular(6)),
                 child: Text(d['fileType'] ?? 'PDF', style: KText.paragraphMediumSmall.copyWith(color: KColors.error)),
               ),
               const SizedBox(width: 12),

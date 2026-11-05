@@ -5,12 +5,15 @@ import '../../core/api.dart';
 import '../../core/config.dart';
 import '../../core/feed_models.dart';
 import '../../core/scope.dart';
+import '../../theme/theme_controller.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/widgets.dart';
 import '../auth/auth_screens.dart' show openLegal;
 import '../feed/feed_screens.dart' show EmptyState;
 import '../feed/social.dart';
 
+/// Figma "Menu item": 28px icon, title Paragraph/Regular/Large, subtitle
+/// Paragraph/Regular/Small, 24px CaretRight (or 28px ArrowUpRight for links).
 class _Row extends StatelessWidget {
   const _Row(this.icon, this.title, this.subtitle, this.onTap, {this.external = false});
   final IconData? icon;
@@ -19,32 +22,92 @@ class _Row extends StatelessWidget {
   final VoidCallback onTap;
   final bool external;
   @override
-  Widget build(BuildContext context) => ListTile(
-        leading: icon == null ? null : Icon(icon, color: KColors.textPrimary),
-        title: Text(title, style: KText.paragraphMediumLarge),
-        subtitle: subtitle == null ? null : Text(subtitle!, style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
-        trailing: Icon(external ? PhosphorIconsRegular.arrowUpRight : PhosphorIconsRegular.caretRight),
+  Widget build(BuildContext context) => InkWell(
         onTap: onTap,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 72),
+          child: Row(children: [
+            if (icon != null) Padding(padding: const EdgeInsets.only(right: 16), child: Icon(icon, size: 28, color: KColors.iconDefault)),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(title, style: KText.paragraphLarge),
+                  if (subtitle != null) ...[const SizedBox(height: 2), Text(subtitle!, style: KText.paragraphSmall.copyWith(color: KColors.textSecondary))],
+                ]),
+              ),
+            ),
+            const SizedBox(width: 8),
+            external
+                ? Icon(PhosphorIconsRegular.arrowUpRight, size: 28, color: KColors.iconDisabled)
+                : SizedBox(height: 48, child: Icon(PhosphorIconsRegular.caretRight, size: 24, color: KColors.iconMuted)),
+          ]),
+        ),
       );
 }
 
+/// Settings pages: Page Header with a 0.5px border-subtle line, rows 16 from
+/// the sides, 8 from the top and 4 apart.
 Scaffold _page(String title, List<Widget> children) => Scaffold(
       backgroundColor: KColors.surfaceDefault,
-      appBar: AppBar(backgroundColor: KColors.surfaceDefault, surfaceTintColor: Colors.transparent, title: Text(title, style: KText.headingXSmall)),
-      body: ListView(children: children),
+      appBar: PageHeader(title, bottomBorder: true),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
+        children: [for (final (i, c) in children.indexed) ...[if (i > 0) const SizedBox(height: 4), c]],
+      ),
     );
 
-/// PRF-12: Phase 1 rows only. Address book, payment methods, security,
-/// language and display (dark mode open) are hidden.
+/// PRF-12: Phase 1 rows. Address book, payment methods, security and
+/// language are later phase and hidden.
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
   @override
   Widget build(BuildContext context) => _page('Settings', [
         _Row(PhosphorIconsRegular.user, 'Your account', 'View all relevant information on your account', () => context.push('/settings/account')),
-        _Row(PhosphorIconsRegular.bell, 'Notification', 'Choose your desired preferences about your activities, interests etc', () => context.push('/settings/notifications')),
-        _Row(PhosphorIconsRegular.folderUser, 'Privacy and Safety', 'Manage what information you see and share', () => context.push('/settings/privacy')),
+        _Row(PhosphorIconsRegular.bellSimple, 'Notification', 'Choose your desired preferences about your activities, interests etc', () => context.push('/settings/notifications')),
+        _Row(PhosphorIconsRegular.folderSimpleLock, 'Privacy and Safety', 'Manage what information you see and share', () => context.push('/settings/privacy')),
+        _Row(PhosphorIconsRegular.monitor, 'Display', 'Manage your app theme here', () => context.push('/settings/display')),
         _Row(null, 'Terms & Conditions', 'English (UK)', () => openLegal(AppConfig.termsUrl), external: true),
       ]);
+}
+
+/// Settings > Display (frames 1239:180529 / 1239:180538). Exactly one switch
+/// is on; tapping the one that is on keeps it on.
+class DisplayScreen extends StatelessWidget {
+  const DisplayScreen({super.key});
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.deps.theme;
+    return ListenableBuilder(
+      listenable: theme,
+      builder: (context, _) {
+        Widget row(IconData? icon, String label, ThemeChoice c) => Semantics(
+              toggled: theme.choice == c,
+              label: label,
+              child: InkWell(
+                onTap: () => theme.set(c),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 72),
+                  child: Row(children: [
+                    if (icon != null) Padding(padding: const EdgeInsets.only(right: 16), child: Icon(icon, size: 28, color: KColors.iconDefault)),
+                    Expanded(child: ExcludeSemantics(child: Text(label, style: KText.paragraphLarge))),
+                    Padding(padding: const EdgeInsets.only(left: 6, right: 8), child: KSwitch(value: theme.choice == c, onChanged: (_) => theme.set(c))),
+                  ]),
+                ),
+              ),
+            );
+        return Scaffold(
+          backgroundColor: KColors.surfaceDefault,
+          appBar: const PageHeader('Display', bottomBorder: true),
+          body: ListView(padding: const EdgeInsets.fromLTRB(16, 12, 16, 20), children: [
+            row(PhosphorIconsRegular.moon, 'Light mode', ThemeChoice.light),
+            row(PhosphorIconsFill.moon, 'Dark mode', ThemeChoice.dark),
+            row(null, 'Use device default settings', ThemeChoice.system),
+          ]),
+        );
+      },
+    );
+  }
 }
 
 class AccountScreen extends StatelessWidget {
@@ -60,7 +123,7 @@ class AccountScreen extends StatelessWidget {
           : _Row(PhosphorIconsRegular.lock, 'Create password', 'Keep access to your account secured', () => context.push('/settings/password/create')),
       _Row(PhosphorIconsRegular.userCircleMinus, 'Deactivate account', null, () => context.push('/settings/deactivate')),
       ListTile(
-        leading: const Icon(PhosphorIconsRegular.signOut, color: KColors.error),
+        leading: Icon(PhosphorIconsRegular.signOut, color: KColors.error),
         title: Text('Log out', style: KText.paragraphMediumLarge.copyWith(color: KColors.error)),
         onTap: () async {
           // PRF-17.1 (design copy "our account" corrected).

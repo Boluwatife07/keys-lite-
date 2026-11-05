@@ -121,9 +121,9 @@ class _UpdateDetailScreenState extends State<UpdateDetailScreen> {
         Container(
           margin: const EdgeInsets.only(bottom: 16),
           padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(color: const Color(0xFFE6F6EA), borderRadius: BorderRadius.circular(KRadius.md)),
+          decoration: BoxDecoration(color: KColors.successSubtle, borderRadius: BorderRadius.circular(KRadius.md)),
           child: Row(children: [
-            const Icon(PhosphorIconsFill.checkCircle, color: KColors.success, size: 20),
+            Icon(PhosphorIconsFill.checkCircle, color: KColors.success, size: 20),
             const SizedBox(width: 8),
             Expanded(child: Text('This update has been resolved', style: KText.paragraphMedium.copyWith(color: KColors.success))),
           ]),
@@ -144,7 +144,7 @@ class _UpdateDetailScreenState extends State<UpdateDetailScreen> {
           Stack(clipBehavior: Clip.none, children: [
             IconButton(tooltip: chat['joined'] == true ? 'Open group chat' : 'Join group chat', icon: const Icon(PhosphorIconsRegular.chatText), onPressed: _openChat),
             if (chat['joined'] != true && !u.resolved)
-              Positioned(right: 8, top: 8, child: Container(width: 9, height: 9, decoration: const BoxDecoration(color: KColors.error, shape: BoxShape.circle))),
+              Positioned(right: 8, top: 8, child: Container(width: 9, height: 9, decoration: BoxDecoration(color: KColors.error, shape: BoxShape.circle))),
           ]),
       ]),
       const SizedBox(height: 16),

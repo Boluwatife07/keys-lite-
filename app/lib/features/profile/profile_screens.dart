@@ -24,8 +24,8 @@ class _Meta extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = KText.paragraphSmall.copyWith(color: KColors.textSecondary);
     return Wrap(spacing: 16, runSpacing: 4, children: [
-      Row(mainAxisSize: MainAxisSize.min, children: [const Icon(PhosphorIconsRegular.buildings, size: 14, color: KColors.textSecondary), const SizedBox(width: 4), Text(community, style: s)]),
-      if (joinedAt != null) Row(mainAxisSize: MainAxisSize.min, children: [const Icon(PhosphorIconsRegular.calendarBlank, size: 13, color: KColors.textSecondary), const SizedBox(width: 4), Text(joined(joinedAt), style: s)]),
+      Row(mainAxisSize: MainAxisSize.min, children: [Icon(PhosphorIconsRegular.buildings, size: 14, color: KColors.textSecondary), const SizedBox(width: 4), Text(community, style: s)]),
+      if (joinedAt != null) Row(mainAxisSize: MainAxisSize.min, children: [Icon(PhosphorIconsRegular.calendarBlank, size: 13, color: KColors.textSecondary), const SizedBox(width: 4), Text(joined(joinedAt), style: s)]),
     ]);
   }
 }
@@ -114,7 +114,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(color: KColors.surfaceInverted, borderRadius: BorderRadius.circular(KRadius.pill)),
-                  child: Text('My post${_total == null ? '' : ' ($_total)'}', style: KText.paragraphMediumSmall.copyWith(color: Colors.white, fontSize: 13)),
+                  child: Text('My post${_total == null ? '' : ' ($_total)'}', style: KText.paragraphMediumSmall.copyWith(color: KColors.textInverse, fontSize: 13)),
                 ),
               ]),
             ),
@@ -355,7 +355,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   onTap: _photo,
                   child: Stack(children: [
                     Avatar(me.photoUrl, size: 116),
-                    const Positioned(right: 0, bottom: 4, child: CircleAvatar(radius: 16, backgroundColor: KColors.surfaceMuted, child: Icon(PhosphorIconsRegular.pencilSimple, size: 16, color: KColors.textPrimary))),
+                    Positioned(right: 0, bottom: 4, child: CircleAvatar(radius: 16, backgroundColor: KColors.surfaceMuted, child: Icon(PhosphorIconsRegular.pencilSimple, size: 16, color: KColors.textPrimary))),
                   ]),
                 ),
               ),
@@ -488,7 +488,7 @@ class _ChangeAddressScreenState extends State<ChangeAddressScreen> with Busy {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    const Padding(padding: EdgeInsets.only(top: 2), child: Icon(PhosphorIconsRegular.info, size: 18, color: KColors.textSecondary)),
+                    Padding(padding: EdgeInsets.only(top: 2), child: Icon(PhosphorIconsRegular.info, size: 18, color: KColors.textSecondary)),
                     const SizedBox(width: 10),
                     Expanded(child: Text(w['message'], style: KText.paragraphMedium)),
                   ]),

@@ -211,15 +211,15 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> with Busy {
                   radius: 60,
                   backgroundColor: KColors.surfaceSubtle,
                   backgroundImage: _photo == null ? null : MemoryImage(_photo!.bytes),
-                  child: _photo == null ? const Icon(PhosphorIconsRegular.user, size: 48, color: KColors.textTertiary) : null,
+                  child: _photo == null ? Icon(PhosphorIconsRegular.user, size: 48, color: KColors.textTertiary) : null,
                 ),
                 Positioned(
                   right: 0,
                   bottom: 0,
                   child: Container(
                     padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(color: KColors.surfaceInverted, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 2)),
-                    child: const Icon(PhosphorIconsRegular.camera, color: Colors.white, size: 18),
+                    decoration: BoxDecoration(color: KColors.surfaceInverted, shape: BoxShape.circle, border: Border.all(color: KColors.surfaceDefault, width: 2)),
+                    child: Icon(PhosphorIconsRegular.camera, color: KColors.textInverse, size: 18),
                   ),
                 ),
               ]),

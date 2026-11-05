@@ -169,7 +169,7 @@ class _HomeShellState extends State<HomeShell> {
                 key: keys.compose,
                 tooltip: 'Create post',
                 backgroundColor: KColors.brand,
-                foregroundColor: KColors.textPrimary,
+                foregroundColor: KColors.staticBlack,
                 shape: const CircleBorder(),
                 onPressed: _create,
                 child: const Icon(PhosphorIconsRegular.plus, size: 28),

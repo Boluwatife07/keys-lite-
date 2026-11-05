@@ -53,10 +53,10 @@ class EventDateBlock extends StatelessWidget {
       decoration: BoxDecoration(color: draft ? KColors.brand : KColors.selected, borderRadius: BorderRadius.circular(KRadius.sm)),
       alignment: Alignment.center,
       child: d == null
-          ? Icon(PhosphorIconsRegular.calendarPlus, color: draft ? KColors.textPrimary : Colors.white)
+          ? Icon(PhosphorIconsRegular.calendarPlus, color: draft ? KColors.staticBlack : Colors.white)
           : Column(mainAxisSize: MainAxisSize.min, children: [
-              Text('${d.day}', style: KText.headingXSmall.copyWith(color: draft ? KColors.textPrimary : Colors.white, height: 1.1)),
-              Text(DateFormat('MMM').format(d), style: KText.paragraphMediumSmall.copyWith(color: draft ? KColors.textPrimary : Colors.white)),
+              Text('${d.day}', style: KText.headingXSmall.copyWith(color: draft ? KColors.staticBlack : Colors.white, height: 1.1)),
+              Text(DateFormat('MMM').format(d), style: KText.paragraphMediumSmall.copyWith(color: draft ? KColors.staticBlack : Colors.white)),
             ]),
     );
   }
@@ -98,7 +98,7 @@ class EventCard extends StatelessWidget {
         width: width,
         child: Material(
           color: KColors.surfaceDefault,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(KRadius.md), side: const BorderSide(color: KColors.borderDefault)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(KRadius.md), side: BorderSide(color: KColors.borderDefault)),
           clipBehavior: Clip.antiAlias,
           child: InkWell(
             onTap: onTap ?? () => context.push('/events/${e.id}'),
@@ -108,7 +108,7 @@ class EventCard extends StatelessWidget {
                 width: double.infinity,
                 child: Stack(fit: StackFit.expand, children: [
                   cover == null
-                      ? Container(color: KColors.surfaceSubtle, child: const Icon(PhosphorIconsRegular.calendarDots, size: 40, color: KColors.textTertiary))
+                      ? Container(color: KColors.surfaceSubtle, child: Icon(PhosphorIconsRegular.calendarDots, size: 40, color: KColors.textTertiary))
                       : Image.network(context.api.absolute(cover), fit: BoxFit.cover, errorBuilder: (_, _, _) => Container(color: KColors.surfaceSubtle)),
                   Positioned(left: 8, top: 8, child: EventDateBlock(e.startAt, draft: e.isDraft)),
                   if (e.status == 'cancelled' || e.soldOut)

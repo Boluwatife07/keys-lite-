@@ -60,7 +60,7 @@ class KeysHeader extends StatelessWidget {
                 IconButton(
                   key: const Key('back'),
                   tooltip: 'Back',
-                  icon: const Icon(PhosphorIconsRegular.caretLeft, size: 30, color: KColors.iconDefault),
+                  icon: Icon(PhosphorIconsRegular.caretLeft, size: 30, color: KColors.iconDefault),
                   onPressed: onBack ?? () => Navigator.of(context).maybePop(),
                 ),
               const Spacer(),
@@ -77,8 +77,9 @@ class KeysHeader extends StatelessWidget {
 /// Figma "Page Header": 48 high, 16 side padding, 26px back caret, 16 gap,
 /// title Inter SemiBold 18 / -0.2.
 class PageHeader extends StatelessWidget implements PreferredSizeWidget {
-  const PageHeader(this.title, {super.key, this.actions = const [], this.onBack, this.showBack = true});
+  const PageHeader(this.title, {super.key, this.actions = const [], this.onBack, this.showBack = true, this.bottomBorder = false});
   final String title;
+  final bool bottomBorder;
   final List<Widget> actions;
   final VoidCallback? onBack;
   final bool showBack;
@@ -90,6 +91,7 @@ class PageHeader extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) => Material(
         color: KColors.surfaceDefault,
+        shape: bottomBorder ? Border(bottom: BorderSide(color: KColors.borderSubtle, width: 0.5)) : null,
         child: SafeArea(
           bottom: false,
           child: SizedBox(
@@ -105,7 +107,7 @@ class PageHeader extends StatelessWidget implements PreferredSizeWidget {
                       key: const Key('back'),
                       radius: 22,
                       onTap: onBack ?? () => Navigator.of(context).maybePop(),
-                      child: const Icon(PhosphorIconsRegular.caretLeft, size: 26, color: KColors.iconDefault),
+                      child: Icon(PhosphorIconsRegular.caretLeft, size: 26, color: KColors.iconDefault),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -363,7 +365,7 @@ class ErrorLine extends StatelessWidget {
   Widget build(BuildContext context) => Semantics(
         liveRegion: true,
         child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Padding(padding: EdgeInsets.only(top: 1), child: Icon(PhosphorIconsRegular.warningCircle, size: 16, color: KColors.error)),
+          Padding(padding: EdgeInsets.only(top: 1), child: Icon(PhosphorIconsRegular.warningCircle, size: 16, color: KColors.error)),
           const SizedBox(width: 6),
           Expanded(child: Text(text, style: KText.paragraphSmall.copyWith(color: KColors.error, fontSize: 13, height: 18 / 13))),
         ]),
@@ -511,7 +513,7 @@ class CircleImage extends StatelessWidget {
             child: Container(
               width: size * 0.43,
               height: size * 0.43,
-              decoration: const BoxDecoration(color: KColors.surfaceDefault, shape: BoxShape.circle),
+              decoration: BoxDecoration(color: KColors.surfaceDefault, shape: BoxShape.circle),
               padding: EdgeInsets.all(size * 0.04),
               child: Container(
                 decoration: BoxDecoration(color: badge == MarkBadge.check ? KColors.success : KColors.error, shape: BoxShape.circle),
@@ -675,4 +677,46 @@ mixin Busy<T extends StatefulWidget> on State<T> {
       if (mounted) setState(() => busy = false);
     }
   }
+}
+
+
+/// Figma iOS "Switch": 60x36 here (track #E8E8E8 off, surface-inverted on),
+/// white knob with the design's two shadows.
+class KSwitch extends StatelessWidget {
+  const KSwitch({super.key, required this.value, required this.onChanged});
+  final bool value;
+  final ValueChanged<bool>? onChanged;
+  @override
+  Widget build(BuildContext context) => Semantics(
+        toggled: value,
+        enabled: onChanged != null,
+        child: GestureDetector(
+          onTap: onChanged == null ? null : () => onChanged!(!value),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            width: 60,
+            height: 36,
+            padding: const EdgeInsets.all(3),
+            decoration: BoxDecoration(color: value ? KColors.surfaceInverted : KColors.surfaceMuted, borderRadius: BorderRadius.circular(18)),
+            child: AnimatedAlign(
+              duration: const Duration(milliseconds: 180),
+              curve: Curves.easeOut,
+              alignment: value ? Alignment.centerRight : Alignment.centerLeft,
+              child: Container(
+                width: 30,
+                height: 30,
+                decoration: BoxDecoration(
+                  color: KColors.isDark && value ? KColors.staticBlack : KColors.staticWhite,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: const Color(0x33171717), width: 0.5),
+                  boxShadow: const [
+                    BoxShadow(color: Color(0x26000000), offset: Offset(0, 3), blurRadius: 8),
+                    BoxShadow(color: Color(0x29000000), offset: Offset(0, 1), blurRadius: 1),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
 }

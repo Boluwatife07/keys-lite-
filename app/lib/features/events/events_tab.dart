@@ -107,7 +107,7 @@ class _EventsTabState extends State<EventsTab> with SingleTickerProviderStateMix
             heroTag: 'event-fab',
             tooltip: 'Create event',
             backgroundColor: KColors.brand,
-            foregroundColor: KColors.textPrimary,
+            foregroundColor: KColors.staticBlack,
             shape: const CircleBorder(),
             onPressed: () async {
               await startEvent(context);
@@ -215,7 +215,7 @@ class _DiscoverState extends State<_Discover> {
                     width: 76,
                     child: ExcludeSemantics(
                       child: Column(children: [
-                        CircleAvatar(radius: 22, backgroundColor: _tag == t ? KColors.brand : KColors.surfaceSubtle, child: Icon(kTagIcons[t] ?? PhosphorIconsRegular.tag, color: KColors.textPrimary)),
+                        CircleAvatar(radius: 22, backgroundColor: _tag == t ? KColors.brand : KColors.surfaceSubtle, child: Icon(kTagIcons[t] ?? PhosphorIconsRegular.tag, color: _tag == t ? KColors.staticBlack : KColors.textPrimary)),
                         const SizedBox(height: 6),
                         Text(t, style: KText.paragraphSmall, maxLines: 1, overflow: TextOverflow.ellipsis),
                       ]),
@@ -230,7 +230,7 @@ class _DiscoverState extends State<_Discover> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
             child: Column(children: [
-              const CircleAvatar(radius: 56, backgroundColor: KColors.surfaceSubtle, child: Icon(PhosphorIconsRegular.calendarDots, size: 48, color: KColors.textPrimary)),
+              CircleAvatar(radius: 56, backgroundColor: KColors.surfaceSubtle, child: Icon(PhosphorIconsRegular.calendarDots, size: 48, color: KColors.textPrimary)),
               const SizedBox(height: 16),
               Text('No events yet', style: KText.headingXSmall),
               const SizedBox(height: 6),
@@ -275,7 +275,7 @@ class TemplateCard extends StatelessWidget {
         width: width,
         child: Container(
           clipBehavior: Clip.antiAlias,
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(KRadius.md), border: Border.all(color: KColors.borderDefault), color: Colors.white),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(KRadius.md), border: Border.all(color: KColors.borderDefault), color: KColors.surfaceDefault),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             if (t['image'] != null) Image.asset('assets/images/${t['image']}', height: 110, width: double.infinity, fit: BoxFit.cover),
             Padding(
