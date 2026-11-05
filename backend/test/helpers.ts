@@ -91,3 +91,32 @@ export async function pioneerStreet(email: string, address: string) {
   await finishProfile(token);
   return { token, community: s.body.community };
 }
+
+/** A resident who joins an existing community on the street of [address]. */
+export async function joinStreet(email: string, address: string, first = 'Ben', last = 'Ade') {
+  const token = await signUp(email, first, last);
+  const r = await call('POST', '/onboarding/address', { token, body: { placeId: await placeId(token, address) } });
+  await call('POST', '/onboarding/join', { token, body: { communityId: r.body.match.communities[0].id } });
+  await call('POST', '/onboarding/home-type', { token, body: { type: 'house' } });
+  await finishProfile(token);
+  return token;
+}
+
+export async function me(token: string) {
+  return (await call('GET', '/me', { token })).body;
+}
+
+export async function verify(token: string) {
+  await call('POST', '/verification/check', { token, body: { method: 'card', paymentMethodId: 'pm_mock_pass_visa_4242' } });
+}
+
+/** Seat a resident on the committee board directly (board API arrives in milestone 3). */
+export async function seat(token: string, role = 'Chair', kind: 'preset' | 'extra' | 'champion' = 'preset') {
+  const m = await me(token);
+  const { one } = await import('../src/db/pool.js');
+  const b = (await one<{ id: string }>(
+    `insert into boards(community_id) values ($1) on conflict (community_id) do update set community_id = excluded.community_id returning id`, [m.community.id],
+  ))!;
+  const pos = (await one<{ n: number }>('select count(*)::int as n from board_seats where board_id = $1', [b.id]))!.n;
+  await one(`insert into board_seats(board_id, kind, role, position, occupant_id, occupied_at) values ($1,$2,$3,$4,$5,now())`, [b.id, kind, role, pos, m.id]);
+}

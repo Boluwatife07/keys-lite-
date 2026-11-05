@@ -5,6 +5,7 @@ export type EmailTemplate =
   | 'signup_code'
   | 'reset_code'
   | 'change_email_code'
+  | 'create_password_code'
   | 'verification_approved'
   | 'verification_rejected';
 
@@ -12,6 +13,7 @@ const subjects: Record<EmailTemplate, string> = {
   signup_code: 'Your Keys verification code',
   reset_code: 'Reset your Keys password',
   change_email_code: 'Confirm your new email address',
+  create_password_code: 'Your Keys verification code',
   verification_approved: 'Your address is verified',
   verification_rejected: 'We could not verify your address',
 };
@@ -20,6 +22,7 @@ function body(t: EmailTemplate, d: Record<string, unknown>): string {
   switch (t) {
     case 'signup_code':
     case 'change_email_code':
+    case 'create_password_code':
       return `Your Keys verification code is ${d.code}. It expires in 60 seconds.`;
     case 'reset_code':
       return `Your Keys password reset code is ${d.code}. It expires in 60 seconds.`;

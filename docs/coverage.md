@@ -49,3 +49,37 @@ noted.
 | XFR-03 | One report list, Other needs text | `verification_media.test` | | API done; report forms come with each feature |
 | XFR-06 / 07 / 08 | English only, km, legal placeholders | | | Done |
 | XFR-09 | Analytics events | | | Waiting for the event list (XFR-Q3) |
+
+## Milestone 2 (backend done, screens next)
+
+| Rows | Behaviour | API test | Status |
+| --- | --- | --- | --- |
+| PRF-01 / 02 / 19 | My profile, other profiles, My posts | `profile.test`, `feed.test` | API done |
+| PRF-03 | Share profile, outsiders get not-available | `profile.test` | API done |
+| PRF-04 | Mute 30 days, auto-ends, list, unmute | `profile.test` | API done |
+| PRF-05 | Block two-way, unblock, list | `profile.test` | API done |
+| PRF-06 | Report a resident | `profile.test` | API done |
+| PRF-07 - 09 | Edit profile, photo (replace only), bio 160 | `profile.test` | API done |
+| PRF-10 | Change email (password, code to new email, in use) | `profile.test` | API done |
+| PRF-11 | Change home address with exit check, re-onboard | `profile.test` | API done |
+| PRF-12 | Settings menu | | App only |
+| PRF-13 | Blocked and muted lists | `profile.test` | API done |
+| PRF-14 | Notification toggles, newsletter off | `profile.test` | API done (final list from Notifications task) |
+| PRF-15 / 16 | Change password, create password for social accounts | `profile.test` | API done |
+| PRF-17 | Log out, push token removed | `profile.test` | API done |
+| PRF-18 | Deactivate, 7-day rule, exit check, 30-day deletion | `profile.test`, `auth.test` | API done |
+| FED-01 | Feed, newest first, pages of 20, muted/blocked hidden | `feed.test`, `profile.test` | API done |
+| FED-02 - 05 | Compose: 200 chars, one attachment type, 10 photos, video, document with title, link preview | `feed.test` | API done |
+| FED-03 | @ tags, suggestions, notifications | `feed.test`, `profile.test` | API done |
+| FED-08 / 10 | Full view, deleted and removed states | `feed.test` | API done |
+| FED-11 | Likes and likes list | `feed.test` | API done |
+| FED-12 - 14 | Comments, replies (one level), edit, delete placeholder | `feed.test` | API done |
+| FED-15 / 17 | Copy, report, mute, block from posts and comments | `profile.test` (shared endpoints) | API done |
+| FED-16 | Share post, non-members get not-available | `feed.test` | API done |
+| FED-18 | Edit and delete own post | `feed.test` | API done |
+| FED-19 | Notifications, never for own actions | `feed.test` | API done (push delivery with Firebase later) |
+| POL-01 | Committee only (not champions) | `feed.test` | API done |
+| POL-02 - 05 | Question, promise, 2-5 options, images all or none, multi, duration, publish | `feed.test` | API done |
+| POL-06 / 07 / 08 | Vote once, final, verified only, results | `feed.test` | API done |
+| POL-09 | Close, winner, notify | `feed.test` | API done |
+| POL-10 - 13 | Comments/likes/share, delete, safety, unavailable | `feed.test` | API done (same as posts) |

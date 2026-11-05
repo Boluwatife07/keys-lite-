@@ -40,6 +40,27 @@ Answers from Dorcas (5 Nov 2026) and defaults chosen where the sheet says
 | Invite copy "futher" | "further" | Typo in design |
 | Language picker on the choice screen | Hidden; English (UK) only | ONB-04.1 |
 
+## Milestone 2 defaults (please confirm)
+
+| Topic | Default | Why |
+| --- | --- | --- |
+| POL-D3: poll promise limit | 200 characters | Filled design state shows 116/200; the 0/50 counter looks out of date |
+| POL-Q3: poll notifications | None on creation (same as Feed posts); creator and voters are told when it closes | Keeps notification volume low |
+| Poll results before voting | Hidden until you vote, the poll closes, or you created it | Avoids results swaying votes |
+| Multi-select results | Each option shows its share of voters (POL-07.2) | Sheet row |
+| Ties | Every option with the top count is marked as winning | Not specified |
+| Editing a post | Text and tags only; attachments stay | Not specified beyond "Edit post" |
+| Comment length | 1,000 characters | Not specified |
+| Feed document downloads | Open to unverified residents too | AVW-09 restricts "community or update documents"; Feed files are posts, not Resources |
+| Mute | Hides the muted person's posts from your Feed and stops their notifications; their comments still show | PRF-04.3 names posts and notifications only |
+| Block | Two-way: posts, comments, likes lists, profile, @ suggestions and notifications. The blocker still sees the profile with "Unblock" | PRF-05.2 / PRF-05.3 |
+| Profile visibility | Only residents of the same community; others get "not available" | PRF-03.3 |
+| Change password | Signs out your other devices | Baseline |
+| Create password (social accounts) | Needs an email code | PRF-16.2 mentions a code |
+| Change home address | A committee seat is a warning and is revoked; hosting an event with tickets issued or being a club President blocks | PRF-11.1, PRF-11.5 (member exit rules file not shared with me) |
+| Deactivate | Committee seat, event with tickets or club presidency blocks it; social accounts must add a password first | PRF-18.5 |
+| Notification toggles | Likes, comments, mentions, polls, updates, committee, chat, events, clubs; newsletter email off by default | Final list waits for the Notifications task |
+
 ## Shared report reasons (XFR-03.1)
 
 1. Spam or misleading

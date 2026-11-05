@@ -5,11 +5,12 @@ import { AppError, badRequest, tooMany } from '../../lib/errors.js';
 import { LIMITS } from '../../lib/rules.js';
 import { sendEmail, type EmailTemplate } from '../../services/email.js';
 
-export type CodePurpose = 'signup' | 'reset' | 'change_email';
+export type CodePurpose = 'signup' | 'reset' | 'change_email' | 'create_password';
 const TEMPLATE: Record<CodePurpose, EmailTemplate> = {
   signup: 'signup_code',
   reset: 'reset_code',
   change_email: 'change_email_code',
+  create_password: 'create_password_code',
 };
 // Copy from design (ONB-07.4). Design says "Pls"; we use "Please" (sheet note suggests it).
 export const INVALID_CODE = 'Invalid verification code. Please check and try again';

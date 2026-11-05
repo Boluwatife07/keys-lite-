@@ -162,7 +162,10 @@ export async function authRoutes(app: FastifyInstance) {
 
   app.post('/auth/logout', async (req) => {
     const u = requireUser(req);
+    const { pushToken } = z.object({ pushToken: z.string().optional() }).parse(req.body ?? {});
     await q('update sessions set revoked_at = $2 where id = $1', [u.session_id, clock.now()]);
+    // PRF-17.2: this device stops getting pushes for the account.
+    if (pushToken) await q('delete from push_tokens where token = $1 and user_id = $2', [pushToken, u.id]);
     return { ok: true };
   });
 }

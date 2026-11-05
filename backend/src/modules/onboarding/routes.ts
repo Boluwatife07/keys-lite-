@@ -64,6 +64,12 @@ async function match(c: Ctx, code?: string) {
   return { kind: covering.length === 1 ? ('single' as const) : ('multiple' as const), communities: cards };
 }
 
+/** After home type: the profile step, unless the resident already has one (moving home, PRF-11). */
+async function afterHome(userId: string, db?: any) {
+  const r = await one<{ photo_url: string | null; safety_ack_at: Date | null }>('select photo_url, safety_ack_at from users where id = $1', [userId], db);
+  return r?.photo_url && r.safety_ack_at ? 'complete' : 'profile';
+}
+
 async function setStep(userId: string, step: string, db?: any) {
   await q('update users set onboarding_step = $2 where id = $1', [userId, step], db);
 }
@@ -156,10 +162,10 @@ export async function onboardingRoutes(app: FastifyInstance) {
       await tx(async (db) => {
         await joinTopLevel(u.id, target.parent_id!, db);
         await q(`update memberships set level = 'building', building_id = $2 where user_id = $1`, [u.id, target.id], db);
-        await setStep(u.id, 'profile', db);
+        await setStep(u.id, await afterHome(u.id, db), db);
       });
       const parent = (await one<{ name: string }>('select name from communities where id = $1', [target.parent_id]))!;
-      return { onboardingStep: 'profile', screen: 'welcome', name: parent.name };
+      return { onboardingStep: await afterHome(u.id), screen: 'welcome', name: parent.name };
     }
     if (!covering.some((x) => x.id === target.id)) throw badRequest('NOT_ELIGIBLE', "You're not eligible for this community");
     await tx(async (db) => {
@@ -304,8 +310,9 @@ export async function onboardingRoutes(app: FastifyInstance) {
     if (body.subtype && !allowed.includes(body.subtype)) throw badRequest('VALIDATION', 'Choose a home type from the list.');
     if (body.type === 'house') {
       await q(`update memberships set level = 'house', building_id = null, home_subtype = $2 where user_id = $1`, [u.id, body.subtype ?? null]);
-      await setStep(u.id, 'profile');
-      return { onboardingStep: 'profile', screen: m.created_by === u.id ? 'live' : 'welcome', name: m.name };
+      const next = await afterHome(u.id);
+      await setStep(u.id, next);
+      return { onboardingStep: next, screen: m.created_by === u.id ? 'live' : 'welcome', name: m.name };
     }
     await q(`update memberships set home_subtype = $2 where user_id = $1`, [u.id, body.subtype ?? null]);
     return { onboardingStep: 'home_type', next: 'building', buildings: await buildingsOnStreet(c.street.id, m.community_id) };
@@ -341,10 +348,10 @@ export async function onboardingRoutes(app: FastifyInstance) {
           type: 'building', name, parentId: m.community_id, anchorStreetId: c.street.id, premise: c.premise, lat: addr!.lat, lng: addr!.lng, createdBy: u.id,
         });
         await q(`update memberships set level = 'building', building_id = $2 where user_id = $1`, [u.id, com.id], db);
-        await setStep(u.id, 'profile', db);
+        await setStep(u.id, await afterHome(u.id, db), db);
         return com;
       });
-      return { onboardingStep: 'profile', screen: 'live', name: b.name };
+      return { onboardingStep: await afterHome(u.id), screen: 'live', name: b.name };
     } catch (e: any) {
       if (e.code === '23505') throw conflict('BUILDING_EXISTS', `"${name}" already exists on this street. Choose a different name.`, { field: 'name' });
       throw e;
@@ -360,8 +367,9 @@ export async function onboardingRoutes(app: FastifyInstance) {
     const b = await one<CommunityRow>(`select * from communities where id = $1 and type = 'building'`, [id]);
     if (!b || b.anchor_street_id !== c.street.id || b.parent_id !== m.community_id) throw badRequest('NOT_ELIGIBLE', "You're not eligible for this building");
     await q(`update memberships set level = 'building', building_id = $2 where user_id = $1`, [u.id, id]);
-    await setStep(u.id, 'profile');
-    return { onboardingStep: 'profile', screen: 'welcome', name: m.name };
+    const next = await afterHome(u.id);
+    await setStep(u.id, next);
+    return { onboardingStep: next, screen: 'welcome', name: m.name };
   });
 
   // ONB-22: photo required (JPG/PNG <= 15 MB, already validated by /media), bio <= 160, safety ack.

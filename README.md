@@ -14,7 +14,7 @@ sheet and the Resident APP Figma files.
 | Milestone | Features | State |
 | --- | --- | --- |
 | 1 | Onboarding and login, Learning experience, Address verification, cross-feature foundations (media limits, reports, share links) | Done |
-| 2 | Profile and settings, Feed, Polls | Next |
+| 2 | Profile and settings, Feed, Polls | Backend done, screens next |
 | 3 | Committee board, Voting | |
 | 4 | Updates, Update chat, Chat | |
 | 5 | Free events, Free clubs, Calendar | |
