@@ -9,6 +9,7 @@ import { LIMITS } from '../../lib/rules.js';
 import { normalise, places, streetKey } from '../../services/places.js';
 import {
   card, communitiesForStreet, counts, createCommunity, haversineSql, saveAddress, upsertStreet, type CommunityRow,
+  countsVisible,
 } from './communities.js';
 
 const INVALID_CODE = 'Invalid community code. Please check and try again.';
@@ -215,7 +216,7 @@ export async function onboardingRoutes(app: FastifyInstance) {
       [name, c.street.lat, c.street.lng, LIMITS.devNameRadiusKm],
     );
     const similar = await Promise.all(
-      rows.map(async (r) => ({ ...(await card(r, { alwaysCounts: true })), distanceKm: Math.round(r.km * 10) / 10 })),
+      rows.map(async (r) => ({ ...(await card(r)), distanceKm: Math.round(r.km * 10) / 10 })),
     );
     return { similar };
   });
@@ -275,7 +276,7 @@ export async function onboardingRoutes(app: FastifyInstance) {
     const streets = await q<{ name: string }>(
       `select s.name from street_links l join streets s on s.id = l.street_id where l.community_id = $1 order by l.created_at`, [id],
     );
-    return { development: await card(dev, { alwaysCounts: true }), yourStreet: c.street.name, streets: streets.map((s) => s.name) };
+    return { development: await card(dev), yourStreet: c.street.name, streets: streets.map((s) => s.name) };
   });
 
   // ONB-19.3: join adds the user's street immediately, no vote.
@@ -323,7 +324,10 @@ export async function onboardingRoutes(app: FastifyInstance) {
       `select * from communities where type = 'building' and anchor_street_id = $1 and parent_id = $2 order by name`,
       [streetId, communityId],
     );
-    return Promise.all(rows.map(async (b) => ({ id: b.id, name: b.name, residents: (await counts(b.id)).residents })));
+    return Promise.all(rows.map(async (b) => {
+      const n = (await counts(b.id)).residents;
+      return { id: b.id, name: b.name, residents: countsVisible(n) ? n : undefined };
+    }));
   }
 
   // ONB-17.4

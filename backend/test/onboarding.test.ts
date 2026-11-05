@@ -41,14 +41,17 @@ describe('ONB-13 / ONB-15 matching and pioneering a street', () => {
     const h = await call('POST', '/onboarding/home-type', { token, body: { type: 'house' } });
     expect(h.body).toMatchObject({ screen: 'welcome', name: 'Cedar Close' });
   });
-  it('ONB-13.4 counts show at 500+ residents', async () => {
+  it('ONB-13.4 counts stay hidden at exactly 500 and show above 500 residents', async () => {
     const c = (await q(`select id from communities where name = 'Cedar Close'`))[0];
     await q(
       `with u as (insert into users(email, first_name, last_name) select 'bulk'||g||'@keys.test','B','C' from generate_series(1,498) g returning id)
        insert into memberships(user_id, community_id, level) select id, $1, 'house' from u`, [c.id],
     );
-    const { match } = await withAddress('p3@keys.test', '20 Cedar Close');
-    expect(match.communities[0]).toMatchObject({ residents: 500, committeeMembers: 0 });
+    const at500 = await withAddress('p3@keys.test', '20 Cedar Close');
+    expect(at500.match.communities[0]).not.toHaveProperty('residents');
+    await call('POST', '/onboarding/join', { token: at500.token, body: { communityId: c.id } });
+    const { match } = await withAddress('p3b@keys.test', '21 Cedar Close');
+    expect(match.communities[0]).toMatchObject({ residents: 501, committeeMembers: 0 });
   });
   it('ONB-15.3 two pioneers at the same time: the second is sent to join', async () => {
     const a = await withAddress('r1@keys.test', '1 Ash Grove');
@@ -104,7 +107,9 @@ describe('ONB-18 - ONB-20 developments', () => {
     const { token } = await withAddress('d7@keys.test', '8 Hazel Drive');
     const r = await call('POST', '/onboarding/development/check', { token, body: { name: 'new keys' } });
     expect(r.body.similar).toHaveLength(1);
-    expect(r.body.similar[0]).toMatchObject({ name: 'New Keys Capital', residents: 1, committeeMembers: 0 });
+    expect(r.body.similar[0]).toMatchObject({ name: 'New Keys Capital' });
+    // ONB-13.4: counts are hidden at 500 residents or fewer here too.
+    expect(r.body.similar[0]).not.toHaveProperty('residents');
     expect(typeof r.body.similar[0].distanceKm).toBe('number');
     const far = await withAddress('d8@keys.test', '8 Harbour Street');
     const none = await call('POST', '/onboarding/development/check', { token: far.token, body: { name: 'New Keys Capital' } });
@@ -147,7 +152,7 @@ describe('ONB-16 / ONB-17 buildings', () => {
     const { token, match } = await withAddress('b3@keys.test', 'Flat 9, 30 Linden Mews');
     await call('POST', '/onboarding/join', { token, body: { communityId: match.communities[0].id } });
     const h = await call('POST', '/onboarding/home-type', { token, body: { type: 'building' } });
-    expect(h.body.buildings).toEqual([{ id: expect.any(String), name: 'Linden House', residents: 1 }]);
+    expect(h.body.buildings).toEqual([{ id: expect.any(String), name: 'Linden House' }]);
     const j = await call('POST', `/onboarding/building/${h.body.buildings[0].id}/join`, { token });
     expect(j.body).toMatchObject({ screen: 'welcome', name: streetCommunity.name });
   });

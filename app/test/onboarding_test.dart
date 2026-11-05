@@ -65,11 +65,32 @@ void main() {
     expect(find.text('What type of home do you live in?'), findsOneWidget);
   });
 
-  testWidgets('ONB-13.4 counts show for 500+', (t) async {
+  testWidgets('ONB-13.4 counts show above 500', (t) async {
     final h = Harness();
     await h.pump(t, MatchScreen(result: MatchResult({'kind': 'single', 'communities': [card('New Keys Capital', type: 'development', residents: 1584)]})), meJson: Harness.me(step: 'community'));
     expect(find.text('1,584 residents'), findsOneWidget);
     expect(find.text('12 committee'), findsOneWidget);
+  });
+
+  testWidgets('ONB-13.4 similar developments hide counts at 500 or fewer', (t) async {
+    final h = Harness();
+    await h.pump(t, SimilarDevelopmentsScreen(name: 'New Keys', similar: [
+      {...card('New Keys Capital', type: 'development'), 'distanceKm': 1.2},
+      {...card('New Keys East', type: 'development', residents: 640), 'distanceKm': 3.4},
+    ]), meJson: Harness.me(step: 'community'));
+    expect(find.text('1.2km away'), findsOneWidget);
+    expect(find.text('640 residents · 12 committee · 3.4km away'), findsOneWidget);
+  });
+
+  testWidgets('ONB-13.4 building list hides counts at 500 or fewer', (t) async {
+    final h = Harness();
+    await h.pump(t, const PickBuildingScreen(buildings: [
+      {'id': 'b1', 'name': 'Linden House'},
+      {'id': 'b2', 'name': 'Oak Tower', 'residents': 512},
+    ]), meJson: Harness.me(step: 'home_type'));
+    expect(find.text('Linden House'), findsOneWidget);
+    expect(find.text('512 residents'), findsOneWidget);
+    expect(find.textContaining('0 residents'), findsNothing);
   });
 
   testWidgets('ONB-13.2 multiple: join inactive until one is picked; not listed -> area type', (t) async {

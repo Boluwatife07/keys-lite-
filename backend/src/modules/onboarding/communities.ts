@@ -51,10 +51,14 @@ export async function counts(communityId: string, db: Db = undefined as any) {
   return { residents: r?.residents ?? 0, committee };
 }
 
-// Card shown on match screens. ONB-13.4: counts only for 500+ residents.
-export async function card(c: CommunityRow, opts: { alwaysCounts?: boolean; db?: Db } = {}) {
+// ONB-13.4: resident and committee counts are shown only above 500 residents,
+// on every onboarding card (matches, similar developments, buildings).
+export const countsVisible = (residents: number) => residents > LIMITS.countsVisibleAbove;
+
+// Card shown on match screens.
+export async function card(c: CommunityRow, opts: { db?: Db } = {}) {
   const n = await counts(c.id, opts.db);
-  const show = opts.alwaysCounts || n.residents >= LIMITS.countsVisibleFrom;
+  const show = countsVisible(n.residents);
   let parentName: string | undefined;
   if (c.parent_id) parentName = (await one<{ name: string }>('select name from communities where id = $1', [c.parent_id], opts.db))?.name;
   return {

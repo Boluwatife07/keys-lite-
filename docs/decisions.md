@@ -16,13 +16,13 @@ Answers from Dorcas (5 Nov 2026) and defaults chosen where the sheet says
 | XFR-Q1: report reasons | One shared list (written below) | `backend/src/lib/rules.ts` |
 | AVW-Q1: Stripe pass rule | Engineering's choice: postcode **and** first address line must pass | `backend/src/services/addressCheck.ts` |
 | Admin Panel manual review | Not in this build. The resident can still submit a document and sees "under review"; the decision function exists for the Admin Panel to call | `backend/src/modules/verification/service.ts` |
+| ONB-Q1: resident counts on onboarding cards | Shown only above 500 residents (501+), on matches, similar developments and the building list | `countsVisible` in `backend/src/modules/onboarding/communities.ts` |
 | Legal documents | Placeholder links | `TERMS_URL`, `PRIVACY_URL`, `SAFETY_URL` |
 
 ## Defaults chosen (please confirm)
 
 | Topic | Default | Why |
 | --- | --- | --- |
-| ONB-Q1: resident counts on cards | Only for 500+ residents (PRD) | Sheet row ONB-13.4 |
 | AVW-Q4: verification document size | 10 MB, PDF/JPG/PNG (design copy) | Matches the screen text |
 | AVW-Q3: re-upload after rejection | Rejected resident is back to unverified and can try the card again or contest again | No rejection screen is designed |
 | Verification attempts | 5 card/wallet checks per 24 hours | Engineering baseline in the sheet |

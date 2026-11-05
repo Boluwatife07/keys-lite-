@@ -20,7 +20,7 @@ export const LIMITS = {
   lockoutMinutes: 15,
   devStreetsMax: 5,
   devNameRadiusKm: 10,
-  countsVisibleFrom: 500,      // ONB-13.4: counts only for 500+ residents
+  countsVisibleAbove: 500,     // ONB-13.4: counts only when a community has more than 500 residents
   verifyAttemptsPerDay: 5,     // AVW baseline, to confirm
   deactivationWindowDays: 30,
   redeactivateBlockDays: 7,

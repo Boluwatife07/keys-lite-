@@ -486,7 +486,11 @@ class SimilarDevelopmentsScreen extends StatelessWidget {
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                       Text(s.name, style: KText.paragraphMediumLarge),
                       const SizedBox(height: 2),
-                      Text('${formatCount(s.residents ?? 0)} residents · ${s.committee ?? 0} committee · ${s.distanceKm}km away', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
+                      Text([
+                        // ONB-13.4: counts only above 500 residents (the API leaves them out otherwise).
+                        if (s.residents != null) ...['${formatCount(s.residents!)} residents', '${formatCount(s.committee ?? 0)} committee'],
+                        '${s.distanceKm}km away',
+                      ].join(' · '), style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
                     ]),
                   ),
                   const Icon(Icons.chevron_right, color: KColors.textSecondary),
@@ -729,7 +733,7 @@ class _PickBuildingScreenState extends State<PickBuildingScreen> with Busy {
           for (final b in widget.buildings) ...[
             OptionTile(
               title: b['name'],
-              subtitle: '${formatCount(b['residents'])} residents',
+              subtitle: b['residents'] != null ? '${formatCount(b['residents'])} residents' : null,
               leading: const CircleImage('assets/images/community_building.png', size: 48),
               selected: _id == b['id'],
               onTap: () => setState(() => _id = b['id']),
