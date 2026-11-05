@@ -10,6 +10,11 @@ export const NOTIFICATION_TOGGLES: Record<string, string> = {
   comment_reply: 'comments',
   mention: 'mentions',
   poll_closed: 'polls',
+  proposal_created: 'committee',
+  proposal_reminder: 'committee',
+  proposal_result: 'committee',
+  board_announcement: 'committee',
+  tier_up: 'committee',
 };
 
 /** In-app toggles shown in Settings > Notification (Phase 1 features only). */

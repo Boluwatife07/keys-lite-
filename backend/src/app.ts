@@ -15,6 +15,7 @@ import { meRoutes } from './modules/me/routes.js';
 import { profileRoutes } from './modules/profile/routes.js';
 import { feedRoutes } from './modules/feed/routes.js';
 import { pollRoutes } from './modules/feed/polls.js';
+import { boardRoutes } from './modules/board/routes.js';
 
 export async function buildApp(): Promise<FastifyInstance> {
   const app = Fastify({ logger: process.env.NODE_ENV === 'test' ? false : { level: 'info' }, bodyLimit: 2 * MB });
@@ -64,5 +65,6 @@ export async function buildApp(): Promise<FastifyInstance> {
   await app.register(profileRoutes);
   await app.register(feedRoutes);
   await app.register(pollRoutes);
+  await app.register(boardRoutes);
   return app;
 }

@@ -12,6 +12,7 @@ import { EMAIL_RE, LIMITS, passwordProblems } from '../../lib/rules.js';
 import { issueCode, spendTicket, verifyCode, INVALID_CODE } from '../auth/codes.js';
 import { shareLink } from '../links/routes.js';
 import { postsFor } from '../feed/read.js';
+import { leaveBoard } from '../board/service.js';
 
 const MUTE_DAYS = 30;
 
@@ -252,8 +253,9 @@ export async function profileRoutes(app: FastifyInstance) {
     const u = requireUser(req);
     const check = await exitCheck(u.id, 'move');
     if (check.blockers.length) throw forbidden('EXIT_BLOCKED', check.blockers[0].message);
+    // PRF-11.3 / CBM-19.2: the seat is revoked and open applications and proposals end.
+    await leaveBoard(u.id, { why: 'left_community', reason: 'Moved home' });
     await tx(async (c) => {
-      await q('update board_seats set occupant_id = null, occupied_at = null where occupant_id = $1', [u.id], c);
       await q('delete from memberships where user_id = $1', [u.id], c);
       await q(
         `update users set onboarding_step = 'address', verification_status = 'unverified', welcome_prompt_done_at = null where id = $1`,
@@ -275,6 +277,7 @@ export async function profileRoutes(app: FastifyInstance) {
     const check = await exitCheck(u.id, 'deactivate');
     if (check.blockers.length) throw forbidden('EXIT_BLOCKED', check.blockers[0].message);
     const now = clock.now();
+    await leaveBoard(u.id, { why: 'left_community' });
     await q('update users set deactivated_at = $2, last_deactivated_at = $2 where id = $1', [u.id, now]);
     await q('update sessions set revoked_at = $2 where user_id = $1 and revoked_at is null', [u.id, now]);
     await q('delete from push_tokens where user_id = $1', [u.id]);

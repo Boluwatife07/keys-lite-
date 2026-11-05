@@ -2,6 +2,7 @@ import { q } from './db/pool.js';
 import { clock, DAY, HOUR } from './lib/clock.js';
 import { LIMITS } from './lib/rules.js';
 import { closeDuePolls } from './modules/feed/polls.js';
+import { proposalJobs } from './modules/board/proposals.js';
 
 // PRF-18: accounts deactivated more than 30 days ago are deleted for good.
 export async function purgeDeletedAccounts() {
@@ -13,4 +14,5 @@ export async function purgeDeletedAccounts() {
 export function startJobs() {
   setInterval(() => { purgeDeletedAccounts().catch(console.error); }, HOUR);
   setInterval(() => { closeDuePolls().catch(console.error); }, 60_000);
+  setInterval(() => { proposalJobs().catch(console.error); }, 60_000);
 }
