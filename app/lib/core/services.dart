@@ -163,3 +163,10 @@ class MemoryStore implements LocalStore {
 
 bool get isIOS => defaultTargetPlatform == TargetPlatform.iOS;
 bool get isAndroid => defaultTargetPlatform == TargetPlatform.android;
+
+/// Voice notes (CHT-07). [stop] returns the recording, or null if it failed.
+abstract class VoiceRecorder {
+  Future<bool> start();
+  Future<PickedFile?> stop();
+  Future<void> cancel();
+}

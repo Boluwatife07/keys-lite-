@@ -8,7 +8,9 @@ import 'core/api.dart';
 import 'core/config.dart';
 import 'core/scope.dart';
 import 'core/services.dart';
+import 'core/realtime.dart';
 import 'core/session.dart';
+import 'core/voice.dart';
 import 'router.dart';
 import 'theme/theme.dart';
 
@@ -26,6 +28,8 @@ void main() {
     sharer: DeviceSharer(),
     store: store,
     videoLength: _videoLength,
+    recorder: DeviceVoiceRecorder(),
+    realtime: SocketRealtime(api),
   );
   runApp(KeysApp(deps: deps));
 }
@@ -71,6 +75,8 @@ class _KeysAppState extends State<KeysApp> {
       final me = widget.deps.session.me;
       if (me != null && me.onboardingStep == 'community') _router.go('/');
     }
+    // CHT-14.4: group invite links.
+    if (seg.length == 2 && seg[0] == 'chat' && widget.deps.session.signedIn) _router.push('/chats/join/${seg[1]}');
   }
 
   @override

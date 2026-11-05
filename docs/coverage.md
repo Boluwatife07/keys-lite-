@@ -92,7 +92,6 @@ App tests: `app/test/feed_test.dart`, `app/test/profile_test.dart`. Checked end 
 | --- | --- | --- |
 | FED-04.3 | Videos over 60 s are refused with a "Please trim your video" message instead of an in-app trim step | Add a native video trimmer package when building for devices |
 | FED-07.2 | Video plays with play/pause/scrub; full-screen rotation not tuned | Device QA |
-| PRF-02.2 | "Chat" opens a placeholder until Chat (milestone 4) | Milestone 4 |
 | FED-19 | Notifications are stored and listed in the app; push sending needs Firebase keys | When keys exist |
 
 ## Milestone 3
@@ -122,3 +121,29 @@ API tests: `backend/test/board.test.ts`. App tests: `app/test/board_test.dart`. 
 | VOT-02 - 04 | Join, reassign, remove details, Yes/No, reasons, results and voters | Done |
 | VOT-05 | Rules: 5+, auto Yes, >50% early close, 7 days, ties pass, committee only, seat protection, no longer applicable | Done |
 | VOT-06 | Notifications: created, 24-hour reminder, result, board changes | Done |
+
+## Milestone 4
+
+API tests: `backend/test/updates.test.ts`, `backend/test/chat.test.ts`, `backend/test/ws.test.ts`. App tests: `app/test/updates_test.dart`, `app/test/chat_test.dart`. Checked in the browser against the real API with the demo data.
+
+| Rows | Behaviour | Status |
+| --- | --- | --- |
+| UPD-01 | Updates tab: search by title, date block, pin and mute marks, unread tint with "+N new additional updates", empty state, View resolved updates, unread badge on the tab | Done |
+| UPD-02 - 04 | Create (committee only): title 100, details 700, images, document, audience All or Sub-community with search, group chat toggle, discard sheet; only the audience is notified | Done |
+| UPD-05 | Detail: author and role, affected locations, images, document (verified residents only), chat entry | Done |
+| UPD-06 / 07 | Additional updates: committee adds text, image and committee @tags; edit, delete, copy, report | Done |
+| UPD-08 - 10 | Pin (max 3), mute with 4 durations, delete for me | Done |
+| UPD-11 | Edit by the creator; the group chat can be turned on but not off | Done |
+| UPD-12 - 14 | Resolve (creator or Chair), delete for everyone, resolved list with search | Done |
+| UCH-01 - 04 | Update group chat: committee added, creator admin, audience joins from the update, no invite link, read-only after resolve or delete, leaving the board leaves the chat | Done |
+| CHT-01 | Chat list: search, tabs, recently active, typing, unread badge, muted, blocked, New Chat | Done |
+| CHT-02 | Pin (max 3), mute, delete chat, clear chat | Done |
+| CHT-03 | New chat: residents A to Z with roles; Chat button on profiles | Done |
+| CHT-04 | Message requests: 2-message limit, Accept or Delete, read receipts only after accepting | Done |
+| CHT-05 | Messages: date separators, Sent / Delivered / Seen, live updates over a websocket | Done |
+| CHT-06 / 07 | Photos, video, documents, links with previews, voice notes | Done |
+| CHT-08 | Reply, copy, forward (5), delete for me or everyone, reactions and who reacted | Done |
+| CHT-09 | Search across chats and inside a chat | Done |
+| CHT-10 - 17 | Groups: create with members, name, icon and settings; info and description; admins; add, remove, invite link, join requests; exit with new-admin handover; system messages | Done |
+| CHT-18 | Shared Media, Links and Documents by month | Done |
+| Push for new messages | Stored push tokens; sending needs Firebase keys | When keys exist |

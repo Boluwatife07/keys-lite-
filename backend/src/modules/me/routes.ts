@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { one } from '../../db/pool.js';
 import { requireUser } from '../../lib/auth.js';
+import { seatOf } from '../../lib/people.js';
 
 // What the app needs at launch to route the user (ONB-26 resume) and to
 // decide which first-run prompts to show (ONB-25, LRN-01).
@@ -23,6 +24,7 @@ export async function meRoutes(app: FastifyInstance) {
       [u.id],
     );
     const done = r.onboarding_step === 'complete';
+    const seat = await seatOf(u.id);
     return {
       id: r.id,
       email: r.email,
@@ -40,6 +42,8 @@ export async function meRoutes(app: FastifyInstance) {
         : null,
       showWelcomePrompt: done && !r.welcome_prompt_done_at,
       showLearning: done && !r.learning_done_at,
+      boardRole: seat?.role ?? null,
+      isCommittee: !!seat && seat.kind !== 'champion',
     };
   });
 }

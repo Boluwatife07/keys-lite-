@@ -4,6 +4,8 @@ import '../../core/models.dart';
 import '../../core/scope.dart';
 import '../feed/feed_screens.dart';
 import '../community/community_tab.dart';
+import '../updates/updates_list.dart';
+import 'dart:async';
 import '../../theme/tokens.dart';
 import '../../widgets/widgets.dart';
 import 'learning_tour.dart';
@@ -22,6 +24,29 @@ class _HomeShellState extends State<HomeShell> {
   final keys = TourKeys();
   final _feedKey = GlobalKey<PostListState>();
   bool _touring = false;
+  int _unreadChats = 0;
+  int _unseenUpdates = 0;
+  StreamSubscription? _live;
+
+  /// Badges: unread chats (not muted) and unread updates.
+  Future<void> _counts() async {
+    final api = context.api;
+    try {
+      final r = await api.get('/chats');
+      final n = (r['chats'] as List).where((c) => c['muted'] != true && (c['unread'] ?? 0) > 0).length;
+      if (mounted) setState(() => _unreadChats = n);
+    } catch (_) {}
+    try {
+      final r = await api.get('/updates');
+      final n = (r['updates'] as List).where((u) => u['seen'] == false).length;
+      if (mounted) setState(() => _unseenUpdates = n);
+    } catch (_) {}
+  }
+
+  Future<void> _openChats() async {
+    await context.push('/chats');
+    _counts();
+  }
 
   /// POL-01.1: committee members choose Post or Poll; everyone else goes straight to a post.
   Future<void> _create() async {
@@ -51,6 +76,16 @@ class _HomeShellState extends State<HomeShell> {
   void initState() {
     super.initState();
     if (widget.autoPrompts) WidgetsBinding.instance.addPostFrameCallback((_) => _firstRun());
+    _counts();
+    _live = context.deps.realtime.events.listen((e) {
+      if (e['type'] == 'message') _counts();
+    });
+  }
+
+  @override
+  void dispose() {
+    _live?.cancel();
+    super.dispose();
   }
 
   /// ONB-25.1 welcome prompt first, then LRN-01.1 learning experience.
@@ -75,7 +110,15 @@ class _HomeShellState extends State<HomeShell> {
   Widget build(BuildContext context) {
     final me = context.session.me;
     final pages = [
-      _HomeTab(keys: keys, feedKey: _feedKey, tab: _homeTab, onTab: (i) => setState(() => _homeTab = i), onCreate: _create),
+      _HomeTab(
+        keys: keys,
+        feedKey: _feedKey,
+        tab: _homeTab,
+        onTab: (i) => setState(() => _homeTab = i),
+        onCreate: _create,
+        unseenUpdates: _unseenUpdates,
+        onUnseen: (n) => setState(() => _unseenUpdates = n),
+      ),
       const CommunityTab(),
       const _Placeholder(title: 'Services', body: 'Recommended vendors and bookings arrive with the Keys services release.'),
       const _Placeholder(title: 'Events', body: 'Browse community events, track the ones you have joined, or create something new.'),
@@ -107,7 +150,11 @@ class _HomeShellState extends State<HomeShell> {
             const Spacer(),
           ]),
           actions: [
-            IconButton(tooltip: 'Chats', icon: const Icon(Icons.chat_bubble_outline), onPressed: () {}),
+            IconButton(
+              tooltip: _unreadChats > 0 ? 'Chats, $_unreadChats unread' : 'Chats',
+              icon: Badge(isLabelVisible: _unreadChats > 0, label: Text('$_unreadChats'), backgroundColor: KColors.error, child: const Icon(Icons.chat_bubble_outline)),
+              onPressed: _openChats,
+            ),
             IconButton(tooltip: 'Notifications', icon: const Icon(Icons.notifications_none), onPressed: () => context.push('/notifications')),
             const SizedBox(width: 4),
           ],
@@ -144,7 +191,9 @@ class _HomeShellState extends State<HomeShell> {
 }
 
 class _HomeTab extends StatelessWidget {
-  const _HomeTab({required this.keys, required this.feedKey, required this.tab, required this.onTab, required this.onCreate});
+  const _HomeTab({required this.keys, required this.feedKey, required this.tab, required this.onTab, required this.onCreate, required this.unseenUpdates, required this.onUnseen});
+  final int unseenUpdates;
+  final ValueChanged<int> onUnseen;
   final TourKeys keys;
   final GlobalKey<PostListState> feedKey;
   final int tab;
@@ -152,14 +201,27 @@ class _HomeTab extends StatelessWidget {
   final VoidCallback onCreate;
   @override
   Widget build(BuildContext context) {
-    Widget tabButton(String label, int i) => Expanded(
+    Widget tabButton(String label, int i, {int badge = 0}) => Expanded(
           child: InkWell(
             onTap: () => onTab(i),
             child: Container(
               height: 44,
               alignment: Alignment.center,
               decoration: BoxDecoration(border: Border(bottom: BorderSide(color: tab == i ? KColors.textPrimary : KColors.borderDefault, width: tab == i ? 2 : 1))),
-              child: Text(label, style: KText.labelSemibold.copyWith(color: tab == i ? KColors.textPrimary : KColors.textSecondary)),
+              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                Text(label, style: KText.labelSemibold.copyWith(color: tab == i ? KColors.textPrimary : KColors.textSecondary)),
+                if (badge > 0) ...[
+                  const SizedBox(width: 6),
+                  Container(
+                    constraints: const BoxConstraints(minWidth: 18),
+                    height: 18,
+                    padding: const EdgeInsets.symmetric(horizontal: 5),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(color: KColors.error, borderRadius: BorderRadius.circular(KRadius.pill)),
+                    child: Text('$badge', style: KText.paragraphMediumSmall.copyWith(color: Colors.white, fontSize: 11)),
+                  ),
+                ],
+              ]),
             ),
           ),
         );
@@ -174,7 +236,7 @@ class _HomeTab extends StatelessWidget {
           TextButton(onPressed: () {}, style: TextButton.styleFrom(foregroundColor: KColors.textPrimary), child: const Text('Calendar →')),
         ]),
       ),
-      Row(key: keys.tabs, children: [tabButton('Feed', 0), tabButton('Updates', 1)]),
+      Row(key: keys.tabs, children: [tabButton('Feed', 0), tabButton('Updates', 1, badge: unseenUpdates)]),
       Expanded(
         child: tab == 0
             ? Container(
@@ -189,7 +251,7 @@ class _HomeTab extends StatelessWidget {
                   ),
                 ),
               )
-            : const _Placeholder(title: 'No updates yet', body: 'Official updates from your committee will show here.'),
+            : UpdatesTab(onUnseen: onUnseen),
       ),
     ]);
   }

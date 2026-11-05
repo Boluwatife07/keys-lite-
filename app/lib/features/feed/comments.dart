@@ -46,8 +46,10 @@ void insertMention(TextEditingController c, MentionTracker t, Map<String, dynami
 
 /// Suggestions list for @ tagging: community members with role, blocked people excluded by the API.
 class MentionSuggestions extends StatefulWidget {
-  const MentionSuggestions({super.key, required this.query, required this.onPick});
+  const MentionSuggestions({super.key, required this.query, required this.onPick, this.committeeOnly = false});
   final String query;
+  /// UPD-06.3: additional updates can only tag committee members.
+  final bool committeeOnly;
   final void Function(Map<String, dynamic>) onPick;
   @override
   State<MentionSuggestions> createState() => _MentionSuggestionsState();
@@ -79,8 +81,10 @@ class _MentionSuggestionsState extends State<MentionSuggestions> {
 
   Future<void> _load() async {
     try {
-      final r = await context.api.get('/members/search', query: {'q': widget.query});
-      if (mounted) setState(() => _people = List<Map<String, dynamic>>.from(r['members']));
+      final r = widget.committeeOnly
+          ? await context.api.get('/chats/people', query: {'q': widget.query, 'committeeOnly': '1'})
+          : await context.api.get('/members/search', query: {'q': widget.query});
+      if (mounted) setState(() => _people = List<Map<String, dynamic>>.from(r[widget.committeeOnly ? 'people' : 'members']));
     } catch (_) {}
   }
 

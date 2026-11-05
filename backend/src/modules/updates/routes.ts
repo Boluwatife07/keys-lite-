@@ -107,7 +107,7 @@ async function card(up: Update, viewer: string) {
     q<{ created_at: Date }>('select created_at from additional_updates where update_id = $1 and deleted_at is null', [up.id]),
   ]);
   const unseen = read ? extra.filter((e) => e.created_at > read.seen_at).length : extra.length;
-  const images = await q<{ url: string }>('select m.url from update_media um join media m on m.id = um.media_id where um.update_id = $1 order by um.position', [up.id]);
+  const images = await q<{ id: string; url: string }>('select m.id, m.url from update_media um join media m on m.id = um.media_id where um.update_id = $1 order by um.position', [up.id]);
   return {
     id: up.id,
     title: up.title,
@@ -118,6 +118,10 @@ async function card(up: Update, viewer: string) {
     locationNames: loc.names,
     audience: up.audience,
     images: images.map((i) => i.url),
+    imageMedia: images,
+    documentId: up.document_media_id,
+    // Unread: never opened, or new additional updates since last opened.
+    seen: !!read && unseen === 0,
     additionalCount: extra.length,
     newAdditional: unseen,
     pinned: !!pin,
@@ -249,6 +253,8 @@ export async function updateRoutes(app: FastifyInstance) {
         [community, u.id, b.title, b.details, b.audience, b.documentId ?? null, clock.now()], c,
       ))!;
       await saveTargets(c, row.id, b);
+      // The author has read their own update.
+      await q('insert into update_reads(user_id, update_id, seen_at) values ($1,$2,$3)', [u.id, row.id, row.created_at], c);
       if (b.groupChat) row.chat_id = await createUpdateChat(c, row);
       return row;
     });
@@ -358,6 +364,7 @@ export async function updateRoutes(app: FastifyInstance) {
       `insert into additional_updates(update_id, author_id, text, media_id, mention_ids, created_at) values ($1,$2,$3,$4,$5,$6) returning *`,
       [id, u.id, b.text, b.mediaId ?? null, mentions, clock.now()],
     ))!;
+    await q(`insert into update_reads(user_id, update_id, seen_at) values ($1,$2,$3) on conflict (user_id, update_id) do update set seen_at = excluded.seen_at`, [u.id, id, a.created_at]);
     await notifyAudience(up, u.id, 'update_additional');
     for (const m of mentions) await notify(m, 'mention', u.id, { type: 'update', id });
     return { additional: await additionalView(a, u.id) };

@@ -8,6 +8,7 @@ import '../../core/scope.dart';
 import '../../core/services.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/widgets.dart';
+import '../chat/chat_common.dart' show openDirectChat;
 import '../feed/feed_screens.dart';
 import '../feed/social.dart';
 import '../onboarding/profile_screens.dart' show SquareCropScreen, photoProblem;
@@ -223,7 +224,7 @@ class _OtherProfileScreenState extends State<OtherProfileScreen> {
                       // PRF-05.2: blocked -> the Chat button becomes Unblock and the actions go.
                       p['isBlocked'] == true
                           ? KeysButton('Unblock', onPressed: _unblock)
-                          : KeysButton('Chat', onPressed: () => context.push('/chat/new/${widget.id}')),
+                          : KeysButton('Chat', onPressed: () => openDirectChat(context, widget.id)),
                     ]),
                   ),
                   Container(height: 8, color: KColors.surfaceSubtle),

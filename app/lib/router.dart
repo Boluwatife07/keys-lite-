@@ -6,6 +6,10 @@ import 'core/feed_models.dart';
 import 'features/feed/compose.dart';
 import 'features/feed/feed_screens.dart';
 import 'features/feed/post_card.dart';
+import 'features/chat/chat_info.dart';
+import 'features/chat/chat_list.dart';
+import 'features/chat/chat_people.dart';
+import 'features/chat/conversation.dart';
 import 'features/community/board_screens.dart';
 import 'features/community/proposals.dart';
 import 'features/home/home_shell.dart';
@@ -15,6 +19,9 @@ import 'features/profile/profile_screens.dart';
 import 'features/profile/settings_screens.dart';
 import 'features/onboarding/community_screens.dart';
 import 'features/onboarding/profile_screens.dart';
+import 'features/updates/update_detail.dart';
+import 'features/updates/update_form.dart';
+import 'features/updates/updates_list.dart';
 import 'features/verification/verification_screens.dart';
 
 Map<String, dynamic> _m(GoRouterState s) => Map<String, dynamic>.from((s.extra as Map?) ?? {});
@@ -88,6 +95,20 @@ GoRouter buildRouter({String initial = '/', List<RouteBase> extraRoutes = const 
         GoRoute(path: '/board/exit', builder: (_, _) => const ExitBoardScreen()),
         GoRoute(path: '/board/invite', builder: (_, _) => const BoardInviteScreen()),
         GoRoute(path: '/board/propose', builder: (_, s) => ProposeScreen(type: _m(s)['type'], subject: Map<String, dynamic>.from(_m(s)['subject']), seats: List<Map<String, dynamic>>.from(_m(s)['seats']))),
+        GoRoute(path: '/updates/create', builder: (_, s) => UpdateFormScreen(edit: _m(s)['edit'] == null ? null : Map<String, dynamic>.from(_m(s)['edit']))),
+        GoRoute(path: '/updates/resolved', builder: (_, _) => const ResolvedUpdatesScreen()),
+        GoRoute(path: '/updates/:id', builder: (_, s) => UpdateDetailScreen(id: s.pathParameters['id']!)),
+        GoRoute(path: '/chats', builder: (_, _) => const ChatListScreen()),
+        GoRoute(path: '/chats/new', builder: (_, _) => const NewChatScreen()),
+        GoRoute(path: '/chats/new/group', builder: (_, _) => const PickMembersScreen()),
+        GoRoute(path: '/chats/new/group/details', builder: (_, s) => GroupDetailsScreen(members: List<PersonRef>.from(_m(s)['members']))),
+        GoRoute(path: '/chats/forward', builder: (_, s) => ForwardScreen(messageIds: List<String>.from(_m(s)['messageIds']))),
+        GoRoute(path: '/chats/join/:code', builder: (_, s) => JoinGroupScreen(code: s.pathParameters['code']!)),
+        GoRoute(path: '/chats/:id', builder: (_, s) => ConversationScreen(id: s.pathParameters['id']!, focus: _m(s)['focus'])),
+        GoRoute(path: '/chats/:id/info', builder: (_, s) => ChatInfoScreen(id: s.pathParameters['id']!)),
+        GoRoute(path: '/chats/:id/add', builder: (_, s) => PickMembersScreen(chatId: s.pathParameters['id']!)),
+        GoRoute(path: '/chats/:id/settings', builder: (_, s) => GroupSettingsScreen(id: s.pathParameters['id']!)),
+        GoRoute(path: '/chats/:id/requests', builder: (_, s) => JoinRequestsScreen(id: s.pathParameters['id']!)),
         GoRoute(path: '/board/proposals/:id', builder: (_, s) => ProposalDetailScreen(id: s.pathParameters['id']!)),
       ],
     );

@@ -87,6 +87,26 @@ await call('POST', `/board/seats/${manage.championSeats[0].id}/activate`, amy.to
 await call('POST', '/board/join', paula.token, { ...A, seatId: manage.championSeats[0].id });
 await call('POST', '/board/proposals', team.ashley.token, { type: 'remove', subjectId: team.nadine.id, reason: 'Nadine has not joined any committee activity for months.' });
 
+// Updates (UPD) with an update group chat, and chats (CHT).
+const closure = (await call('POST', '/updates', amy.token, {
+  title: 'Temporary road closure for maintenance',
+  details: 'Attention residents! The council will be carrying out road maintenance on Maple Road. Expect temporary lane closures and noise during this period. Please plan accordingly. We appreciate your patience!',
+  imageIds: [await upload(amy.token, 'carousel_4.jpg'), await upload(amy.token, 'community_live_street.png')],
+  groupChat: true,
+})).update;
+await call('POST', `/updates/${closure.id}/additional`, team.eric.token, { text: 'Update: works now finish on Friday at 6pm.' });
+await call('POST', `/chats/${closure.chatId}/messages`, team.eric.token, { text: 'Will bin collection still happen this week?' });
+await call('POST', '/updates', team.omari.token, { title: 'Water supply interruption on Thursday', details: 'Due to pipe repairs, water will be off from midnight until 6am. Kindly store enough water.' });
+const direct = (await call('POST', '/chats/direct', team.ashley.token, { userId: amy.id })).chat;
+await call('POST', `/chats/${direct.id}/messages`, team.ashley.token, { text: 'Hey Amy! Are we still on for the committee meeting?' });
+await call('POST', `/chats/${direct.id}/messages`, amy.token, { text: 'Yes, 7pm at the community hall.' });
+await call('POST', `/chats/${direct.id}/messages`, team.ashley.token, { text: 'Perfect, see you there 👍' });
+await call('POST', '/chats/direct', ben.token, { userId: amy.id }).then((r) => call('POST', `/chats/${r.chat.id}/messages`, ben.token, { text: 'Hi Amy, could I borrow your ladder this weekend?' }));
+const group = (await call('POST', '/chats/groups', amy.token, { name: 'Maple Road Gardeners', memberIds: [team.ashley.id, team.brianna.id, paula.id] })).chat;
+await call('PATCH', `/chats/${group.id}`, amy.token, { description: 'Swap seeds, plan the greener garden and share tips.' });
+await call('POST', `/chats/${group.id}/messages`, team.brianna.token, { text: 'Morning everyone! The tomatoes are finally ripe 🍅' });
+await call('POST', `/chats/${group.id}/messages`, paula.token, { text: 'Lovely! Anyone have spare compost?' });
+
 await app.close();
 await pool.end();
 console.log(`
@@ -95,6 +115,8 @@ Demo data ready (password for every account: ${PASSWORD})
   ashley@keys.test   Vice Chair             - other committee roles: eric, brianna, ajani, tobias, nadine, omari
   ben@keys.test      resident, unverified   - try voting on the poll or joining the board to see the verify sheet
   paula@keys.test    applied to be a Champion
+  Updates and chats: amy has two updates (one with a group chat), a direct chat with ashley,
+  a message request from ben and the "Maple Road Gardeners" group.
 To try sign-up from scratch use any new email; codes are printed in the email_outbox table (mock email).
 Test addresses: e.g. "5 Cedar Close" (no community yet), "4 Elm Street" (connected streets), "3 Oak Avenue".
 `);

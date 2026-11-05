@@ -59,7 +59,7 @@ class AuthorLine extends StatelessWidget {
   final Widget? trailing;
   @override
   Widget build(BuildContext context) {
-    final sub = [if (p.role != null) p.role!, if (subtitle != null) subtitle!].join(' • ');
+    final sub = [?p.role, ?subtitle].join(' • ');
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Row(children: [
         Flexible(child: Text(p.name, style: KText.paragraphMediumLarge.copyWith(fontSize: 15), overflow: TextOverflow.ellipsis)),
@@ -112,8 +112,11 @@ class SheetAction {
 
 Future<void> showActionSheet(BuildContext context, List<SheetAction> actions) => showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       builder: (c) => SafeArea(
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(c).height * 0.8),
+          child: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, children: [
           for (final a in actions)
             ListTile(
               leading: Icon(a.icon, color: a.destructive ? KColors.error : KColors.textPrimary),
@@ -124,7 +127,8 @@ Future<void> showActionSheet(BuildContext context, List<SheetAction> actions) =>
                 a.onTap();
               },
             ),
-        ]),
+        ])),
+        ),
       ),
     );
 
@@ -265,3 +269,123 @@ Future<void> showShareSheet(BuildContext context, String link) => showActionShee
       }),
       SheetAction(Icons.ios_share, 'Share via', () => context.deps.sharer.share(link)),
     ]);
+
+const kMuteDurations = {'1h': 'For 1 hour', '24h': 'For 24 hours', '1w': 'For 1 week', 'forever': 'Until I turn it back on'};
+
+/// UPD-09 / CHT-02.2: choose how long to mute; returns '1h', '24h', '1w' or 'forever'.
+Future<String?> pickMuteDuration(BuildContext context, {required String title, required String body}) => showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      builder: (c) => _MuteSheet(title: title, body: body),
+    );
+
+class _MuteSheet extends StatefulWidget {
+  const _MuteSheet({required this.title, required this.body});
+  final String title, body;
+  @override
+  State<_MuteSheet> createState() => _MuteSheetState();
+}
+
+class _MuteSheetState extends State<_MuteSheet> {
+  String? _pick;
+  @override
+  Widget build(BuildContext context) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(widget.title, style: KText.headingSmall),
+            const SizedBox(height: 8),
+            Text(widget.body, style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
+            const SizedBox(height: 8),
+            RadioGroup<String>(
+              groupValue: _pick,
+              onChanged: (v) => setState(() => _pick = v),
+              child: Column(children: [
+                for (final e in kMuteDurations.entries)
+                  RadioListTile<String>(value: e.key, title: Text(e.value, style: KText.paragraphLarge), contentPadding: EdgeInsets.zero, activeColor: KColors.surfaceInverted),
+              ]),
+            ),
+            const SizedBox(height: 12),
+            KeysButton('Mute', onPressed: _pick == null ? null : () => Navigator.pop(context, _pick)),
+          ]),
+        ),
+      );
+}
+
+/// Black date block used on update cards and the update detail (UPD-01.2).
+class DateBlock extends StatelessWidget {
+  const DateBlock(this.date, {super.key, this.dot = false, this.size = 46});
+  final DateTime date;
+  final bool dot;
+  final double size;
+  static const _m = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  @override
+  Widget build(BuildContext context) => Semantics(
+        label: '${date.day} ${_m[date.month - 1]}',
+        child: SizedBox(
+          width: size,
+          height: size * 1.3,
+          child: Stack(clipBehavior: Clip.none, children: [
+            Container(
+              decoration: BoxDecoration(color: KColors.surfaceInverted, borderRadius: BorderRadius.circular(KRadius.sm)),
+              alignment: Alignment.center,
+              child: ExcludeSemantics(
+                child: Column(mainAxisSize: MainAxisSize.min, children: [
+                  Text('${date.day}', style: KText.paragraphMediumLarge.copyWith(color: KColors.textInverse, fontWeight: FontWeight.w700, height: 1.1)),
+                  const SizedBox(height: 4),
+                  Text(_m[date.month - 1], style: KText.paragraphSmall.copyWith(color: KColors.textInverse, fontWeight: FontWeight.w600)),
+                ]),
+              ),
+            ),
+            if (dot)
+              Positioned(
+                right: -3,
+                top: -3,
+                child: Container(width: 11, height: 11, decoration: BoxDecoration(color: KColors.error, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 1.5))),
+              ),
+          ]),
+        ),
+      );
+}
+
+/// Document row with type badge, size and a download icon.
+class DocumentTile extends StatelessWidget {
+  const DocumentTile({super.key, required this.name, required this.meta, required this.onTap, this.fileType = 'PDF', this.dense = false});
+  final String name, meta, fileType;
+  final VoidCallback onTap;
+  final bool dense;
+  @override
+  Widget build(BuildContext context) => Semantics(
+        container: true,
+        button: true,
+        label: 'Download $name',
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(KRadius.md),
+          child: Container(
+            padding: EdgeInsets.all(dense ? 8 : 12),
+            decoration: BoxDecoration(color: KColors.surfaceSubtle, borderRadius: BorderRadius.circular(KRadius.md)),
+            child: ExcludeSemantics(
+              child: Row(children: [
+                Container(
+                  width: dense ? 36 : 44, height: dense ? 42 : 52, alignment: Alignment.center,
+                  decoration: BoxDecoration(color: const Color(0xFFFDECEA), borderRadius: BorderRadius.circular(6)),
+                  child: Text(fileType, style: KText.paragraphMediumSmall.copyWith(color: KColors.error, fontSize: dense ? 10 : 12)),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text(name, style: KText.paragraphMediumLarge.copyWith(fontSize: dense ? 14 : 15), maxLines: 2, overflow: TextOverflow.ellipsis),
+                    const SizedBox(height: 2),
+                    Text(meta, style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
+                  ]),
+                ),
+                const Icon(Icons.download_outlined),
+              ]),
+            ),
+          ),
+        ),
+      );
+}
+
+String fileSize(num bytes) => bytes >= 1024 * 1024 ? '${(bytes / 1024 / 1024).toStringAsFixed(1)} MB' : '${(bytes / 1024).ceil()} KB';

@@ -84,6 +84,27 @@ Answers from Dorcas (5 Nov 2026) and defaults chosen where the sheet says
 | CBM-08.2: "Getting started" video guide | Not built; no videos yet. New members see the success screen | Dorcas, 5 Nov 2026 |
 | Board announcement copy | Uses "their" where the design says "his" | Neutral copy |
 
+## Milestone 4 defaults (please confirm)
+
+| Topic | Default | Why |
+| --- | --- | --- |
+| Who sees sub-community updates | Residents of the chosen streets and buildings; committee members see every update so they can manage them | UPD-01.4 |
+| Images per update (UPD-D2) | Up to 10 | No maximum in the design or PRD |
+| Audience picker search (UPD-D3) | Included: search streets and buildings by name | Shown in the design |
+| Pins (UPD-D4) | Each resident pins up to 3 updates for themselves | UPD-08 |
+| "Set this as my default audience" | Not built; each update starts at All residents | No rule for it in the PRD |
+| "Schedule this update" | Not built | Scheduling is a later-phase item |
+| Unread updates | Unread until opened, and again when someone else adds an additional update. Authors have read their own | UPD-01.2 tint and dot |
+| Additional update @tags | Committee members only | UPD-06.3 |
+| Chat tabs | All, Primary, Groups, Clubs, Events, Services, Volunteering. Services and Volunteering stay empty until those features exist | CHT-01.2 |
+| Chat notifications | Delivered live in the app and by push; not added to the in-app notification list | Avoids a duplicate list |
+| Blocking in a direct chat | The person who blocked cannot send until they unblock ("You blocked this user. Tap to unblock."). The blocked person's messages show Sent and are never delivered | CHT-05.5 |
+| Leaving the board or the community | The person also leaves the community's update chats | UCH-04.2 |
+| Voice notes | Up to 10 minutes and 25 MB; tap the mic to record, tap send to stop and send | CHT-07 |
+| Photos per message | Up to 10, or one video (60 s, 100 MB), or one document (25 MB), sent separately | Same limits as posts |
+| Forwarding | Up to 5 chats, with an optional note | CHT-08.4 |
+| Group system messages | Use the person's name, also for your own actions ("Amy Duncan created this group") | One text for everyone |
+
 ## Shared report reasons (XFR-03.1)
 
 1. Spam or misleading

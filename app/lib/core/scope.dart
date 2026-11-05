@@ -1,12 +1,13 @@
 import 'package:flutter/widgets.dart';
 import 'api.dart';
+import 'realtime.dart';
 import 'services.dart';
 import 'session.dart';
 
 /// Everything screens need, provided once at the top of the tree. Tests
 /// build it with fakes.
 class Deps {
-  Deps({required this.api, required this.session, required this.media, required this.social, required this.cards, required this.sharer, required this.store, this.videoLength});
+  Deps({required this.api, required this.session, required this.media, required this.social, required this.cards, required this.sharer, required this.store, this.videoLength, this.recorder, Realtime? realtime}) : realtime = realtime ?? NoRealtime();
   final ApiClient api;
   final Session session;
   final MediaPicker media;
@@ -16,6 +17,9 @@ class Deps {
   final LocalStore store;
   /// Reads a picked video's length (FED-04.3). Null skips the client check; the server re-checks.
   final Future<Duration?> Function(PickedFile file)? videoLength;
+  /// Voice notes; null hides the microphone.
+  final VoiceRecorder? recorder;
+  final Realtime realtime;
 }
 
 class AppScope extends InheritedWidget {

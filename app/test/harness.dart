@@ -104,7 +104,8 @@ class Harness {
     await t.pumpAndSettle();
   }
 
-  String get location => router.routerDelegate.currentConfiguration.uri.path;
+  /// Path of the top route, including pushed ones.
+  String get location => router.routerDelegate.currentConfiguration.last.matchedLocation;
 }
 
 // A real 1x1 PNG, padded with zeros to the size a test needs.

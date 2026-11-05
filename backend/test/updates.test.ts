@@ -157,3 +157,31 @@ describe('UPD-12 / UPD-13 / UPD-14 resolve, delete, resolved search', () => {
     expect((await call('GET', `/updates/${r.id}`, { token: house })).body.error.message).toBe('This post has been removed for violating Keys Guidelines');
   });
 });
+
+describe('UPD-01.2 unseen state and edit data', () => {
+  it('a new update is unseen until opened; new additional updates make it unseen again', async () => {
+    const r = await call('POST', '/updates', { token: chair, body: { title: 'Bin day moved', details: 'Collection moves to Thursday.' } });
+    const id = r.body.update.id;
+    const card = async () => (await call('GET', '/updates', { token: house })).body.updates.find((u: any) => u.id === id);
+    expect((await card()).seen).toBe(false);
+    await call('GET', `/updates/${id}`, { token: house });
+    expect((await card()).seen).toBe(true);
+    await call('POST', `/updates/${id}/additional`, { token: chair, body: { text: 'And again next week.' } });
+    expect(await card()).toMatchObject({ seen: false, newAdditional: 1 });
+    expect(r.body.update).toMatchObject({ imageMedia: [], documentId: null });
+  });
+
+  it('/me says whether the resident is on the committee', async () => {
+    expect(await me(chair)).toMatchObject({ boardRole: 'Chair', isCommittee: true });
+    expect(await me(house)).toMatchObject({ boardRole: null, isCommittee: false });
+  });
+});
+
+describe('UPD-01.2 the author', () => {
+  it('has read their own update and follow-ups', async () => {
+    const id = (await call('POST', '/updates', { token: chair, body: { title: 'Parking bay works', details: 'Bays 1-4 closed.' } })).body.update.id;
+    await call('POST', `/updates/${id}/additional`, { token: chair, body: { text: 'Now bays 1-6.' } });
+    const card = (await call('GET', '/updates', { token: chair })).body.updates.find((u: any) => u.id === id);
+    expect(card).toMatchObject({ seen: true, newAdditional: 0 });
+  });
+});
