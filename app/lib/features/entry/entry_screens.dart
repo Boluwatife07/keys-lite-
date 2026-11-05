@@ -141,6 +141,7 @@ class ChooseAccountScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget option(String asset, String title, String body, VoidCallback onTap) => Semantics(
+          container: true,
           button: true,
           label: title,
           child: InkWell(

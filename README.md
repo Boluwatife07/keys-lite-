@@ -15,7 +15,7 @@ sheet and the Resident APP Figma files.
 | --- | --- | --- |
 | 1 | Onboarding and login, Learning experience, Address verification, cross-feature foundations (media limits, reports, share links) | Done |
 | 2 | Profile and settings, Feed, Polls | Done |
-| 3 | Committee board, Voting | |
+| 3 | Committee board, Voting | Done |
 | 4 | Updates, Update chat, Chat | |
 | 5 | Free events, Free clubs, Calendar | |
 

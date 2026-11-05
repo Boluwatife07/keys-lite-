@@ -143,6 +143,7 @@ class KeysButton extends StatelessWidget {
       ButtonVariant.light => (KColors.surfaceDefault, KColors.textPrimary, null),
     };
     return Semantics(
+      container: true,
       button: true,
       enabled: enabled,
       label: label,
@@ -488,6 +489,7 @@ class ChoiceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
+      container: true,
       selected: selected,
       button: true,
       label: '$title. $subtitle',
@@ -529,6 +531,7 @@ class OptionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
+      container: true,
       selected: selected,
       button: true,
       child: InkWell(

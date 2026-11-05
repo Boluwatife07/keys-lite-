@@ -6,6 +6,8 @@ import 'core/feed_models.dart';
 import 'features/feed/compose.dart';
 import 'features/feed/feed_screens.dart';
 import 'features/feed/post_card.dart';
+import 'features/community/board_screens.dart';
+import 'features/community/proposals.dart';
 import 'features/home/home_shell.dart';
 import 'features/home/notifications_screen.dart';
 import 'features/polls/create_poll.dart';
@@ -78,5 +80,14 @@ GoRouter buildRouter({String initial = '/', List<RouteBase> extraRoutes = const 
         GoRoute(path: '/media', builder: (_, s) => MediaViewer(urls: List<String>.from(_m(s)['urls']), index: _m(s)['index'] ?? 0, caption: _m(s)['caption'])),
         GoRoute(path: '/video', builder: (_, s) => VideoScreen(url: s.extra as String)),
         GoRoute(path: '/notifications', builder: (_, _) => const NotificationsScreen()),
+        GoRoute(path: '/board', builder: (_, _) => const BoardScreen()),
+        GoRoute(path: '/board/join', builder: (_, s) => JoinBoardScreen(create: _m(s)['create'] == true, role: _m(s)['role'], seatId: _m(s)['seatId'])),
+        GoRoute(path: '/board/done', builder: (_, s) => BoardDoneScreen(title: _m(s)['title'], message: _m(s)['message'], pending: _m(s)['pending'] == true)),
+        GoRoute(path: '/board/manage', builder: (_, _) => const ManageSeatsScreen()),
+        GoRoute(path: '/board/tiers', builder: (_, _) => const TiersScreen()),
+        GoRoute(path: '/board/exit', builder: (_, _) => const ExitBoardScreen()),
+        GoRoute(path: '/board/invite', builder: (_, _) => const BoardInviteScreen()),
+        GoRoute(path: '/board/propose', builder: (_, s) => ProposeScreen(type: _m(s)['type'], subject: Map<String, dynamic>.from(_m(s)['subject']), seats: List<Map<String, dynamic>>.from(_m(s)['seats']))),
+        GoRoute(path: '/board/proposals/:id', builder: (_, s) => ProposalDetailScreen(id: s.pathParameters['id']!)),
       ],
     );

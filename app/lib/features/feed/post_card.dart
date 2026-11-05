@@ -100,6 +100,7 @@ class _PostCardState extends State<PostCard> {
           child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Expanded(
               child: Semantics(
+                container: true,
                 button: true,
                 label: 'Open ${p.author.name}\'s profile',
                 child: GestureDetector(
@@ -175,6 +176,7 @@ class _Action extends StatelessWidget {
   final bool selected;
   @override
   Widget build(BuildContext context) => Semantics(
+        container: true,
         button: true,
         selected: selected,
         label: label,

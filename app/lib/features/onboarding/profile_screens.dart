@@ -192,6 +192,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> with Busy {
         const SizedBox(height: 24),
         Center(
           child: Semantics(
+            container: true,
             button: true,
             label: _photo == null ? 'Add profile picture' : 'Change profile picture',
             child: GestureDetector(

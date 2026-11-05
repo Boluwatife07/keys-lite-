@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/models.dart';
 import '../../core/scope.dart';
 import '../feed/feed_screens.dart';
+import '../community/community_tab.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/widgets.dart';
 import 'learning_tour.dart';
@@ -75,7 +76,7 @@ class _HomeShellState extends State<HomeShell> {
     final me = context.session.me;
     final pages = [
       _HomeTab(keys: keys, feedKey: _feedKey, tab: _homeTab, onTab: (i) => setState(() => _homeTab = i), onCreate: _create),
-      const _Placeholder(title: 'Community', body: 'Your committee board and community hub.'),
+      const CommunityTab(),
       const _Placeholder(title: 'Services', body: 'Recommended vendors and bookings arrive with the Keys services release.'),
       const _Placeholder(title: 'Events', body: 'Browse community events, track the ones you have joined, or create something new.'),
       const _Placeholder(title: 'Clubs', body: 'Join an existing group, create your own, or use a template.'),
@@ -92,6 +93,7 @@ class _HomeShellState extends State<HomeShell> {
               key: keys.profile,
               onTap: () => context.push('/profile'),
               child: Semantics(
+                container: true,
                 button: true,
                 label: 'Profile',
                 child: CircleAvatar(

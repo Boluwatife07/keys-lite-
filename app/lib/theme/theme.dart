@@ -18,6 +18,16 @@ ThemeData buildTheme() {
       backgroundColor: KColors.surfaceInverted,
       contentTextStyle: TextStyle(fontFamily: 'Inter', color: KColors.textInverse, fontSize: 14),
     ),
+    // Grey pills as in the design (role chips, board tabs, filters).
+    chipTheme: const ChipThemeData(
+      backgroundColor: KColors.surfaceSubtle,
+      selectedColor: KColors.surfaceInverted,
+      side: BorderSide.none,
+      shape: StadiumBorder(),
+      labelStyle: TextStyle(fontFamily: 'Inter', fontSize: 14, color: KColors.textPrimary),
+      secondaryLabelStyle: TextStyle(fontFamily: 'Inter', fontSize: 14, color: KColors.textInverse),
+      showCheckmark: false,
+    ),
     bottomSheetTheme: const BottomSheetThemeData(
       backgroundColor: KColors.surfaceDefault,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(KRadius.lg))),

@@ -346,6 +346,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             const SizedBox(height: 16),
             Center(
               child: Semantics(
+                container: true,
                 button: true,
                 label: 'Change profile photo',
                 child: GestureDetector(

@@ -117,6 +117,7 @@ class _ChoiceRow extends StatelessWidget {
   final VoidCallback onTap;
   @override
   Widget build(BuildContext context) => Semantics(
+        container: true,
         selected: selected,
         button: true,
         label: o.text,

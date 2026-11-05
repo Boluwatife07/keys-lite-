@@ -94,3 +94,31 @@ App tests: `app/test/feed_test.dart`, `app/test/profile_test.dart`. Checked end 
 | FED-07.2 | Video plays with play/pause/scrub; full-screen rotation not tuned | Device QA |
 | PRF-02.2 | "Chat" opens a placeholder until Chat (milestone 4) | Milestone 4 |
 | FED-19 | Notifications are stored and listed in the app; push sending needs Firebase keys | When keys exist |
+
+## Milestone 3
+
+API tests: `backend/test/board.test.ts`. App tests: `app/test/board_test.dart`. Checked in the browser against the real API.
+
+| Rows | Behaviour | Status |
+| --- | --- | --- |
+| CBM-01 | Community tab: header, Hub, Proposals for committee only; hidden Phase 2 sections | Done |
+| CBM-02 | No committee yet; verified only | Done |
+| CBM-03 | Share community code and link | Done |
+| CBM-04 | Create board: pledge, leadership question, role with About, answers (500) | Done |
+| CBM-05 | Preset roles first come, first served; race refused cleanly | Done |
+| CBM-06 | Apply for extra/champion seat; review; one application at a time; new seat protection; below 5 joins straight away | Done |
+| CBM-07 | Board invite link and share | Done (opening the link inside the app comes with deep-link routing for all items) |
+| CBM-08 | Welcome / Get started after joining | Success screen done; the "Getting started" video guide needs the video asset |
+| CBM-09 | Board: All / Members / Champions, Unoccupied seats, empty champions | Done |
+| CBM-10 | Tiers explainer | Done |
+| CBM-11 | Manage seats (Chair only), Tier 1 champions after 8 presets, occupied seats locked | Done |
+| CBM-12 | Tier rise: Chair notified, banner | Done (milestone prompt waits for CBM-Q2) |
+| CBM-13 / 14 | Exit with reason; Chair hands over | Done |
+| CBM-15 / 16 | Reassign (swap) and remove proposals, 5+ only | Done |
+| CBM-17 | Removed member told | Done (notification) |
+| CBM-18 | Announcements with View reason / Apply / Reassign | Done |
+| CBM-19 | Application and seat rules | Done |
+| VOT-01 | Proposals list, filter, Closes today | Done |
+| VOT-02 - 04 | Join, reassign, remove details, Yes/No, reasons, results and voters | Done |
+| VOT-05 | Rules: 5+, auto Yes, >50% early close, 7 days, ties pass, committee only, seat protection, no longer applicable | Done |
+| VOT-06 | Notifications: created, 24-hour reminder, result, board changes | Done |

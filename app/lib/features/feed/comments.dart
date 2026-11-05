@@ -265,7 +265,7 @@ class _CommentsThreadState extends State<CommentsThread> with Busy {
       child: Padding(
         padding: EdgeInsets.only(top: 12, left: reply ? 44 : 0),
         child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Semantics(button: true, label: 'Open ${a.name}\'s profile', child: GestureDetector(onTap: () => context.push('/users/${a.id}'), child: Avatar(a.photoUrl, size: reply ? 28 : 36))),
+          Semantics(container: true, button: true, label: 'Open ${a.name}\'s profile', child: GestureDetector(onTap: () => context.push('/users/${a.id}'), child: Avatar(a.photoUrl, size: reply ? 28 : 36))),
           const SizedBox(width: 10),
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
