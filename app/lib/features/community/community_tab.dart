@@ -19,6 +19,7 @@ class CommunityTab extends StatefulWidget {
 class CommunityTabState extends State<CommunityTab> {
   Map<String, dynamic>? _c;
   int _tab = 0;
+  int? _milestoneShown;
 
   @override
   void initState() {
@@ -29,7 +30,14 @@ class CommunityTabState extends State<CommunityTab> {
   Future<void> refresh() async {
     try {
       final r = await context.api.get('/community');
-      if (mounted) setState(() => _c = r);
+      if (!mounted) return;
+      setState(() => _c = r);
+      // CBM-Q2: the milestone prompt opens once per visit.
+      final m = r['milestone'];
+      if (m != null && _milestoneShown != m['threshold']) {
+        _milestoneShown = m['threshold'];
+        await showMilestoneSheet(context, Map<String, dynamic>.from(m));
+      }
     } on ApiException catch (e) {
       if (mounted) showToast(context, e.message);
     }
@@ -239,3 +247,136 @@ Future<void> showShareCommunity(BuildContext context, String code, String link) 
         ]),
       ),
     );
+
+/// CBM-Q2: "[N] members strong" prompt, shown once when the community moves up a tier.
+/// Closing it or opening "View new residents" marks it seen.
+Future<void> showMilestoneSheet(BuildContext context, Map<String, dynamic> m) async {
+  final api = context.api;
+  final router = GoRouter.of(context);
+  final view = await showModalBottomSheet<bool>(
+    context: context,
+    isScrollControlled: true,
+    showDragHandle: false,
+    backgroundColor: Colors.transparent,
+    builder: (c) => Container(
+      decoration: const BoxDecoration(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [KColors.brandMuted, KColors.surfaceElevated], stops: [0, 0.79038]),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          // Grabber
+          SizedBox(
+            height: 12,
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(width: 48, height: 4, decoration: BoxDecoration(color: KColors.surfaceDefault.withValues(alpha: 0.7), borderRadius: BorderRadius.circular(100))),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(0, 8, 8, 16),
+            child: Row(children: [
+              const Spacer(),
+              SizedBox(
+                width: 36,
+                height: 36,
+                child: IconButton(padding: EdgeInsets.zero, tooltip: 'Close', icon: const Icon(Icons.close, size: 22, color: KColors.iconDefault), onPressed: () => Navigator.of(c).pop(false)),
+              ),
+            ]),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
+            child: Column(children: [
+              ClipOval(
+                child: Container(
+                  width: 200,
+                  height: 200,
+                  color: const Color(0xFFFEEFD2),
+                  child: Image.asset('assets/images/milestone_welcome.png', fit: BoxFit.cover),
+                ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: 323,
+                child: Column(children: [
+                  Text(m['title'], textAlign: TextAlign.center, style: const TextStyle(fontFamily: 'Inter', fontSize: 20, fontWeight: FontWeight.w600, height: 28 / 20, letterSpacing: -0.3, color: KColors.textPrimary)),
+                  const SizedBox(height: 8),
+                  Text(m['body'], textAlign: TextAlign.center, style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
+                ]),
+              ),
+              const SizedBox(height: 20),
+              const DashedDivider(),
+              const SizedBox(height: 20),
+              KeysButton('View new residents', onPressed: () => Navigator.of(c).pop(true)),
+            ]),
+          ),
+        ]),
+      ),
+    ),
+  );
+  try {
+    await api.post('/community/milestone/seen', {'threshold': m['threshold']});
+  } on ApiException catch (_) {/* shown again next time */}
+  if (view == true) router.push('/community/new-members');
+}
+
+/// Dashed 1px line in surface-subtle (#DDD in the design).
+class DashedDivider extends StatelessWidget {
+  const DashedDivider({super.key, this.color = const Color(0xFFDDDDDD)});
+  final Color color;
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(builder: (_, box) {
+        const dash = 4.0, gap = 4.0;
+        final n = (box.maxWidth / (dash + gap)).floor();
+        return Row(children: [for (var i = 0; i < n; i++) Container(width: dash, height: 1, margin: const EdgeInsets.only(right: gap), color: color)]);
+      });
+}
+
+/// CBM-Q2: "New members" behind "View new residents".
+class NewMembersScreen extends StatefulWidget {
+  const NewMembersScreen({super.key});
+  @override
+  State<NewMembersScreen> createState() => _NewMembersScreenState();
+}
+
+class _NewMembersScreenState extends State<NewMembersScreen> {
+  List<PersonRef>? _people;
+
+  @override
+  void initState() {
+    super.initState();
+    context.api.get('/community/new-members').then((r) {
+      if (mounted) setState(() => _people = [for (final p in r['members']) PersonRef(p)]);
+    }, onError: (e) {
+      if (mounted) showToast(context, e is ApiException ? e.message : 'Something went wrong');
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final people = _people;
+    return Scaffold(
+      backgroundColor: KColors.surfaceDefault,
+      appBar: const PageHeader('New members'),
+      body: people == null
+          ? const Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              padding: const EdgeInsets.fromLTRB(16, 0, 15, 24),
+              itemCount: people.length,
+              itemBuilder: (_, i) => InkWell(
+                onTap: () => context.push('/users/${people[i].id}'),
+                child: Container(
+                  constraints: const BoxConstraints(minHeight: 80),
+                  decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: KColors.borderSubtle))),
+                  child: Row(children: [
+                    Padding(padding: const EdgeInsets.fromLTRB(0, 16, 16, 16), child: Avatar(people[i].photoUrl, size: 48)),
+                    Expanded(child: Text(people[i].name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: 'Inter', fontSize: 14, fontWeight: FontWeight.w500, height: 1, letterSpacing: -0.1, color: KColors.textPrimary))),
+                  ]),
+                ),
+              ),
+            ),
+    );
+  }
+}

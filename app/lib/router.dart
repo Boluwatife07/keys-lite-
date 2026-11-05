@@ -18,6 +18,7 @@ import 'features/events/events_tab.dart';
 import 'features/chat/chat_list.dart';
 import 'features/chat/chat_people.dart';
 import 'features/chat/conversation.dart';
+import 'features/community/community_tab.dart' show NewMembersScreen;
 import 'features/community/board_screens.dart';
 import 'features/community/proposals.dart';
 import 'features/home/home_shell.dart';
@@ -96,6 +97,7 @@ GoRouter buildRouter({String initial = '/', List<RouteBase> extraRoutes = const 
         GoRoute(path: '/video', builder: (_, s) => VideoScreen(url: s.extra as String)),
         GoRoute(path: '/notifications', builder: (_, _) => const NotificationsScreen()),
         GoRoute(path: '/board', builder: (_, _) => const BoardScreen()),
+        GoRoute(path: '/community/new-members', builder: (_, _) => const NewMembersScreen()),
         GoRoute(path: '/board/join', builder: (_, s) => JoinBoardScreen(create: _m(s)['create'] == true, role: _m(s)['role'], seatId: _m(s)['seatId'])),
         GoRoute(path: '/board/done', builder: (_, s) => BoardDoneScreen(title: _m(s)['title'], message: _m(s)['message'], pending: _m(s)['pending'] == true)),
         GoRoute(path: '/board/manage', builder: (_, _) => const ManageSeatsScreen()),

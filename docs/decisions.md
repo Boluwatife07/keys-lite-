@@ -80,7 +80,7 @@ Answers from Dorcas (5 Nov 2026) and defaults chosen where the sheet says
 | Tier drop | Nobody is removed; seats above the new allowance cannot be activated or applied for | CBM-12.4 |
 | Moving home or deactivating | Seat ends (with a Board exit card), applications are cancelled, proposals by or about the person become "No longer applicable" | CBM-19.2, VOT-05.7 |
 | Role descriptions ("About the role") | Short Phase 1 texts without wallet or project powers | Confirmed by Dorcas, 5 Nov 2026 |
-| CBM-Q2: milestone prompt (e.g. "400 members strong") | Not built until thresholds are agreed | Confirmed by Dorcas, 5 Nov 2026 |
+| CBM-Q2: milestone prompt ("[N] members strong") | Fires when the community reaches a new tier: 100, 400 and 700 residents (Dorcas). Each milestone fires once, also with no committee board. Shown on the Community tab to residents who were members when it was reached, for 30 days or until closed or "View new residents" is tapped. "New residents" are those who joined since the previous milestone. Copy says "has welcomed [N] new residents" (exact count, so "over" is dropped). No push notification | `backend/src/modules/board/milestones.ts` |
 | CBM-08.2: "Getting started" video guide | Not built; no videos yet. New members see the success screen | Dorcas, 5 Nov 2026 |
 | Board announcement copy | Uses "their" where the design says "his" | Neutral copy |
 

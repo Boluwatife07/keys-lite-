@@ -142,7 +142,7 @@ describe('CLB-14 club events', () => {
   it('owners and admins create club events for everyone or members only', async () => {
     expect((await call('GET', '/events/create-check?category=club', { token: pres })).body.clubs.map((c: any) => c.name)).toContain('Blues United FC Fans');
     const pid = await placeId(pres, '1 Maple Road');
-    const d = await call('POST', '/events', { token: pres, body: { ...(await eventBasics(pres)), category: 'club', clubId: blues.id, audience: 'members', title: 'Watch party', startAt: inDays(2), endAt: inDays(2, 21), format: 'physical', placeId: pid, tags: ['Social'] } });
+    const d = await call('POST', '/events', { token: pres, body: { ...(await eventBasics(pres)), category: 'club', clubId: blues.id, audience: 'members', title: 'Watch party', startAt: inDays(5), endAt: inDays(5, 21), format: 'physical', placeId: pid, tags: ['Social'] } });
     expect(d.status).toBe(200);
     await call('POST', `/events/${d.body.event.id}/launch`, { token: pres });
     expect(await notes(ben)).toContain('club_event');

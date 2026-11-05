@@ -9,6 +9,7 @@ class KColors {
   static const textLink = Color(0xFF329CFF);
   static const iconDefault = Color(0xFF171717);
   static const borderDefault = Color(0xFFE8E8E8);
+  static const borderSubtle = Color(0xFFF3F3F3);
   static const borderStrong = Color(0xFF282828);
   static const surfaceDefault = Color(0xFFFFFFFF);
   static const surfaceSubtle = Color(0xFFF3F3F3);
@@ -16,6 +17,8 @@ class KColors {
   static const surfaceInverted = Color(0xFF171717);
   static const brand = Color(0xFFFFD12A);
   static const brandSubtle = Color(0xFFFFF9EA);
+  static const brandMuted = Color(0xFFFFF4CC);
+  static const surfaceElevated = Color(0xFFFFFFFF);
   static const success = Color(0xFF21AE48);
   static const error = Color(0xFFD92D20);
   static const selected = Color(0xFF1C8C86); // selected card outline (home type cards)

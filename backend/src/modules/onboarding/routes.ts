@@ -6,6 +6,7 @@ import { requireUser } from '../../lib/auth.js';
 import { clock } from '../../lib/clock.js';
 import { AppError, badRequest, conflict, forbidden } from '../../lib/errors.js';
 import { LIMITS } from '../../lib/rules.js';
+import { recordMilestones } from '../board/milestones.js';
 import { normalise, places, streetKey } from '../../services/places.js';
 import {
   card, communitiesForStreet, counts, createCommunity, haversineSql, saveAddress, upsertStreet, type CommunityRow,
@@ -81,6 +82,7 @@ async function joinTopLevel(userId: string, communityId: string, db: any) {
      on conflict (user_id) do update set community_id = excluded.community_id, level = null, building_id = null, joined_at = excluded.joined_at`,
     [userId, communityId, clock.now()], db,
   );
+  await recordMilestones(communityId, db);
 }
 
 async function membership(userId: string) {

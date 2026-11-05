@@ -73,6 +73,51 @@ class KeysHeader extends StatelessWidget {
   }
 }
 
+/// Figma "Page Header": 48 high, 16 side padding, 26px back caret, 16 gap,
+/// title Inter SemiBold 18 / -0.2.
+class PageHeader extends StatelessWidget implements PreferredSizeWidget {
+  const PageHeader(this.title, {super.key, this.actions = const [], this.onBack, this.showBack = true});
+  final String title;
+  final List<Widget> actions;
+  final VoidCallback? onBack;
+  final bool showBack;
+  static const titleStyle = TextStyle(fontFamily: 'Inter', fontSize: 18, fontWeight: FontWeight.w600, height: 1, letterSpacing: -0.2);
+
+  @override
+  Size get preferredSize => const Size.fromHeight(48);
+
+  @override
+  Widget build(BuildContext context) => Material(
+        color: KColors.surfaceDefault,
+        child: SafeArea(
+          bottom: false,
+          child: SizedBox(
+            height: 48,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(children: [
+                if (showBack) ...[
+                  Semantics(
+                    button: true,
+                    label: 'Back',
+                    child: InkResponse(
+                      key: const Key('back'),
+                      radius: 22,
+                      onTap: onBack ?? () => Navigator.of(context).maybePop(),
+                      child: const Icon(Icons.chevron_left, size: 26, color: KColors.iconDefault),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                ],
+                Expanded(child: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: titleStyle.copyWith(color: KColors.textPrimary))),
+                ...actions,
+              ]),
+            ),
+          ),
+        ),
+      );
+}
+
 /// Onboarding progress: orange to yellow gradient on a light track.
 class ProgressBar extends StatelessWidget {
   const ProgressBar({super.key, required this.value});

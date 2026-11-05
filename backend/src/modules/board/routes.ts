@@ -8,6 +8,7 @@ import { exitCheck } from '../../lib/exit.js';
 import { notify } from '../../lib/notify.js';
 import { communityOf, people, person, seatOf } from '../../lib/people.js';
 import { shareLink } from '../links/routes.js';
+import { markMilestoneSeen, milestonePrompt, MILESTONES, newMemberIds } from './milestones.js';
 import { eligibleVoters, evaluate, tally } from './proposals.js';
 import {
   announce, boardFor, broadcast, closesAt, committeeIds, leaveBoard, occupy, PRESET_ROLES, protectSeat, refreshTier, residentCount,
@@ -149,9 +150,28 @@ export async function boardRoutes(app: FastifyInstance) {
       me: { role: seat?.role ?? null, isCommittee: !!seat && seat.kind !== 'champion', isChampion: seat?.kind === 'champion', isChair: seat?.role === 'Chair' },
       proposalsTab: !!seat && seat.kind !== 'champion',
       announcements: board ? await announcements(board.id) : [],
+      milestone: await milestonePrompt(u.id, communityId),
       tierUp: board?.tier_up_at && clock.now().getTime() - board.tier_up_at.getTime() < 14 * 86400000 ? { tier: board.tier } : null,
       shareLink: shareLink('c', c.code),
     };
+  });
+
+  // CBM-Q2: close the milestone prompt (also sent when "View new residents" is tapped).
+  app.post('/community/milestone/seen', async (req) => {
+    const u = requireUser(req);
+    const { threshold } = z.object({ threshold: z.number().int().refine((t) => MILESTONES.includes(t)) }).parse(req.body);
+    const { communityId } = await ctx(u.id);
+    await markMilestoneSeen(u.id, communityId, threshold);
+    return { ok: true };
+  });
+
+  // CBM-Q2: "New members" list behind "View new residents".
+  app.get('/community/new-members', async (req) => {
+    const u = requireUser(req);
+    const { communityId } = await ctx(u.id);
+    const ids = await newMemberIds(u.id, communityId);
+    const ps = await people(ids);
+    return { members: ids.map((id) => ps.get(id)).filter(Boolean) };
   });
 
   async function announcements(boardId: string) {

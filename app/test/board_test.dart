@@ -47,6 +47,36 @@ void main() {
     }
   });
 
+  testWidgets('CBM-Q2 milestone sheet: "View new residents" marks it seen and opens New members', (t) async {
+    final h = Harness();
+    h.fake.on('GET /community', (_, _) => {
+          ...community(),
+          'milestone': {'threshold': 400, 'title': '400 members strong', 'body': "Exciting news! Your community has welcomed 300 new residents. Let's come together to greet them and make them feel at home!", 'newResidents': 300},
+        });
+    h.fake.on('POST /community/milestone/seen', (_, _) => {'ok': true});
+    h.fake.on('GET /community/new-members', (_, _) => {'members': [person('u5', 'Ashley White'), person('u6', 'Brianna Roy')]});
+    await h.pump(t, const Scaffold(body: CommunityTab()));
+    expect(find.text('400 members strong'), findsOneWidget);
+    expect(find.textContaining('welcomed 300 new residents'), findsOneWidget);
+    await t.tap(find.text('View new residents'));
+    await t.pumpAndSettle();
+    expect(h.fake.lastBody('POST /community/milestone/seen'), {'threshold': 400});
+    expect(h.location, '/community/new-members');
+    expect(find.text('New members'), findsOneWidget);
+    expect(find.text('Brianna Roy'), findsOneWidget);
+  });
+
+  testWidgets('CBM-Q2 closing the milestone sheet marks it seen', (t) async {
+    final h = Harness();
+    h.fake.on('GET /community', (_, _) => {...community(), 'milestone': {'threshold': 100, 'title': '100 members strong', 'body': 'x', 'newResidents': 100}});
+    h.fake.on('POST /community/milestone/seen', (_, _) => {'ok': true});
+    await h.pump(t, const Scaffold(body: CommunityTab()));
+    await t.tap(find.byTooltip('Close'));
+    await t.pumpAndSettle();
+    expect(find.text('100 members strong'), findsNothing);
+    expect(h.fake.lastBody('POST /community/milestone/seen'), {'threshold': 100});
+  });
+
   testWidgets('CBM-01 / CBM-18 committee member sees Hub | Proposals and announcements with View reason', (t) async {
     final h = Harness();
     h.fake.on('GET /community', (_, _) => community(board: board(), role: 'Treasurer', committee: true));
