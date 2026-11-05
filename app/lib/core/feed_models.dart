@@ -58,6 +58,10 @@ class Post {
   DateTime get createdAt => DateTime.parse(json['createdAt']).toLocal();
   bool get edited => json['editedAt'] != null;
   String get shareLink => json['shareLink'];
+  /// CLB-13: club announcement info; likes only.
+  Map<String, dynamic>? get club => json['club'];
+  bool get canComment => json['canComment'] != false;
+  bool get canDelete => json['canDelete'] == true || isMine;
 }
 
 class Comment {

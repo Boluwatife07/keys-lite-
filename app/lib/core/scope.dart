@@ -7,7 +7,7 @@ import 'session.dart';
 /// Everything screens need, provided once at the top of the tree. Tests
 /// build it with fakes.
 class Deps {
-  Deps({required this.api, required this.session, required this.media, required this.social, required this.cards, required this.sharer, required this.store, this.videoLength, this.recorder, Realtime? realtime}) : realtime = realtime ?? NoRealtime();
+  Deps({required this.api, required this.session, required this.media, required this.social, required this.cards, required this.sharer, required this.store, this.videoLength, this.recorder, Realtime? realtime, this.cameraScanner = false}) : realtime = realtime ?? NoRealtime();
   final ApiClient api;
   final Session session;
   final MediaPicker media;
@@ -20,6 +20,8 @@ class Deps {
   /// Voice notes; null hides the microphone.
   final VoiceRecorder? recorder;
   final Realtime realtime;
+  /// Ticket scanning with the camera (EVT-23); off in tests, which type the code.
+  final bool cameraScanner;
 }
 
 class AppScope extends InheritedWidget {

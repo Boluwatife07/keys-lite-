@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { clock, DAY } from '../src/lib/clock.js';
-import { call, joinStreet, pioneerStreet, placeId, seat, setup, teardown, verify } from './helpers.js';
+import { call, eventBasics, joinStreet, pioneerStreet, placeId, seat, setup, teardown, verify } from './helpers.js';
 
 let chair: string; let ben: string; let cara: string;
 const day = (d: number, hour = 18) => {
@@ -27,7 +27,7 @@ describe('CAL calendar', () => {
 
   it('CAL-04: events for ticket holders and the team; updates for their audience on the posting day', async () => {
     const pid = await placeId(chair, '1 Maple Road');
-    const d = (await call('POST', '/events', { token: chair, body: { category: 'residential', title: 'Movie night', startAt: day(5).toISOString(), endAt: day(5, 21).toISOString(), format: 'physical', placeId: pid, tags: ['Social'] } })).body.event;
+    const d = (await call('POST', '/events', { token: chair, body: { ...(await eventBasics(chair)), category: 'residential', title: 'Movie night', startAt: day(5).toISOString(), endAt: day(5, 21).toISOString(), format: 'physical', placeId: pid, tags: ['Social'] } })).body.event;
     await call('POST', `/events/${d.id}/launch`, { token: chair });
     await call('POST', '/updates', { token: chair, body: { title: 'Bins tomorrow', details: 'Put them out tonight.' } });
     const from = day(-1, 0).toISOString();

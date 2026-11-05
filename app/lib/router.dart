@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'core/models.dart';
 import 'features/auth/auth_screens.dart';
@@ -6,7 +7,14 @@ import 'core/feed_models.dart';
 import 'features/feed/compose.dart';
 import 'features/feed/feed_screens.dart';
 import 'features/feed/post_card.dart';
+import 'features/calendar/calendar.dart';
 import 'features/chat/chat_info.dart';
+import 'features/clubs/club_detail.dart';
+import 'features/clubs/club_form.dart';
+import 'features/clubs/clubs_tab.dart';
+import 'features/events/event_detail.dart';
+import 'features/events/event_form.dart';
+import 'features/events/events_tab.dart';
 import 'features/chat/chat_list.dart';
 import 'features/chat/chat_people.dart';
 import 'features/chat/conversation.dart';
@@ -79,7 +87,7 @@ GoRouter buildRouter({String initial = '/', List<RouteBase> extraRoutes = const 
         GoRoute(path: '/settings/password', builder: (_, _) => const PasswordScreen(create: false)),
         GoRoute(path: '/settings/password/create', builder: (_, _) => const PasswordScreen(create: true)),
         GoRoute(path: '/settings/deactivate', builder: (_, _) => const DeactivateScreen()),
-        GoRoute(path: '/feed/compose', builder: (_, s) => ComposeScreen(initialText: _m(s)['text'], edit: _m(s)['edit'] as Post?, welcomeImage: _m(s)['welcomeImage'] == true)),
+        GoRoute(path: '/feed/compose', builder: (_, s) => ComposeScreen(initialText: _m(s)['text'], edit: _m(s)['edit'] as Post?, welcomeImage: _m(s)['welcomeImage'] == true, clubId: _m(s)['clubId'], clubName: _m(s)['clubName'])),
         GoRoute(path: '/posts/:id', builder: (_, s) => PostDetailScreen(id: s.pathParameters['id']!, initial: s.extra is Post ? s.extra as Post : null)),
         GoRoute(path: '/posts/:id/likes', builder: (_, s) => LikesScreen(path: '/posts/${s.pathParameters['id']}/likes')),
         GoRoute(path: '/polls/create', builder: (_, _) => const CreatePollScreen()),
@@ -109,6 +117,36 @@ GoRouter buildRouter({String initial = '/', List<RouteBase> extraRoutes = const 
         GoRoute(path: '/chats/:id/add', builder: (_, s) => PickMembersScreen(chatId: s.pathParameters['id']!)),
         GoRoute(path: '/chats/:id/settings', builder: (_, s) => GroupSettingsScreen(id: s.pathParameters['id']!)),
         GoRoute(path: '/chats/:id/requests', builder: (_, s) => JoinRequestsScreen(id: s.pathParameters['id']!)),
+        GoRoute(
+          path: '/events/create',
+          builder: (_, s) => EventFormScreen(
+            category: _m(s)['category'],
+            clubs: List<Map<String, dynamic>>.from(_m(s)['clubs'] ?? []),
+            template: _m(s)['template'] == null ? null : Map<String, dynamic>.from(_m(s)['template']),
+            clubId: _m(s)['clubId'],
+          ),
+        ),
+        GoRoute(path: '/events/templates', builder: (_, _) => const EventTemplatesScreen()),
+        GoRoute(path: '/events/search', builder: (_, _) => const EventSearchScreen()),
+        GoRoute(path: '/events/:id', builder: (_, s) => EventDetailScreen(id: s.pathParameters['id']!)),
+        GoRoute(path: '/events/:id/edit', builder: (_, s) => EventFormScreen(eventId: s.pathParameters['id']!)),
+        GoRoute(path: '/events/:id/attendees', builder: (_, s) => AttendeesScreen(id: s.pathParameters['id']!)),
+        GoRoute(path: '/events/:id/scan', builder: (_, s) => ScanScreen(id: s.pathParameters['id']!)),
+        GoRoute(path: '/events/:id/ratings', builder: (_, s) => RatingsScreen(id: s.pathParameters['id']!)),
+        GoRoute(path: '/tickets/:id', builder: (_, s) => TicketScreen(id: s.pathParameters['id']!)),
+        GoRoute(path: '/clubs', builder: (_, _) => Scaffold(appBar: AppBar(title: const Text('Clubs')), body: const ClubsTab())),
+        GoRoute(path: '/clubs/create', builder: (_, s) => ClubFormScreen(template: _m(s)['template'] == null ? null : Map<String, dynamic>.from(_m(s)['template']))),
+        GoRoute(path: '/clubs/create/members', builder: (_, _) => const ClubInviteScreen()),
+        GoRoute(path: '/clubs/created', builder: (_, s) => ClubCreatedScreen(result: _m(s))),
+        GoRoute(path: '/clubs/search', builder: (_, _) => const ClubSearchScreen()),
+        GoRoute(path: '/clubs/templates', builder: (_, _) => const ClubTemplatesScreen()),
+        GoRoute(path: '/clubs/mine', builder: (_, _) => const MyClubsScreen()),
+        GoRoute(path: '/clubs/:id', builder: (_, s) => ClubDetailScreen(id: s.pathParameters['id']!)),
+        GoRoute(path: '/clubs/:id/edit', builder: (_, s) => ClubFormScreen(edit: _m(s))),
+        GoRoute(path: '/clubs/:id/members', builder: (_, s) => ClubMembersScreen(id: s.pathParameters['id']!)),
+        GoRoute(path: '/clubs/:id/invite', builder: (_, s) => ClubInviteScreen(clubId: s.pathParameters['id']!)),
+        GoRoute(path: '/clubs/:id/events', builder: (_, s) => ClubEventsScreen(id: s.pathParameters['id']!)),
+        GoRoute(path: '/calendar', builder: (_, s) => CalendarScreen(eventsOnly: _m(s)['eventsOnly'] == true)),
         GoRoute(path: '/board/proposals/:id', builder: (_, s) => ProposalDetailScreen(id: s.pathParameters['id']!)),
       ],
     );

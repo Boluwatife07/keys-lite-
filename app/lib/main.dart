@@ -30,6 +30,7 @@ void main() {
     videoLength: _videoLength,
     recorder: DeviceVoiceRecorder(),
     realtime: SocketRealtime(api),
+    cameraScanner: true,
   );
   runApp(KeysApp(deps: deps));
 }

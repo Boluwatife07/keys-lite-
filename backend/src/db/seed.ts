@@ -107,6 +107,53 @@ await call('PATCH', `/chats/${group.id}`, amy.token, { description: 'Swap seeds,
 await call('POST', `/chats/${group.id}/messages`, team.brianna.token, { text: 'Morning everyone! The tomatoes are finally ripe 🍅' });
 await call('POST', `/chats/${group.id}/messages`, paula.token, { text: 'Lovely! Anyone have spare compost?' });
 
+// Free events (EVT) and clubs (CLB).
+const day = (d: number, hour: number) => { const t = new Date(); t.setDate(t.getDate() + d); t.setHours(hour, 0, 0, 0); return t.toISOString(); };
+const maple = (await call('GET', '/addresses/autocomplete?q=1%20Maple%20Road', amy.token)).suggestions[0].placeId;
+const fair = (await call('POST', '/events', amy.token, {
+  category: 'residential', title: 'Maple Road summer fair',
+  description: 'Food stalls, games for the kids, live music and a raffle. Bring the whole family and meet your neighbours.',
+  mediaIds: [await upload(amy.token, 'template_flea.jpg'), await upload(amy.token, 'carousel_2.jpg')],
+  startAt: day(6, 12), endAt: day(6, 17), format: 'physical', placeId: maple, tags: ['Social', 'Food & Drink'], capacity: 80,
+  lineup: [{ name: 'The Maple Band', title: 'Local jazz trio' }], cohostIds: [team.ashley.id], acceptVolunteers: true, volunteerCap: 4,
+})).event;
+await call('POST', `/events/${fair.id}/launch`, amy.token);
+await call('POST', `/events/${fair.id}/cohost/accept`, team.ashley.token);
+for (const t of [team.eric, team.brianna, team.ajani, paula]) await call('POST', `/events/${fair.id}/tickets`, t.token);
+await call('POST', `/events/${fair.id}/volunteer`, team.tobias.token);
+const quiz = (await call('POST', '/events', team.eric.token, {
+  category: 'residential', title: 'Pub quiz night', description: 'Teams of up to six. Prizes for the winners and the best team name!',
+  mediaIds: [await upload(team.eric.token, 'template_wine.jpg')],
+  startAt: day(2, 19), endAt: day(2, 22), format: 'physical', placeId: maple, tags: ['Social'],
+})).event;
+await call('POST', `/events/${quiz.id}/launch`, team.eric.token);
+await call('POST', `/events/${quiz.id}/tickets`, amy.token);
+const agm = (await call('POST', '/events', amy.token, {
+  category: 'administrative', title: 'Annual General Meeting', description: 'The committee reviews the year and shares plans for the next.',
+  mediaIds: [await upload(amy.token, 'template_agm.jpg')], startAt: day(14, 18), endAt: day(14, 20), format: 'online', platform: 'zoom',
+  link: 'https://zoom.us/j/123456789', meetingId: '123 456 789', tags: ['Networking'],
+})).event;
+await call('POST', `/events/${agm.id}/launch`, amy.token);
+await call('POST', '/events', amy.token, { category: 'residential', title: 'Book swap', description: 'Bring a book, take a book.', tags: ['Education'] });
+
+const runners = (await call('POST', '/clubs', team.brianna.token, {
+  name: 'Maple Road Runners', description: 'Weekly group runs for all paces, couch-to-5k support and friendly company on the road.',
+  category: 'Sports', memberLimit: 30, coverMediaId: await upload(team.brianna.token, 'club_running.jpg'), inviteIds: [amy.id],
+})).club;
+for (const t of [amy, team.ashley, paula]) await call('POST', `/clubs/${runners.id}/join`, t.token);
+await call('POST', `/clubs/${runners.id}/admins/${team.ashley.id}`, team.brianna.token);
+await call('POST', '/posts', team.brianna.token, { text: 'Welcome runners! Our first group run is this Sunday at 9am from the park gates.', clubId: runners.id, audience: 'all' });
+await call('POST', '/posts', team.ashley.token, { text: 'Members: new club t-shirts are in. Collect yours on Sunday.', clubId: runners.id, audience: 'members' });
+const run5k = (await call('POST', '/events', team.brianna.token, {
+  category: 'club', clubId: runners.id, audience: 'members', title: 'Sunday 5k', description: 'An easy 5k loop around the park. All paces welcome.',
+  mediaIds: [await upload(team.brianna.token, 'club_running.jpg')], startAt: day(4, 9), endAt: day(4, 10), format: 'physical', placeId: maple, tags: ['Social'],
+})).event;
+await call('POST', `/events/${run5k.id}/launch`, team.brianna.token);
+await call('POST', '/clubs', team.omari.token, {
+  name: 'Sweet Treats', description: 'A friendly club for home bakers. Swap recipes and meet up for bake-alongs.',
+  category: 'Food & Drink', memberLimit: 20, coverMediaId: await upload(team.omari.token, 'club_baking.jpg'),
+});
+
 await app.close();
 await pool.end();
 console.log(`
@@ -117,6 +164,8 @@ Demo data ready (password for every account: ${PASSWORD})
   paula@keys.test    applied to be a Champion
   Updates and chats: amy has two updates (one with a group chat), a direct chat with ashley,
   a message request from ben and the "Maple Road Gardeners" group.
+  Events: amy hosts "Maple Road summer fair" (ashley co-hosts) and a draft; amy has a ticket for "Pub quiz night".
+  Clubs: brianna is President of "Maple Road Runners" (amy, ashley and paula are members); omari runs "Sweet Treats".
 To try sign-up from scratch use any new email; codes are printed in the email_outbox table (mock email).
 Test addresses: e.g. "5 Cedar Close" (no community yet), "4 Elm Street" (connected streets), "3 Oak Avenue".
 `);

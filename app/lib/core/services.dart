@@ -119,6 +119,8 @@ class MockCardVerifier implements CardVerifier {
 abstract class Sharer {
   Future<void> share(String text);
   Future<void> copy(String text);
+  /// Shares or saves a generated file, such as a ticket PDF (EVT-20.2).
+  Future<void> shareFile(Uint8List bytes, String name, String mime);
 }
 
 class DeviceSharer implements Sharer {
@@ -126,6 +128,9 @@ class DeviceSharer implements Sharer {
   Future<void> share(String text) => SharePlus.instance.share(ShareParams(text: text));
   @override
   Future<void> copy(String text) => Clipboard.setData(ClipboardData(text: text));
+  @override
+  Future<void> shareFile(Uint8List bytes, String name, String mime) =>
+      SharePlus.instance.share(ShareParams(files: [XFile.fromData(bytes, name: name, mimeType: mime)], fileNameOverrides: [name]));
 }
 
 /// Small persistent values: session token (secure) and device flags.

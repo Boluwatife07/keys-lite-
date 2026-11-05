@@ -18,10 +18,13 @@ const kMaxDocBytes = 25 * 1024 * 1024;
 
 /// FED-02 - FED-05 compose; also edits a post (text and tags, FED-18.2).
 class ComposeScreen extends StatefulWidget {
-  const ComposeScreen({super.key, this.initialText, this.edit, this.welcomeImage = false});
+  const ComposeScreen({super.key, this.initialText, this.edit, this.welcomeImage = false, this.clubId, this.clubName});
   final String? initialText;
   final Post? edit;
   final bool welcomeImage;
+  /// CLB-13.1: a club announcement, for the community or members only.
+  final String? clubId;
+  final String? clubName;
   @override
   State<ComposeScreen> createState() => _ComposeScreenState();
 }
@@ -36,6 +39,7 @@ class _ComposeScreenState extends State<ComposeScreen> with Busy {
   Map<String, dynamic>? _link;
   String? _error;
   bool _failed = false;
+  String _audience = 'all';
 
   bool get _editing => widget.edit != null;
   String get _type => _photos.isNotEmpty ? 'photos' : _video != null ? 'video' : _doc != null ? 'document' : _link != null ? 'link' : 'none';
@@ -138,7 +142,7 @@ class _ComposeScreenState extends State<ComposeScreen> with Busy {
         return;
       }
       Future<String> up(PickedFile f, String kind) async => (await api.upload('/media', bytes: f.bytes, filename: f.name, mime: f.mime, query: {'kind': kind}))['id'];
-      final body = <String, dynamic>{'text': text, 'mentionIds': _tags.idsIn(text)};
+      final body = <String, dynamic>{'text': text, 'mentionIds': _tags.idsIn(text), if (widget.clubId != null) 'clubId': widget.clubId, if (widget.clubId != null) 'audience': _audience};
       if (_photos.isNotEmpty) body['photoIds'] = [for (final p in _photos) await up(p, 'photo')];
       if (_video != null) body['videoId'] = await up(_video!, 'video');
       if (_doc != null) body['document'] = {'mediaId': await up(_doc!.file, 'document'), 'title': _doc!.title};
@@ -223,15 +227,45 @@ class _ComposeScreenState extends State<ComposeScreen> with Busy {
                 ),
                 Avatar(me?.photoUrl, size: 36),
                 const SizedBox(width: 8),
-                // FED-02.4: audience is everyone and cannot change in Phase 1.
-                Semantics(
-                  label: 'Audience: Everyone',
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(border: Border.all(color: KColors.borderDefault), borderRadius: BorderRadius.circular(KRadius.pill)),
-                    child: Text('Everyone', style: KText.paragraphMedium),
+                // FED-02.4: audience is everyone and cannot change in Phase 1; club announcements choose (CLB-13.1).
+                if (widget.clubId == null)
+                  Semantics(
+                    label: 'Audience: Everyone',
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(border: Border.all(color: KColors.borderDefault), borderRadius: BorderRadius.circular(KRadius.pill)),
+                      child: Text('Everyone', style: KText.paragraphMedium),
+                    ),
+                  )
+                else if (!_editing)
+                  Semantics(
+                    button: true,
+                    label: 'Audience: ${_audience == 'all' ? 'Everyone in this community' : 'Only members of this club'}',
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(KRadius.pill),
+                      onTap: () async {
+                        final v = await showModalBottomSheet<String>(
+                          context: context,
+                          builder: (c) => SafeArea(
+                            child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                              Padding(padding: const EdgeInsets.fromLTRB(20, 0, 20, 8), child: Text('Audience', style: KText.headingSmall)),
+                              ListTile(leading: const Icon(Icons.public), title: const Text('Everyone in this community'), onTap: () => Navigator.pop(c, 'all')),
+                              ListTile(leading: const Icon(Icons.groups_outlined), title: const Text('Only members of this club'), onTap: () => Navigator.pop(c, 'members')),
+                            ]),
+                          ),
+                        );
+                        if (v != null) setState(() => _audience = v);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(border: Border.all(color: KColors.borderDefault), borderRadius: BorderRadius.circular(KRadius.pill)),
+                        child: Row(mainAxisSize: MainAxisSize.min, children: [
+                          Text(_audience == 'all' ? 'Everyone' : 'Members only', style: KText.paragraphMedium),
+                          const Icon(Icons.keyboard_arrow_down, size: 18),
+                        ]),
+                      ),
+                    ),
                   ),
-                ),
                 const Spacer(),
                 SizedBox(
                   height: 36,

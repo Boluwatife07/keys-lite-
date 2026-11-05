@@ -120,3 +120,9 @@ export async function seat(token: string, role = 'Chair', kind: 'preset' | 'extr
   const pos = (await one<{ n: number }>('select count(*)::int as n from board_seats where board_id = $1', [b.id]))!.n;
   await one(`insert into board_seats(board_id, kind, role, position, occupant_id, occupied_at) values ($1,$2,$3,$4,$5,now())`, [b.id, kind, role, pos, m.id]);
 }
+
+/** Description and one photo: what a launch needs besides date, place and tags. */
+export async function eventBasics(token: string) {
+  const img = (await upload('/media?kind=photo', token, { name: 'e.png', mime: 'image/png', data: PNG })).body.id;
+  return { description: 'Come along and meet your neighbours.', mediaIds: [img] };
+}

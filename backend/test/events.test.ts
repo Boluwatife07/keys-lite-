@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { one, q } from '../src/db/pool.js';
 import { clock, DAY, HOUR } from '../src/lib/clock.js';
 import { eventJobs } from '../src/modules/events/routes.js';
-import { call, joinStreet, me, pioneerStreet, placeId, PNG, seat, setup, teardown, upload, verify } from './helpers.js';
+import { call, eventBasics, joinStreet, me, pioneerStreet, placeId, PNG, seat, setup, teardown, upload, verify } from './helpers.js';
 
 let host: string; let ben: string; let cara: string; let dan: string; let unverified: string;
 let benId: string; let caraId: string; let danId: string;
@@ -19,7 +19,7 @@ async function draft(token: string, extra: Record<string, unknown> = {}) {
 }
 async function liveEvent(token: string, extra: Record<string, unknown> = {}) {
   const pid = await placeId(token, '1 Maple Road');
-  const d = await draft(token, { startAt: inDays(3), endAt: inDays(3, 21), format: 'physical', placeId: pid, tags: ['Social'], ...extra });
+  const d = await draft(token, { ...(await eventBasics(token)), startAt: inDays(3), endAt: inDays(3, 21), format: 'physical', placeId: pid, tags: ['Social'], ...extra });
   const r = await call('POST', `/events/${d.body.event.id}/launch`, { token });
   expect(r.status).toBe(200);
   return r.body.event;
@@ -66,15 +66,15 @@ describe('EVT-05 / EVT-12 draft, form rules and launch', () => {
     expect((await call('PATCH', `/events/${id}`, { token: host, body: { title: 'Party', tags: ['Music', 'Social', 'Tech', 'Culture'] } })).body.error.message).toBe('You can add a maximum of 3 tags');
     expect((await call('PATCH', `/events/${id}`, { token: host, body: { title: 'Party', capacity: 9 } })).body.error.message).toBe('Minimum of 10');
     // EVT-07.2: single-day.
-    await call('PATCH', `/events/${id}`, { token: host, body: { title: 'Party', startAt: inDays(3), endAt: inDays(4), format: 'online', platform: 'zoom', link: 'https://zoom.us/j/1', meetingId: '123', tags: ['Social'] } });
+    await call('PATCH', `/events/${id}`, { token: host, body: { ...(await eventBasics(host)), title: 'Party', startAt: inDays(3), endAt: inDays(4), format: 'online', platform: 'zoom', link: 'https://zoom.us/j/1', meetingId: '123', tags: ['Social'] } });
     expect((await call('POST', `/events/${id}/launch`, { token: host })).body.error.message).toBe('Residential, administrative and club events are single-day');
-    await call('PATCH', `/events/${id}`, { token: host, body: { title: 'Party', startAt: inDays(3), endAt: inDays(3, 22), format: 'online', platform: 'zoom', link: 'https://zoom.us/j/1', meetingId: '123', tags: ['Social'] } });
+    await call('PATCH', `/events/${id}`, { token: host, body: { ...(await eventBasics(host)), title: 'Party', startAt: inDays(3), endAt: inDays(3, 22), format: 'online', platform: 'zoom', link: 'https://zoom.us/j/1', meetingId: '123', tags: ['Social'] } });
     const l = await call('POST', `/events/${id}/launch`, { token: host, body: { saveAsTemplate: true } });
     expect(l.body.title).toBe('Your event is live!');
     expect((await notes(host))).toContain('event_published');
     expect((await call('GET', '/events/templates', { token: host })).body.personal.map((t: any) => t.name)).toEqual(['Party']);
     // EVT-13.1: title, date and format are locked after launch.
-    const e = await call('PATCH', `/events/${id}`, { token: host, body: { title: 'Renamed', description: 'Bring snacks', startAt: inDays(5), endAt: inDays(5, 22), format: 'physical', tags: ['Music'] } });
+    const e = await call('PATCH', `/events/${id}`, { token: host, body: { ...(await eventBasics(host)), title: 'Renamed', description: 'Bring snacks', startAt: inDays(5), endAt: inDays(5, 22), format: 'physical', tags: ['Music'] } });
     expect(e.body.title).toBe('Event updated!');
     expect(e.body.event).toMatchObject({ title: 'Party', description: 'Bring snacks', format: 'online', tags: ['Music'] });
     // The join link is only for ticket holders and the team.

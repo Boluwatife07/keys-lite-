@@ -59,6 +59,9 @@ class FakeSharer implements Sharer {
   Future<void> share(String text) async => shared.add(text);
   @override
   Future<void> copy(String text) async => copied.add(text);
+  final files = <String>[];
+  @override
+  Future<void> shareFile(Uint8List bytes, String name, String mime) async => files.add(name);
 }
 
 class Harness {

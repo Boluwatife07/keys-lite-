@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { one, q } from '../src/db/pool.js';
 import { clock, DAY, HOUR } from '../src/lib/clock.js';
 import { clubJobs } from '../src/modules/clubs/routes.js';
-import { call, joinStreet, me, pioneerStreet, placeId, PNG, setup, teardown, upload, verify } from './helpers.js';
+import { call, eventBasics, joinStreet, me, pioneerStreet, placeId, PNG, setup, teardown, upload, verify } from './helpers.js';
 
 let pres: string; let ben: string; let cara: string; let dan: string; let unverified: string;
 let benId: string; let caraId: string; let danId: string;
@@ -142,7 +142,7 @@ describe('CLB-14 club events', () => {
   it('owners and admins create club events for everyone or members only', async () => {
     expect((await call('GET', '/events/create-check?category=club', { token: pres })).body.clubs.map((c: any) => c.name)).toContain('Blues United FC Fans');
     const pid = await placeId(pres, '1 Maple Road');
-    const d = await call('POST', '/events', { token: pres, body: { category: 'club', clubId: blues.id, audience: 'members', title: 'Watch party', startAt: inDays(2), endAt: inDays(2, 21), format: 'physical', placeId: pid, tags: ['Social'] } });
+    const d = await call('POST', '/events', { token: pres, body: { ...(await eventBasics(pres)), category: 'club', clubId: blues.id, audience: 'members', title: 'Watch party', startAt: inDays(2), endAt: inDays(2, 21), format: 'physical', placeId: pid, tags: ['Social'] } });
     expect(d.status).toBe(200);
     await call('POST', `/events/${d.body.event.id}/launch`, { token: pres });
     expect(await notes(ben)).toContain('club_event');

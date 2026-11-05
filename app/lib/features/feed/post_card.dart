@@ -13,10 +13,12 @@ import 'social.dart';
 /// One post or poll in the Feed (FED-01.2, FED-06). [onChanged] gets the new
 /// post, or null when it should leave the list (deleted, author muted/blocked).
 class PostCard extends StatefulWidget {
-  const PostCard({super.key, required this.post, required this.onChanged, this.full = false});
+  const PostCard({super.key, required this.post, required this.onChanged, this.full = false, this.showClub = true});
   final Post post;
   final void Function(Post? post) onChanged;
   final bool full;
+  /// Club announcements show which club they came from (hidden on the club page).
+  final bool showClub;
   @override
   State<PostCard> createState() => _PostCardState();
 }
@@ -62,6 +64,7 @@ class _PostCardState extends State<PostCard> {
     }
     final a = p.author;
     await showActionSheet(context, [
+      if (p.canDelete) SheetAction(Icons.delete_outline, 'Delete post', _delete, destructive: true),
       SheetAction(Icons.volume_off_outlined, 'Mute ${a.firstName}', () => muteFromPost(context, a, () => widget.onChanged(null)), subtitle: 'Stop seeing posts from this user for 30 days'),
       SheetAction(Icons.flag_outlined, 'Report this post', () => showReportSheet(context, itemType: p.isPoll ? 'poll' : 'post', itemId: p.id, title: 'Report this post'), subtitle: "${a.firstName} won't know you reported."),
       SheetAction(Icons.block, 'Block ${a.firstName}', () async {
@@ -95,6 +98,18 @@ class _PostCardState extends State<PostCard> {
       color: KColors.surfaceDefault,
       padding: const EdgeInsets.only(top: 12),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        if (p.club != null && widget.showClub)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: InkWell(
+              onTap: () => context.push('/clubs/${p.club!['id']}'),
+              child: Row(children: [
+                const Icon(Icons.groups_outlined, size: 16, color: KColors.textSecondary),
+                const SizedBox(width: 6),
+                Flexible(child: Text(p.club!['name'] ?? '', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary), overflow: TextOverflow.ellipsis)),
+              ]),
+            ),
+          ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -108,7 +123,10 @@ class _PostCardState extends State<PostCard> {
                   child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Avatar(p.author.photoUrl, size: 40),
                     const SizedBox(width: 10),
-                    Expanded(child: AuthorLine(p.author, subtitle: context.session.me?.communityName)),
+                    Expanded(
+                      child: AuthorLine(p.author,
+                          subtitle: p.club != null ? (p.club!['audience'] == 'members' ? 'Members only' : 'All') : context.session.me?.communityName),
+                    ),
                   ]),
                 ),
               ),
@@ -141,8 +159,10 @@ class _PostCardState extends State<PostCard> {
               onTap: p.likeCount == 0 ? null : () => context.push('/posts/${p.id}/likes'),
               child: Text(plural(p.likeCount, 'like'), style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
             ),
-            const SizedBox(width: 12),
-            Text(plural(p.commentCount, 'comment'), style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
+            if (p.canComment) ...[
+              const SizedBox(width: 12),
+              Text(plural(p.commentCount, 'comment'), style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
+            ],
           ]),
         ),
         const Divider(height: 16, indent: 16, endIndent: 16, color: KColors.borderDefault),
@@ -150,7 +170,7 @@ class _PostCardState extends State<PostCard> {
           padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
           child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
             _Action(icon: p.likedByMe ? Icons.favorite : Icons.favorite_border, color: p.likedByMe ? KColors.error : null, label: 'Like', onTap: _toggleLike, selected: p.likedByMe),
-            _Action(icon: Icons.chat_bubble_outline, label: 'Comment', onTap: () async {
+            if (p.canComment) _Action(icon: Icons.chat_bubble_outline, label: 'Comment', onTap: () async {
               final api = context.api;
               await showCommentsSheet(context, p);
               if (!mounted) return;

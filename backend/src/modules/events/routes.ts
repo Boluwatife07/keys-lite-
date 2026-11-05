@@ -81,9 +81,11 @@ async function requireManager(e: Event, userId: string) {
 }
 
 /** Problems that stop a launch (EVT-05.5); a draft can be saved without them. */
-function launchProblems(e: Event) {
+function launchProblems(e: Event, mediaCount: number) {
   const p: string[] = [];
   if (!e.title.trim()) p.push('Add an event title');
+  if (!e.description.trim()) p.push('Add a description');
+  if (!mediaCount) p.push('Add at least one photo or video');
   if (!e.start_at || !e.end_at) p.push('Set the date and time');
   else {
     if (e.end_at <= e.start_at) p.push('The end must be after the start');
@@ -243,7 +245,7 @@ async function detail(e: Event, viewer: string) {
     canEdit: canManageEvent(role) && e.status !== 'cancelled' && !completed,
     canScan: team && e.status === 'live',
     chatId: role && role !== 'cohost_invited' ? e.chat_id : null,
-    launchProblems: e.status === 'draft' ? launchProblems(e) : [],
+    launchProblems: e.status === 'draft' ? launchProblems(e, media.length) : [],
     cancelReason: e.cancel_reason,
     ratings,
     canRate: completed && role !== 'host' && ticket?.status === 'active' && !myRating?.stars,
@@ -414,7 +416,8 @@ export async function eventRoutes(app: FastifyInstance) {
     const e = await loadEvent(id, u.id);
     if (e.host_id !== u.id) throw forbidden('NOT_HOST', 'Only the host can launch this event.');
     if (e.status !== 'draft') throw conflict('ALREADY_LIVE', 'This event is already live.');
-    const problems = launchProblems(e);
+    const mediaCount = (await one<{ n: number }>('select count(*)::int as n from event_media where event_id = $1', [id]))!.n;
+    const problems = launchProblems(e, mediaCount);
     if (problems.length) throw badRequest('NOT_READY', problems[0], { problems });
     await q(`update events set status = 'live', launched_at = $2 where id = $1`, [id, clock.now()]);
     if (saveAsTemplate) {

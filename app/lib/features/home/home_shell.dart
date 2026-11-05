@@ -5,6 +5,9 @@ import '../../core/scope.dart';
 import '../feed/feed_screens.dart';
 import '../community/community_tab.dart';
 import '../updates/updates_list.dart';
+import '../events/events_tab.dart';
+import '../clubs/clubs_tab.dart';
+import '../calendar/calendar.dart';
 import 'dart:async';
 import '../../theme/tokens.dart';
 import '../../widgets/widgets.dart';
@@ -121,8 +124,8 @@ class _HomeShellState extends State<HomeShell> {
       ),
       const CommunityTab(),
       const _Placeholder(title: 'Services', body: 'Recommended vendors and bookings arrive with the Keys services release.'),
-      const _Placeholder(title: 'Events', body: 'Browse community events, track the ones you have joined, or create something new.'),
-      const _Placeholder(title: 'Clubs', body: 'Join an existing group, create your own, or use a template.'),
+      const EventsTab(),
+      const ClubsTab(),
     ];
     return Stack(children: [
       Scaffold(
@@ -227,15 +230,7 @@ class _HomeTab extends StatelessWidget {
         );
     return Column(children: [
       // FED-01.1: Calendar preview above the tabs (calendar items arrive with the Calendar milestone).
-      Padding(
-        key: keys.calendar,
-        padding: const EdgeInsets.fromLTRB(16, 4, 8, 4),
-        child: Row(children: [
-          Text('Upcoming', style: KText.headingXSmall),
-          const Spacer(),
-          TextButton(onPressed: () {}, style: TextButton.styleFrom(foregroundColor: KColors.textPrimary), child: const Text('Calendar →')),
-        ]),
-      ),
+      KeyedSubtree(key: keys.calendar, child: const UpcomingPreview()),
       Row(key: keys.tabs, children: [tabButton('Feed', 0), tabButton('Updates', 1, badge: unseenUpdates)]),
       Expanded(
         child: tab == 0
