@@ -28,7 +28,8 @@ void shot(String name, Widget Function() screen, {Setup? setup, Act? act, Map<St
       // Decode asset images before the capture.
       await t.runAsync(() async {
         for (final e in find.byType(Image).evaluate()) {
-          await precacheImage((e.widget as Image).image, e);
+          final img = (e.widget as Image).image;
+          if (img is! NetworkImage) await precacheImage(img, e);
         }
       });
       await t.pumpAndSettle();

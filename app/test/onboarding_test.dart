@@ -146,13 +146,20 @@ void main() {
     h.fake.on('POST /onboarding/development', (_, _) => {'onboardingStep': 'home_type'});
     await h.pump(t, const ShapeDevelopmentScreen(name: 'Elm Park'), meJson: Harness.me(step: 'community'));
     expect(find.text('Only streets directly connected to your street are shown.'), findsOneWidget);
+    // Add streets is inactive until a street is ticked; Skip is always there.
+    expect(buttonEnabled(t, 'Add streets'), isFalse);
     for (final n in ['A', 'B', 'C', 'D', 'E']) {
-      await t.tap(find.byTooltip('Add $n Road'));
+      await t.ensureVisible(find.text('$n Road'));
+      await t.tap(find.text('$n Road'));
       await t.pump();
     }
     expect(find.text('Maximum of 5 streets can be linked'), findsOneWidget);
-    expect(t.widget<IconButton>(find.widgetWithIcon(IconButton, PhosphorIconsRegular.plusCircle)).onPressed, isNull);
-    await t.tap(find.text('Create development'));
+    // A sixth street cannot be ticked.
+    await t.ensureVisible(find.text('F Road'));
+    await t.tap(find.text('F Road'));
+    await t.pump();
+    expect(find.text('Has its own street community. It will stay linked to both.', findRichText: true), findsNothing);
+    await t.tap(find.text('Add streets').last);
     await t.pumpAndSettle();
     expect(h.fake.lastBody('POST /onboarding/development')['streetKeys'], ['A', 'B', 'C', 'D', 'E']);
   });

@@ -10,6 +10,7 @@ import { authRoutes } from './modules/auth/routes.js';
 import { onboardingRoutes } from './modules/onboarding/routes.js';
 import { verificationRoutes } from './modules/verification/routes.js';
 import { mediaRoutes } from './modules/media/routes.js';
+import { mapRoutes } from './modules/maps/routes.js';
 import { reportRoutes } from './modules/reports/routes.js';
 import { linkRoutes } from './modules/links/routes.js';
 import { meRoutes } from './modules/me/routes.js';
@@ -78,5 +79,6 @@ export async function buildApp(): Promise<FastifyInstance> {
   await app.register(eventRoutes);
   await app.register(clubRoutes);
   await app.register(calendarRoutes);
+  await app.register(mapRoutes);
   return app;
 }

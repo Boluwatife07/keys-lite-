@@ -234,9 +234,10 @@ export async function onboardingRoutes(app: FastifyInstance) {
         `select c.id from streets st join communities c on c.anchor_street_id = st.id and c.type = 'street' where st.street_key = $1`,
         [streetKey(s.name, s.town)],
       );
-      out.push({ key: streetKey(s.name, s.town), name: s.name, town: s.town, hasStreetCommunity: !!existing });
+      out.push({ key: streetKey(s.name, s.town), name: s.name, town: s.town, lat: s.lat, lng: s.lng, hasStreetCommunity: !!existing });
     }
-    return { yourStreet: { name: c.street.name, town: c.street.town }, streets: out, max: LIMITS.devStreetsMax };
+    // lat/lng place the street pins on the app's map.
+    return { yourStreet: { name: c.street.name, town: c.street.town, lat: c.street.lat, lng: c.street.lng }, streets: out, max: LIMITS.devStreetsMax };
   });
 
   // ONB-18, ONB-20: create the development with up to 5 connected streets.

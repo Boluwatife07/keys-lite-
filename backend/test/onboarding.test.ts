@@ -76,6 +76,12 @@ describe('ONB-18 - ONB-20 developments', () => {
     const { token } = await withAddress('d1@keys.test', '4 Elm Street');
     const r = await call('GET', '/onboarding/development/connected-streets', { token });
     expect(r.body.streets.map((s: any) => s.name)).toEqual(['Oak Avenue', 'Hazel Drive', 'Rowan Court', 'Poplar Place', 'Linden Mews', 'Chestnut Row']);
+    // Coordinates for the map pins.
+    expect(typeof r.body.yourStreet.lat).toBe('number');
+    expect(typeof r.body.streets[0].lng).toBe('number');
+    // Without a Maps key the static map is unavailable and the app draws its own.
+    const m = await call('GET', '/maps/static?lat=51.5&lng=-0.1&zoom=15&w=360&h=197', { token });
+    expect(m.status).toBe(404);
   });
   it('ONB-20.2 at most 5 streets; non-connected streets refused', async () => {
     const { token } = await withAddress('d2@keys.test', '6 Elm Street');

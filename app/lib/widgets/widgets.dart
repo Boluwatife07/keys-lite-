@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import '../core/api.dart';
 import '../theme/tokens.dart';
 export 'keys_logo.dart';
+export 'street_map.dart';
 
 // ---------------------------------------------------------------- layout
 
@@ -442,6 +443,32 @@ class _KeysTextFieldState extends State<KeysTextField> {
 }
 
 /// Figma input "Hint" in its error colour: Inter 12/16, no icon.
+/// Figma "Control buttons / Checkbox / Small": 18pt box in a 24pt slot.
+class KCheckbox extends StatelessWidget {
+  const KCheckbox({super.key, required this.value, this.enabled = true});
+  final bool value;
+  final bool enabled;
+  @override
+  Widget build(BuildContext context) {
+    final on = enabled ? KColors.textPrimary : KColors.surfaceMuted;
+    return SizedBox.square(
+      dimension: 24,
+      child: Center(
+        child: Container(
+          width: 18,
+          height: 18,
+          decoration: BoxDecoration(
+            color: value ? on : Colors.transparent,
+            borderRadius: BorderRadius.circular(4),
+            border: Border.all(color: value ? on : (enabled ? KColors.borderStrong : KColors.surfaceMuted), width: 1.5),
+          ),
+          child: value ? Icon(PhosphorIconsBold.check, size: 12, color: enabled ? KColors.textInverse : KColors.surfaceDefault) : null,
+        ),
+      ),
+    );
+  }
+}
+
 /// Figma "Success icon": 120pt green ring with a double tick.
 class SuccessMark extends StatelessWidget {
   const SuccessMark({super.key, this.size = 120});

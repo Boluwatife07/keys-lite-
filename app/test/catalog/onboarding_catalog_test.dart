@@ -79,9 +79,10 @@ void main() {
   shot('shape_development', () => const ShapeDevelopmentScreen(name: 'New Keys Capital'), me: onboardingMe('community'), setup: (h) {
     h.fake.on('GET /onboarding/development/connected-streets', (_, _) => {
           'max': 5,
-          'yourStreet': {'name': 'Dreadnought Walk', 'town': 'London'},
+          'yourStreet': {'name': 'Dreadnought Walk', 'town': 'London', 'lat': 51.4935, 'lng': 0.0035},
           'streets': [
-            for (final s in ['Dowells Street', 'Victoria Parade', 'Thames St', 'Norway St', 'Wood Wharf']) {'name': s, 'town': 'London', 'key': '${s.toLowerCase()}|london'},
+            for (final (i, s) in ['Dowells Street', 'Victoria Parade', 'Thames St', 'Norway St', 'Wood Wharf'].indexed)
+              {'name': s, 'town': 'London', 'key': '${s.toLowerCase()}|london', 'lat': 51.4935 + [0.0012, -0.0009, 0.0004, -0.0013, 0.0010][i], 'lng': 0.0035 + [-0.0016, -0.0011, 0.0013, 0.0019, 0.0024][i]},
           ],
         });
   });
@@ -93,9 +94,9 @@ void main() {
         {'id': 'b4', 'name': 'Building 04', 'residents': 503},
       ]), me: onboardingMe('home_type'));
   shot('name_building', () => const NameBuildingScreen(), me: onboardingMe('home_type'));
-  shot('street_live', () => const CommunityLiveScreen(screen: 'pioneer_live', name: 'Bellenden Road'), me: onboardingMe('profile'));
+  shot('street_live', () => const CommunityLiveScreen(screen: 'live', name: 'Bellenden Road'), me: onboardingMe('profile'));
   shot('welcome_to_street', () => const CommunityLiveScreen(screen: 'welcome', name: 'Bellenden Road'), me: onboardingMe('profile'));
-  shot('building_live', () => const CommunityLiveScreen(screen: 'pioneer_live', name: 'Linden Court', building: true), me: onboardingMe('profile'));
+  shot('building_live', () => const CommunityLiveScreen(screen: 'live', name: 'Linden Court', building: true), me: onboardingMe('profile'));
   // profile, verify, invite
   shot('profile_setup', () => const ProfileSetupScreen(), me: onboardingMe('profile'), setup: (h) {
     h.fake.on('GET /onboarding/defaults', (_, _) => {'bio': 'Hi neighbors! I am new to the area and excited to meet people nearby.'});

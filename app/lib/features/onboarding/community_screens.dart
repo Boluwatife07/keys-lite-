@@ -223,15 +223,29 @@ class CommunityHero extends StatelessWidget {
 /// Figma "Community card" (pick your community): icon disc, teal type
 /// label, name, counts; selected shows a 2pt teal outline and a teal disc.
 class CommunityPickCard extends StatelessWidget {
-  const CommunityPickCard(this.c, {super.key, required this.selected, required this.onTap});
-  final CommunityCard c;
+  CommunityPickCard(CommunityCard c, {super.key, required this.selected, required this.onTap})
+      : type = c.type,
+        typeLabel = c.typeLabel,
+        name = c.name,
+        residents = c.residents,
+        committee = c.committee ?? 0;
+  /// A building row (ONB-17): no committee count.
+  const CommunityPickCard.building({super.key, required this.name, this.residents, required this.selected, required this.onTap})
+      : type = 'building',
+        typeLabel = 'BUILDING',
+        committee = null;
+  final String type;
+  final String typeLabel;
+  final String name;
+  final int? residents;
+  final int? committee;
   final bool selected;
   final VoidCallback onTap;
   static const teal = Color(0xFF008080);
 
   @override
   Widget build(BuildContext context) {
-    final icon = switch (c.type) {
+    final icon = switch (type) {
       'development' => PhosphorIconsRegular.tree,
       'building' => PhosphorIconsRegular.buildings,
       _ => PhosphorIconsRegular.houseLine,
@@ -240,7 +254,7 @@ class CommunityPickCard extends StatelessWidget {
     return Semantics(
       button: true,
       selected: selected,
-      label: '${c.typeLabel} ${c.name}',
+      label: '$typeLabel $name',
       child: Material(
         color: KColors.surfaceDefault,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: selected ? teal : KColors.surfaceSubtle, width: selected ? 2 : 1)),
@@ -260,16 +274,18 @@ class CommunityPickCard extends StatelessWidget {
               Expanded(
                 child: ExcludeSemantics(
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text(c.typeLabel, style: KText.overline.copyWith(color: teal)),
+                    Text(typeLabel.toUpperCase(), style: KText.overline.copyWith(color: teal)),
                     const SizedBox(height: 8),
-                    Text(c.name, style: KText.paragraphMediumLarge),
-                    // Counts show only past 500 residents (CommunityCard).
-                    if (c.residents != null) ...[
+                    Text(name, style: KText.paragraphMediumLarge),
+                    // Counts show only past 500 residents (the API leaves them out).
+                    if (residents != null) ...[
                       const SizedBox(height: 2),
                       Row(children: [
-                        Text('${formatCount(c.residents!)} residents', style: small),
-                        Container(width: 1, height: 10, margin: const EdgeInsets.symmetric(horizontal: 12), color: KColors.borderDefault),
-                        Text('${formatCount(c.committee ?? 0)} committee', style: small),
+                        Text('${formatCount(residents!)} residents', style: small),
+                        if (committee != null) ...[
+                          Container(width: 1, height: 10, margin: const EdgeInsets.symmetric(horizontal: 12), color: KColors.borderDefault),
+                          Text('${formatCount(committee!)} committee', style: small),
+                        ],
                       ]),
                     ],
                   ]),
@@ -731,37 +747,52 @@ class _JoinDevelopmentScreenState extends State<JoinDevelopmentScreen> with Busy
   @override
   Widget build(BuildContext context) {
     final p = _p;
-    Widget row(String label, String value) => Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
+    // Figma 1573:19507: grey summary card with ruled rows.
+    Widget row(String label, Widget value, {bool last = false}) => Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(border: last ? null : Border(bottom: BorderSide(color: KColors.palette.brightness == Brightness.dark ? KColors.borderDefault : const Color(0xFFDDDDDD)))),
           child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            SizedBox(width: 120, child: Text(label, style: KText.paragraphMedium.copyWith(color: KColors.textSecondary))),
-            Expanded(child: Text(value, style: KText.paragraphMediumLarge.copyWith(fontSize: 14))),
+            SizedBox(width: 130, child: Text(label, style: KText.paragraphMedium)),
+            Expanded(child: value),
           ]),
         );
+    final strong = KText.paragraphMedium.copyWith(fontWeight: FontWeight.w500);
     return KeysScaffold(
+      gradient: false,
       header: const KeysHeader(progress: P.create),
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
       body: p == null
           ? const Center(child: Padding(padding: EdgeInsets.all(48), child: CircularProgressIndicator()))
           : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Intro(
-                overline: 'Join existing development',
-                title: 'Add your street to ${p['development']['name']}',
-                body: 'Joining this community will add your street ${p['yourStreet']} to ${p['development']['name']}.',
+              Text('JOIN EXISTING DEVELOPMENT', style: TextStyle(fontFamily: 'Inter', fontSize: 12, height: 28 / 12, letterSpacing: 3, color: KColors.textPrimary)),
+              const SizedBox(height: 12),
+              Text('Add your street to ${p['development']['name']}', style: KText.headingSmall),
+              const SizedBox(height: 8),
+              Text.rich(
+                TextSpan(style: KText.paragraphLarge.copyWith(color: KColors.textSecondary), children: [
+                  const TextSpan(text: 'Joining this community will add your street '),
+                  TextSpan(text: '${p['yourStreet']}', style: TextStyle(fontWeight: FontWeight.w600, color: KColors.textPrimary)),
+                  TextSpan(text: ' to ${p['development']['name']}.'),
+                ]),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                decoration: BoxDecoration(color: KColors.surfaceDefault, borderRadius: BorderRadius.circular(KRadius.md), border: Border.all(color: KColors.borderDefault)),
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                decoration: BoxDecoration(color: KColors.surfaceSubtle, borderRadius: BorderRadius.circular(16)),
                 child: Column(children: [
-                  row('Your street', p['yourStreet']),
-                  Divider(color: KColors.borderDefault, height: 1),
-                  row('Development', p['development']['name']),
-                  Divider(color: KColors.borderDefault, height: 1),
-                  row('Current streets', (p['streets'] as List).join('\n')),
+                  row('Your street', Text('${p['yourStreet']}', style: strong)),
+                  row('Development', Text('${p['development']['name']}', style: strong)),
+                  row(
+                    'Current streets',
+                    Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      for (final st in (p['streets'] as List)) Text('•  $st', style: strong),
+                    ]),
+                    last: true,
+                  ),
                 ]),
               ),
             ]),
-      bottom: KeysButton('Join development', loading: busy, onPressed: p == null ? null : _join),
+      bottom: KeysButton('Join community', loading: busy, onPressed: p == null ? null : _join),
     );
   }
 }
@@ -796,73 +827,124 @@ class _ShapeDevelopmentScreenState extends State<ShapeDevelopmentScreen> with Bu
   @override
   Widget build(BuildContext context) {
     final d = _data;
+    final streets = d == null ? <Map<String, dynamic>>[] : List<Map<String, dynamic>>.from(d['streets']);
     final full = _picked.length >= _max;
+    double? dbl(Object? v) => (v as num?)?.toDouble();
+    // Figma 1300:188241 (4 streets) and 1300:188333 (max reached).
     return KeysScaffold(
-      header: const KeysHeader(progress: P.create),
-      body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        // Copy updated: committee street-adding is Phase 2 (Design vs PRD ONB-D4).
-        const Intro(overline: 'Pioneering a development', title: 'Shape your development', body: 'Add the streets in your development so their residents can join this development community. You can skip this step.'),
-        const SizedBox(height: 16),
-        if (d == null)
-          const Center(child: Padding(padding: EdgeInsets.all(32), child: CircularProgressIndicator()))
-        else ...[
-          Text('Your street', style: KText.overline),
-          const SizedBox(height: 8),
-          _StreetRow(name: d['yourStreet']['name'], trailing: Icon(PhosphorIconsRegular.lock, size: 18, color: KColors.textSecondary)),
-          const SizedBox(height: 20),
-          Row(children: [
-            Expanded(child: Text('Connected streets', style: KText.overline)),
-            Text('${_picked.length}/$_max', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
-          ]),
-          const SizedBox(height: 4),
-          Text('Only streets directly connected to your street are shown.', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
-          const SizedBox(height: 8),
-          for (final s in List<Map<String, dynamic>>.from(d['streets']))
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: _StreetRow(
-                name: s['name'],
-                sub: s['hasStreetCommunity'] == true ? 'Has its own street community. It will stay linked to both.' : null,
-                trailing: _picked.contains(s['key'])
-                    ? IconButton(tooltip: 'Remove ${s['name']}', icon: Icon(PhosphorIconsFill.checkCircle, color: KColors.selected), onPressed: () => setState(() => _picked.remove(s['key'])))
-                    : IconButton(
-                        tooltip: 'Add ${s['name']}',
-                        icon: Icon(PhosphorIconsRegular.plusCircle, color: full ? KColors.textTertiary : KColors.textPrimary),
-                        onPressed: full ? null : () => setState(() => _picked.add(s['key'])),
-                      ),
-              ),
+      gradient: false,
+      header: KeysHeader(
+        progress: P.create,
+        trailing: InkWell(
+          key: const Key('shape-skip'),
+          borderRadius: BorderRadius.circular(KRadius.pill),
+          onTap: busy || d == null ? null : () => _create(skip: true),
+          child: const SizedBox(
+            height: 36,
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: Center(widthFactor: 1, child: Text('Skip', style: TextStyle(fontFamily: 'Inter', fontSize: 12, fontWeight: FontWeight.w600))),
             ),
-          if (full) Padding(padding: const EdgeInsets.only(top: 4), child: ErrorLine('Maximum of $_max streets can be linked')),
+          ),
+        ),
+      ),
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
+      body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        // Committee street-adding is Phase 2 (Design vs PRD ONB-D4), so the
+        // copy stops at "You can skip this step."
+        const Intro(small: true, overline: 'Pioneering a development', title: 'Shape your development', body: 'Add the streets in your development so their residents can join this development community. You can skip this step.'),
+        const SizedBox(height: 36),
+        Container(
+          height: 32,
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          decoration: BoxDecoration(color: const Color(0xFF008080), borderRadius: BorderRadius.circular(8)),
+          child: Row(mainAxisSize: MainAxisSize.min, children: [
+            const Icon(PhosphorIconsRegular.tree, size: 16, color: Colors.white),
+            const SizedBox(width: 4),
+            Text(widget.name, style: KText.paragraphMedium.copyWith(fontWeight: FontWeight.w500, color: Colors.white)),
+          ]),
+        ),
+        const SizedBox(height: 8),
+        if (d == null)
+          const SizedBox(height: 197, child: Center(child: CircularProgressIndicator()))
+        else ...[
+          StreetMap(streets: [
+            if (dbl(d['yourStreet']['lat']) != null) MapStreet(lat: dbl(d['yourStreet']['lat'])!, lng: dbl(d['yourStreet']['lng'])!),
+            for (final s in streets)
+              if (dbl(s['lat']) != null) MapStreet(lat: dbl(s['lat'])!, lng: dbl(s['lng'])!, active: _picked.contains(s['key'])),
+          ]),
+          const SizedBox(height: 36),
+          Text('Add streets', style: KText.paragraphMediumLarge),
+          const SizedBox(height: 4),
+          Text('Only streets directly connected to your street are shown.', style: KText.paragraphSmall.copyWith(color: KColors.textPlaceholder)),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(color: KColors.surfaceSubtle, borderRadius: BorderRadius.circular(12)),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Column(children: [
+                _StreetOption(name: d['yourStreet']['name'], town: d['yourStreet']['town'], checked: true, enabled: false),
+                for (final s in streets)
+                  _StreetOption(
+                    name: s['name'],
+                    town: s['town'],
+                    note: s['hasStreetCommunity'] == true ? 'Has its own street community. It will stay linked to both.' : null,
+                    checked: _picked.contains(s['key']),
+                    enabled: _picked.contains(s['key']) || !full,
+                    onTap: () => setState(() => _picked.contains(s['key']) ? _picked.remove(s['key']) : _picked.add(s['key'])),
+                  ),
+              ]),
+            ),
+          ),
+          if (full) Padding(padding: const EdgeInsets.only(top: 10), child: FieldHint('Maximum of $_max streets can be linked')),
         ],
       ]),
-      bottom: ButtonStack([
-        KeysButton('Create development', loading: busy, onPressed: d == null ? null : () => _create()),
-        KeysButton('Skip', variant: ButtonVariant.ghost, onPressed: busy || d == null ? null : () => _create(skip: true)),
-      ]),
+      bottom: KeysButton('Add streets', loading: busy, onPressed: d == null || _picked.isEmpty ? null : () => _create()),
     );
   }
 }
 
-class _StreetRow extends StatelessWidget {
-  const _StreetRow({required this.name, this.sub, required this.trailing});
+/// Figma "Menu item" with a small checkbox: name, town, checkbox.
+class _StreetOption extends StatelessWidget {
+  const _StreetOption({required this.name, required this.town, this.note, required this.checked, required this.enabled, this.onTap});
   final String name;
-  final String? sub;
-  final Widget trailing;
+  final String town;
+  final String? note;
+  final bool checked;
+  final bool enabled;
+  final VoidCallback? onTap;
   @override
-  Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.only(left: 12, top: 4, bottom: 4),
-        decoration: BoxDecoration(color: KColors.surfaceDefault, borderRadius: BorderRadius.circular(KRadius.sm), border: Border.all(color: KColors.borderDefault)),
-        child: Row(children: [
-          Icon(PhosphorIconsRegular.signpost, size: 20, color: KColors.textSecondary),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(name, style: KText.paragraphMediumLarge.copyWith(fontSize: 15)),
-              if (sub != null) Text(sub!, style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
-            ]),
+  Widget build(BuildContext context) => Semantics(
+        checked: checked,
+        enabled: enabled,
+        label: name,
+        child: Material(
+          color: KColors.surfaceDefault,
+          child: InkWell(
+            onTap: enabled ? onTap : null,
+            child: Container(
+              decoration: BoxDecoration(border: Border(bottom: BorderSide(color: KColors.borderDefault))),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+              child: Row(children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: ExcludeSemantics(
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Text(name, style: KText.paragraphMedium),
+                        const SizedBox(height: 2),
+                        Text(note == null ? town : '$town · $note', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
+                      ]),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                KCheckbox(value: checked, enabled: enabled && onTap != null),
+              ]),
+            ),
           ),
-          SizedBox(height: 44, child: Center(child: trailing)),
-        ]),
+        ),
       );
 }
 
@@ -889,16 +971,19 @@ class _HomeTypeScreenState extends State<HomeTypeScreen> with Busy {
   }
 
   @override
+  // Figma 1300:186168. No back: the community is already joined here.
   Widget build(BuildContext context) => KeysScaffold(
+        gradient: false,
         header: KeysHeader(progress: P.homeType, showBack: false),
+        padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
         body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Intro(overline: 'Your home', title: 'What type of home do you live in?', body: 'This helps us connect you with the right neighbours on Keys.'),
-          const SizedBox(height: 24),
-          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          const Intro(small: true, overline: 'Start something new', title: 'What type of home do you live in?', body: 'This helps us connect you with the right neighbours on Keys.'),
+          const SizedBox(height: 36),
+          IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
             Expanded(child: ChoiceCard(asset: 'assets/images/home_house.png', title: 'House', subtitle: 'Bungalow • Detached house • Semi detached • Townhouse', selected: _type == 'house', onTap: () => setState(() => _type = 'house'))),
             const SizedBox(width: 16),
             Expanded(child: ChoiceCard(asset: 'assets/images/community_building.png', title: 'Building', subtitle: 'Apartment • Maisonette • Duplex • Loft • High rise', selected: _type == 'building', onTap: () => setState(() => _type = 'building'))),
-          ]),
+          ])),
         ]),
         bottom: KeysButton('Proceed', loading: busy, onPressed: _type == null ? null : _proceed),
       );
@@ -922,24 +1007,26 @@ class _PickBuildingScreenState extends State<PickBuildingScreen> with Busy {
   }
 
   @override
+  // Figma 1300:188487.
   Widget build(BuildContext context) => KeysScaffold(
+        gradient: false,
         header: const KeysHeader(progress: P.building),
+        padding: const EdgeInsets.fromLTRB(16, 20, 16, 4),
         body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Intro(overline: 'Your home', title: 'Pick your building', body: 'This helps us connect you with the right neighbours on Keys.'),
-          const SizedBox(height: 24),
+          const Intro(small: true, overline: 'Start something new', title: 'Pick your building', body: 'This helps us connect you with the right neighbours on Keys.'),
+          const SizedBox(height: 36),
           for (final b in widget.buildings) ...[
-            OptionTile(
-              title: b['name'],
-              subtitle: b['residents'] != null ? '${formatCount(b['residents'])} residents' : null,
-              leading: const CircleImage('assets/images/community_building.png', size: 48),
+            CommunityPickCard.building(
+              name: b['name'],
+              residents: b['residents'] as int?,
               selected: _id == b['id'],
               onTap: () => setState(() => _id = b['id']),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
           ],
         ]),
         bottom: ButtonStack([
-          KeysButton('Proceed', loading: busy, onPressed: _id == null ? null : _join),
+          KeysButton('Join', loading: busy, onPressed: _id == null ? null : _join),
           KeysButton("My building isn't listed", variant: ButtonVariant.secondary, onPressed: () => context.push('/onboarding/building/name')),
         ]),
       );
@@ -963,15 +1050,43 @@ class _NameBuildingScreenState extends State<NameBuildingScreen> with Busy {
   }
 
   @override
-  Widget build(BuildContext context) => KeysScaffold(
+  // Figma 1300:186097: the street community the building joins, then the name.
+  Widget build(BuildContext context) {
+    final community = context.session.me?.communityName ?? '';
+    return KeysScaffold(
+        gradient: false,
         header: const KeysHeader(progress: P.building),
+        padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
         body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Intro(overline: 'Pioneering a building', title: 'Name your building', body: "Use the official name of your building. If you're not sure, check your tenancy agreement or documents from your managing agent."),
-          const SizedBox(height: 24),
-          KeysTextField(label: 'Building name', controller: _name, maxLength: 60, error: _error, textCapitalization: TextCapitalization.words, onChanged: (_) => setState(() => _error = null)),
+          const Intro(small: true, overline: 'Pioneering a building', title: 'Name your building', body: "Use the official name of your building. If you're not sure, check your tenancy agreement or documents from your managing agent."),
+          if (community.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(color: KColors.brandSubtle, borderRadius: BorderRadius.circular(16)),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('COMMUNITY', style: KText.overline),
+                Text(community, style: KText.paragraphMediumLarge),
+              ]),
+            ),
+          ],
+          const SizedBox(height: 36),
+          KeysTextField(
+            label: 'Building name',
+            hint: 'Enter name of your building',
+            prefixIcon: PhosphorIconsRegular.buildings,
+            controller: _name,
+            maxLength: 60,
+            showCount: false,
+            error: _error,
+            textCapitalization: TextCapitalization.words,
+            onChanged: (_) => setState(() => _error = null),
+          ),
         ]),
         bottom: KeysButton('Create building', loading: busy, onPressed: _name.text.trim().isEmpty ? null : _create),
       );
+  }
 }
 
 /// ONB-21: "[Name] is live." or "Welcome to [Community]".
@@ -983,20 +1098,23 @@ class CommunityLiveScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final live = screen == 'live';
+    // Figma 1300:186067 / 1300:186198 / 4903:70890. No back: the community
+    // is joined at this point.
     return KeysScaffold(
       header: const KeysHeader(progress: P.live, showBack: false),
+      padding: const EdgeInsets.fromLTRB(16, 52, 16, 52),
       body: Column(children: [
-        const SizedBox(height: 24),
-        Text(live ? '$name is live.' : 'Welcome to $name', style: KText.headingMedium.copyWith(fontSize: 32, height: 40 / 32), textAlign: TextAlign.center),
+        Text(live ? '$name\nis live${building ? '' : '.'}' : 'Welcome to\n$name',
+            style: KText.headingMedium.copyWith(fontSize: 36, height: 48 / 36, letterSpacing: -0.8), textAlign: TextAlign.center),
         const SizedBox(height: 12),
         Text(
           live && !building
               ? "You're the first. Others on your street will be able to join as they sign up."
               : 'Say hello to your neighbours, follow local projects, help shape what happens next',
           textAlign: TextAlign.center,
-          style: KText.paragraphMedium.copyWith(color: KColors.textSecondary),
+          style: KText.paragraphLarge.copyWith(color: KColors.textSecondary),
         ),
-        const SizedBox(height: 40),
+        const SizedBox(height: 64),
         CircleImage(building ? 'assets/images/community_building.png' : 'assets/images/community_live_street.png', size: 270),
       ]),
       bottom: KeysButton('Enter community', onPressed: () => context.go('/onboarding/profile')),
