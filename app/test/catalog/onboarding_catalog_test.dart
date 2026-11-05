@@ -30,6 +30,7 @@ void main() {
     await t.enterText(find.byType(TextField).first, 'amyduncan@gmail.com');
   });
   shot('verify_email_empty', () => const VerifyCodeScreen(email: 'amyduncan@gmail.com', purpose: 'signup'));
+  shot('verify_reset_empty', () => const VerifyCodeScreen(email: 'amyduncan@gmail.com', purpose: 'reset'));
   shot('create_account_empty', () => const CreateAccountScreen(ticket: 't'));
   shot('login_password', () => const PasswordLoginScreen(email: 'amyduncan@gmail.com', firstName: 'Amy'));
   shot('forgot_password', () => const ForgotPasswordScreen(email: 'amyduncan@gmail.com'));
@@ -50,7 +51,7 @@ void main() {
   // community matching
   shot('match_street_found', () => MatchScreen(result: MatchResult({'kind': 'single', 'communities': [card('Bellenden Road', residents: 863)]})), me: onboardingMe('community'));
   shot('match_development_found', () => MatchScreen(result: MatchResult({'kind': 'single', 'communities': [card('New Keys Capital', type: 'development', residents: 1584, committee: 12)]})), me: onboardingMe('community'));
-  shot('match_not_eligible', () => MatchScreen(result: MatchResult({'kind': 'code_mismatch', 'communities': [card('Bellenden Road', residents: 863)]})), me: onboardingMe('community'));
+  shot('match_not_eligible', () => MatchScreen(result: MatchResult({'kind': 'code_ineligible', 'communities': [card('Bellenden Road', residents: 863)]})), me: onboardingMe('community'));
   shot('pick_community', () => MatchScreen(result: MatchResult({
         'kind': 'multiple',
         'communities': [

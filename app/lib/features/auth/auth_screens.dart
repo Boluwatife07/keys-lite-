@@ -196,8 +196,18 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> with Busy {
         const SizedBox(height: 12),
         Text('Enter the 6-digit verification code sent to', style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
         const SizedBox(height: 2),
-        Text(widget.email, style: KText.paragraphMedium),
+        // Figma 1300:189099 (reset): the address, then why, plus a field label.
+        signup
+            ? Text(widget.email, style: KText.paragraphMedium)
+            : Text.rich(TextSpan(style: KText.paragraphMedium, children: [
+                TextSpan(text: widget.email),
+                TextSpan(text: ' to reset your password', style: TextStyle(color: KColors.textSecondary)),
+              ])),
         const SizedBox(height: 36),
+        if (!signup) ...[
+          SizedBox(height: 20, child: OverflowBox(maxHeight: 24, alignment: Alignment.bottomLeft, child: Text('Reset code', style: KText.paragraphMediumLarge))),
+          const SizedBox(height: 8),
+        ],
         CodeInput(controller: _code, error: _error, onCompleted: _verify),
         const SizedBox(height: 20),
         Center(
@@ -316,23 +326,32 @@ class _PasswordLoginScreenState extends State<PasswordLoginScreen> with Busy {
 
   @override
   Widget build(BuildContext context) {
+    // Figma 1300:185572.
     return KeysScaffold(
-      gradient: false,
       header: const KeysHeader(),
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
       body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text('Welcome, ${widget.firstName}', style: KText.headingSmall),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
         Text.rich(TextSpan(style: KText.paragraphMedium.copyWith(color: KColors.textSecondary), children: [
           const TextSpan(text: 'Signing in as '),
           TextSpan(text: widget.email, style: KText.paragraphMedium),
         ])),
-        const SizedBox(height: 24),
+        const SizedBox(height: 36),
         KeysTextField(label: 'Password', controller: _pw, obscure: true, error: _error, autofocus: true, onChanged: (_) => setState(() => _error = null), autofillHints: const [AutofillHints.password]),
-        Align(
-          alignment: Alignment.centerRight,
-          child: LinkText('Forgot password?', onTap: () => context.push('/auth/forgot', extra: {'email': widget.email})),
+        const SizedBox(height: 8),
+        Semantics(
+          button: true,
+          child: InkWell(
+            onTap: () => context.push('/auth/forgot', extra: {'email': widget.email}),
+            borderRadius: BorderRadius.circular(KRadius.pill),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text('Forgot password?', style: KText.labelSemibold.copyWith(decoration: TextDecoration.underline, decorationColor: KColors.textPrimary)),
+            ),
+          ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 36),
         KeysButton('Log in', loading: busy, onPressed: _pw.text.isEmpty ? null : _login),
       ]),
     );
@@ -364,11 +383,15 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> with Busy {
   Widget build(BuildContext context) => KeysScaffold(
         gradient: false,
         header: const KeysHeader(),
+        // Figma 1300:189089.
+        padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
         body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Intro(title: 'Forgot your password?', body: "No worries. Enter your email below and we'll send you a code to reset your password"),
-          const SizedBox(height: 24),
-          KeysTextField(label: 'Email address', controller: _email, keyboardType: TextInputType.emailAddress, error: _error, onChanged: (_) => setState(() => _error = null)),
-          const SizedBox(height: 24),
+          Text('Forgot your password?', style: KText.headingSmall),
+          const SizedBox(height: 8),
+          Text("No worries. Enter your email below and we'll send you a code to reset your password", style: KText.paragraphLarge.copyWith(color: KColors.textSecondary)),
+          const SizedBox(height: 36),
+          KeysTextField(label: 'Email address', hint: 'Enter email address', controller: _email, keyboardType: TextInputType.emailAddress, error: _error, onChanged: (_) => setState(() => _error = null)),
+          const SizedBox(height: 36),
           KeysButton('Send reset code', loading: busy, onPressed: _email.text.trim().isEmpty ? null : _send),
         ]),
       );
@@ -399,29 +422,50 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> with Busy {
   Widget build(BuildContext context) => KeysScaffold(
         gradient: false,
         header: const KeysHeader(),
+        // Figma 1300:189137.
+        padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
         body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Intro(title: 'Set a new password', body: 'Enter your new password'),
-          const SizedBox(height: 24),
-          KeysTextField(label: 'New password', controller: _pw, obscure: true, onChanged: (_) => setState(() {})),
-          PasswordRules(password: _pw.text),
-          const SizedBox(height: 16),
-          KeysTextField(label: 'Confirm new password', controller: _pw2, obscure: true, error: _error, onChanged: (_) => setState(() => _error = null)),
+          Text('Set a new password', style: KText.headingSmall),
+          const SizedBox(height: 12),
+          Text("Choose a strong password you haven't used before. You'll use this to sign in next time.", style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
+          const SizedBox(height: 32),
+          KeysTextField(label: 'New password', hint: 'Enter password', controller: _pw, obscure: true, onChanged: (_) => setState(() {})),
+          PasswordRules(password: _pw.text, large: true),
+          const SizedBox(height: 32),
+          KeysTextField(label: 'Confirm password', hint: 'Enter your password again', controller: _pw2, obscure: true, error: _error, onChanged: (_) => setState(() => _error = null)),
+          const SizedBox(height: 32),
+          KeysButton('Reset password', loading: busy, onPressed: PasswordRules.ok(_pw.text) && _pw2.text.isNotEmpty ? _reset : null),
         ]),
-        bottom: KeysButton('Reset password', loading: busy, onPressed: PasswordRules.ok(_pw.text) && _pw2.text.isNotEmpty ? _reset : null),
       );
 }
 
 class PasswordResetDoneScreen extends StatelessWidget {
   const PasswordResetDoneScreen({super.key});
   @override
-  Widget build(BuildContext context) => KeysScaffold(
-        body: Column(children: [
-          const SizedBox(height: 120),
-          CircleAvatar(radius: 36, backgroundColor: KColors.success, child: Icon(PhosphorIconsRegular.check, color: Colors.white, size: 40)),
-          const SizedBox(height: 24),
-          const Intro(center: true, title: 'Password reset', body: 'Your password has been changed. For your security, you have been signed out on all devices.'),
-        ]),
-        bottom: KeysButton('Proceed to log in', onPressed: () => context.go('/auth/email')),
+  // Figma 1300:189153: centred success block with the action under it.
+  Widget build(BuildContext context) => Scaffold(
+        backgroundColor: KColors.surfaceDefault,
+        body: SafeArea(
+          child: Column(children: [
+            KeysHeader(onBack: () => context.go('/auth/email')),
+            Expanded(
+              child: Center(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+                  child: Column(mainAxisSize: MainAxisSize.min, children: [
+                    const SuccessMark(),
+                    const SizedBox(height: 20),
+                    Text('Password reset', textAlign: TextAlign.center, style: KText.headingXSmall.copyWith(height: 26 / 18, letterSpacing: -0.2)),
+                    const SizedBox(height: 8),
+                    Text('Your password has been updated. Sign in with your new password to continue.', textAlign: TextAlign.center, style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
+                    const SizedBox(height: 20),
+                    KeysButton('Proceed to log in', onPressed: () => context.go('/auth/email')),
+                  ]),
+                ),
+              ),
+            ),
+          ]),
+        ),
       );
 }
 

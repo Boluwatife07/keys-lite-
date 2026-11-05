@@ -11,7 +11,10 @@ export 'keys_logo.dart';
 /// Standard onboarding page: back + progress header, scrolling body, pinned
 /// buttons at the bottom, white to brand-subtle background.
 class KeysScaffold extends StatelessWidget {
-  const KeysScaffold({super.key, this.header, required this.body, this.bottom, this.gradient = true, this.padding = const EdgeInsets.fromLTRB(16, 8, 16, 16)});
+  const KeysScaffold({super.key, this.header, required this.body, this.bottom, this.gradient = true, this.padding = const EdgeInsets.fromLTRB(16, 8, 16, 16), this.fill = false});
+  /// Body is at least as tall as the space, so it can use Expanded/Spacer
+  /// (e.g. a block centred under the intro). Still scrolls when it overflows.
+  final bool fill;
   final Widget? header;
   final Widget body;
   final Widget? bottom;
@@ -30,7 +33,16 @@ class KeysScaffold extends StatelessWidget {
           child: Column(
             children: [
               ?header,
-              Expanded(child: SingleChildScrollView(padding: padding, child: body)),
+              Expanded(
+                child: fill
+                    ? LayoutBuilder(
+                        builder: (context, box) => SingleChildScrollView(
+                          padding: padding,
+                          child: ConstrainedBox(constraints: BoxConstraints(minHeight: box.maxHeight - padding.vertical), child: IntrinsicHeight(child: body)),
+                        ),
+                      )
+                    : SingleChildScrollView(padding: padding, child: body),
+              ),
               // Figma pins the bottom action 12 below the content and right on the
               // home indicator; without a bottom inset keep a 16 margin.
               if (bottom != null) Padding(padding: EdgeInsets.fromLTRB(16, 12, 16, MediaQuery.viewPaddingOf(context).bottom > 0 ? 0 : 16), child: bottom!),
@@ -273,7 +285,7 @@ class ButtonStack extends StatelessWidget {
   final List<Widget> children;
   @override
   Widget build(BuildContext context) => Column(mainAxisSize: MainAxisSize.min, children: [
-        for (var i = 0; i < children.length; i++) ...[if (i > 0) const SizedBox(height: 12), children[i]],
+        for (var i = 0; i < children.length; i++) ...[if (i > 0) const SizedBox(height: 10), children[i]],
       ]);
 }
 
@@ -301,6 +313,9 @@ class KeysTextField extends StatefulWidget {
     required this.controller,
     this.hint,
     this.hintColor,
+    this.prefixIcon,
+    this.showCount = true,
+    this.labelNote,
     this.error,
     this.obscure = false,
     this.maxLength,
@@ -319,6 +334,12 @@ class KeysTextField extends StatefulWidget {
   final TextEditingController controller;
   final String? hint;
   final Color? hintColor;
+  /// Leading 24pt icon inside the field, 8 before the text.
+  final IconData? prefixIcon;
+  /// Shows "n/max" by the label when [maxLength] is set.
+  final bool showCount;
+  /// Grey text after the label, e.g. " (Optional)".
+  final String? labelNote;
   final String? error;
   final bool obscure;
   final int? maxLength;
@@ -346,13 +367,13 @@ class _KeysTextFieldState extends State<KeysTextField> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (widget.label != null || widget.maxLength != null)
+        if (widget.label != null || (widget.maxLength != null && widget.showCount))
           Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: Row(children: [
               // Figma "Input element/Heading": a 20pt row whose 24pt text hangs from the bottom.
-              if (widget.label != null) Expanded(child: SizedBox(height: 20, child: OverflowBox(maxHeight: 24, alignment: Alignment.bottomLeft, child: Text(widget.label!, style: KText.paragraphMediumLarge)))),
-              if (widget.maxLength != null)
+              if (widget.label != null) Expanded(child: SizedBox(height: 20, child: OverflowBox(maxHeight: 24, alignment: Alignment.bottomLeft, child: Text.rich(TextSpan(text: widget.label!, children: [if (widget.labelNote != null) TextSpan(text: widget.labelNote, style: TextStyle(color: KColors.textSecondary))]), style: KText.paragraphMediumLarge)))),
+              if (widget.maxLength != null && widget.showCount)
                 ValueListenableBuilder(
                   valueListenable: widget.controller,
                   builder: (_, v, _) => Text('${v.text.characters.length}/${widget.maxLength}', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
@@ -370,6 +391,7 @@ class _KeysTextFieldState extends State<KeysTextField> {
           padding: const EdgeInsets.only(left: 12, right: 8),
           constraints: const BoxConstraints(minHeight: 48),
           child: Row(children: [
+            if (widget.prefixIcon != null) ...[Icon(widget.prefixIcon, size: 24, color: KColors.iconDefault), const SizedBox(width: 8)],
             Expanded(
               child: TextField(
                 key: widget.fieldKey,
@@ -420,6 +442,19 @@ class _KeysTextFieldState extends State<KeysTextField> {
 }
 
 /// Figma input "Hint" in its error colour: Inter 12/16, no icon.
+/// Figma "Success icon": 120pt green ring with a double tick.
+class SuccessMark extends StatelessWidget {
+  const SuccessMark({super.key, this.size = 120});
+  final double size;
+  @override
+  Widget build(BuildContext context) => Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: KColors.success, width: size / 20)),
+        child: Icon(PhosphorIconsBold.checks, size: size * 0.4, color: KColors.success),
+      );
+}
+
 class FieldHint extends StatelessWidget {
   const FieldHint(this.text, {super.key});
   final String text;
@@ -530,7 +565,9 @@ class _CodeInputState extends State<CodeInput> {
 
 /// Live password rules (ONB-08.2, ONB-10.3).
 class PasswordRules extends StatelessWidget {
-  const PasswordRules({super.key, required this.password, this.showErrors = false});
+  const PasswordRules({super.key, required this.password, this.showErrors = false, this.large = false});
+  /// 14pt rules in text/secondary, as on the reset-password screen.
+  final bool large;
   final String password;
   static const rules = ['Between 8-15 characters', 'Contain letters and numbers', 'At least one special character'];
   static List<bool> check(String p) => [
@@ -554,9 +591,9 @@ class PasswordRules extends StatelessWidget {
         children: List.generate(rules.length, (i) {
           final pass = c[i];
           final fail = showErrors && !pass;
-          final color = pass ? KColors.success : fail ? KColors.error : KColors.textPlaceholder;
+          final color = pass ? KColors.success : fail ? KColors.error : large ? KColors.textSecondary : KColors.textPlaceholder;
           return Padding(
-            padding: EdgeInsets.only(top: i == 0 ? 0 : 5),
+            padding: EdgeInsets.only(top: i == 0 ? 0 : 5, left: large ? 16 : 0),
             child: Row(children: [
               SizedBox.square(
                 dimension: 11,
@@ -569,7 +606,7 @@ class PasswordRules extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 5),
-              Text(rules[i], style: KText.paragraphSmall.copyWith(color: color)),
+              Text(rules[i], style: (large ? KText.paragraphMedium : KText.paragraphSmall).copyWith(color: color)),
             ]),
           );
         }),
@@ -594,19 +631,18 @@ class CircleImage extends StatelessWidget {
       height: size,
       child: Stack(clipBehavior: Clip.none, children: [
         ClipOval(child: Image.asset(asset, width: size, height: size, fit: BoxFit.cover)),
+        // Figma "Approved": 72pt white disc (for a 140 image) holding a 60pt
+        // filled check or cross, 14 past the top-right edge.
         if (badge != null)
           Positioned(
-            right: -size * 0.06,
-            top: -size * 0.02,
+            right: -size * 0.1,
+            top: -size * 0.1,
             child: Container(
-              width: size * 0.43,
-              height: size * 0.43,
+              width: size * 72 / 140,
+              height: size * 72 / 140,
               decoration: BoxDecoration(color: KColors.surfaceDefault, shape: BoxShape.circle),
-              padding: EdgeInsets.all(size * 0.04),
-              child: Container(
-                decoration: BoxDecoration(color: badge == MarkBadge.check ? KColors.success : KColors.error, shape: BoxShape.circle),
-                child: Icon(badge == MarkBadge.check ? PhosphorIconsRegular.check : PhosphorIconsRegular.x, color: Colors.white, size: size * 0.24),
-              ),
+              alignment: Alignment.center,
+              child: Icon(badge == MarkBadge.check ? PhosphorIconsFill.checkCircle : PhosphorIconsFill.xCircle, color: badge == MarkBadge.check ? KColors.success : KColors.error, size: size * 60 / 140),
             ),
           ),
       ]),
@@ -629,24 +665,26 @@ class ChoiceCard extends StatelessWidget {
       selected: selected,
       button: true,
       label: '$title. $subtitle',
+      // Figma card (1300:185987): radius 16, padding 16, 120 image, 20 gap,
+      // Inter Medium 16 title, 12/16 placeholder-grey description.
       child: InkWell(
-        borderRadius: BorderRadius.circular(KRadius.md),
+        borderRadius: BorderRadius.circular(16),
         onTap: onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),
-          padding: const EdgeInsets.fromLTRB(12, 16, 12, 16),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: KColors.surfaceDefault,
-            borderRadius: BorderRadius.circular(KRadius.md),
-            border: Border.all(color: selected ? KColors.selected : KColors.borderDefault, width: selected ? 2 : 1),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: selected ? const Color(0xFF008080) : KColors.surfaceSubtle, width: selected ? 2 : 1),
           ),
           child: ExcludeSemantics(
             child: Column(children: [
-              ClipOval(child: Image.asset(asset, width: 110, height: 110, fit: BoxFit.cover)),
-              const SizedBox(height: 14),
-              Text(title, style: KText.paragraphMediumLarge.copyWith(fontSize: 17)),
-              const SizedBox(height: 4),
-              Text(subtitle, textAlign: TextAlign.center, style: KText.paragraphMedium.copyWith(color: KColors.textSecondary, fontSize: 13)),
+              ClipOval(child: Image.asset(asset, width: 120, height: 120, fit: BoxFit.cover)),
+              const SizedBox(height: 20),
+              Text(title, textAlign: TextAlign.center, style: KText.paragraphMediumLarge),
+              const SizedBox(height: 2),
+              Text(subtitle, textAlign: TextAlign.center, style: KText.paragraphSmall.copyWith(color: KColors.textPlaceholder)),
             ]),
           ),
         ),

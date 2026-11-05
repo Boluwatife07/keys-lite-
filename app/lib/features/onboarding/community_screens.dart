@@ -10,9 +10,9 @@ import '../../widgets/widgets.dart';
 
 // Progress per step, matching the bar in the design.
 class P {
-  static const address = 0.15;
-  static const match = 0.3;
-  static const create = 0.4;
+  static const address = 0.2; // Figma: 72 of 360
+  static const match = 0.5; // Figma: 180 of 360
+  static const create = 0.5;
   static const homeType = 0.5;
   static const building = 0.6;
   static const live = 0.65;
@@ -96,49 +96,99 @@ class _AddressScreenState extends State<AddressScreen> with Busy {
     });
   }
 
+  Widget _suggestionList() => Container(
+        // Figma "menu_list": white card, radius 16, soft shadow, 8 top inset.
+        clipBehavior: Clip.antiAlias,
+        padding: const EdgeInsets.only(top: 8),
+        decoration: BoxDecoration(
+          color: KColors.surfaceElevated,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: const [BoxShadow(color: Color(0x1F000000), blurRadius: 16, offset: Offset(0, 4))],
+        ),
+        child: Material(
+          type: MaterialType.transparency,
+          child: Column(children: [
+            for (final s in _suggestions)
+              InkWell(
+                onTap: () => _pick(s),
+                child: Container(
+                  decoration: BoxDecoration(border: Border(bottom: BorderSide(color: KColors.borderDefault))),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  constraints: const BoxConstraints(minHeight: 48),
+                  child: Row(children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(color: KColors.surfaceSubtle, shape: BoxShape.circle),
+                      child: Icon(PhosphorIconsFill.mapPin, size: 20, color: KColors.iconDefault),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Text(s['primary'], style: KText.paragraphMedium),
+                          const SizedBox(height: 2),
+                          Text(s['secondary'], style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
+                        ]),
+                      ),
+                    ),
+                  ]),
+                ),
+              ),
+          ]),
+        ),
+      );
+
   @override
   Widget build(BuildContext context) {
+    final showList = _suggestions.isNotEmpty;
+    // Figma 1300:185508 (default) and 1300:185546 (suggestions).
     return KeysScaffold(
-      header: KeysHeader(progress: P.address, showBack: false),
+      gradient: false,
+      header: KeysHeader(
+        progress: P.address,
+        onBack: () async {
+          await context.session.logout();
+          if (context.mounted) context.go('/auth/email');
+        },
+      ),
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
       body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Intro(overline: 'Account setup', title: "What's your home address?", body: 'We use your address to find your community. Only your street and community are shown to neighbours.'),
-        const SizedBox(height: 24),
-        KeysTextField(
-          label: 'Home address',
-          controller: _address,
-          hint: 'Start typing your address',
-          error: _addressError,
-          onChanged: _onType,
-          fieldKey: const Key('address-field'),
-          suffix: _picked != null ? Icon(PhosphorIconsFill.checkCircle, color: KColors.success, size: 20) : null,
-        ),
-        if (_suggestions.isNotEmpty)
-          Container(
-            margin: const EdgeInsets.only(top: 6),
-            clipBehavior: Clip.antiAlias,
-            decoration: BoxDecoration(borderRadius: BorderRadius.circular(KRadius.sm), border: Border.all(color: KColors.borderDefault)),
-            child: Material(color: KColors.surfaceDefault, child: Column(children: [
-              for (final s in _suggestions)
-                ListTile(
-                  leading: Icon(PhosphorIconsRegular.mapPin, color: KColors.textSecondary),
-                  title: Text(s['primary'], style: KText.paragraphMediumLarge),
-                  subtitle: Text(s['secondary'], style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
-                  onTap: () => _pick(s),
-                ),
-            ])),
-          ),
-        const SizedBox(height: 20),
-        KeysTextField(
-          label: 'Community code (optional)',
-          controller: _code,
-          hint: 'e.g. BLLEDN',
-          error: _codeError,
-          textCapitalization: TextCapitalization.characters,
-          onChanged: (_) => setState(() => _codeError = null),
-          fieldKey: const Key('code-field-community'),
-        ),
+        const Intro(small: true, overline: 'Home address', title: "What's your home address?", body: 'Enter your home address to find your community. Kindly provide your community code if you have one.'),
+        const SizedBox(height: 36),
+        // The suggestion card floats over the code field, 16 below the address.
+        Stack(clipBehavior: Clip.none, children: [
+          Column(children: [
+            KeysTextField(
+              label: 'Home address',
+              controller: _address,
+              hint: 'Enter your home address',
+              prefixIcon: PhosphorIconsRegular.magnifyingGlass,
+              error: _addressError,
+              onChanged: _onType,
+              fieldKey: const Key('address-field'),
+              suffix: _picked != null ? Icon(PhosphorIconsFill.checkCircle, color: KColors.success, size: 20) : null,
+            ),
+            const SizedBox(height: 32),
+            KeysTextField(
+              label: 'Community code',
+              labelNote: ' (Optional)',
+              controller: _code,
+              hint: 'Enter your community code',
+              prefixIcon: PhosphorIconsRegular.key,
+              error: _codeError,
+              textCapitalization: TextCapitalization.characters,
+              onChanged: (_) => setState(() => _codeError = null),
+              fieldKey: const Key('code-field-community'),
+            ),
+          ]),
+          if (showList) Positioned(top: 92, left: 0, right: 0, child: _suggestionList()),
+        ]),
+        if (showList) SizedBox(height: (_suggestions.length * 57.0 + 8 + 16 - 76).clamp(0, double.infinity)),
       ]),
-      bottom: KeysButton('Continue', loading: busy, onPressed: _address.text.trim().isEmpty ? null : _continue),
+      // Inactive while suggestions are open; a typed address that was not
+      // picked is refused with an error on Continue (ONB-11.3).
+      bottom: KeysButton('Continue', loading: busy, onPressed: _address.text.trim().isEmpty || (showList && _picked == null) ? null : _continue),
     );
   }
 }
@@ -150,21 +200,86 @@ class CommunityHero extends StatelessWidget {
   final MarkBadge? badge;
   @override
   Widget build(BuildContext context) {
+    // Figma 1300:185679: code pill, 32, image, 32, type + name + counts.
     return Column(children: [
-      if (c.json['code'] != null)
+      if (c.json['code'] != null) ...[
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(color: KColors.surfaceSubtle, borderRadius: BorderRadius.circular(KRadius.pill)),
-          child: Text((c.json['code'] as String).split('').join(' '), style: KText.paragraphMediumSmall.copyWith(fontFamily: 'Geist', letterSpacing: 2, fontWeight: FontWeight.w600)),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(color: KColors.surfaceSubtle, borderRadius: BorderRadius.circular(16)),
+          child: Text(c.json['code'] as String, style: TextStyle(fontFamily: 'GeistMono', fontWeight: FontWeight.w500, fontSize: 14, height: 18 / 14, letterSpacing: 5, color: KColors.textPrimary)),
         ),
-      const SizedBox(height: 16),
+        const SizedBox(height: 32),
+      ],
       CircleImage(c.image, size: 140, badge: badge),
-      const SizedBox(height: 24),
+      const SizedBox(height: 32),
       Text(c.typeLabel, style: KText.overline),
       const SizedBox(height: 4),
       Text(c.name, style: KText.headingSmall, textAlign: TextAlign.center),
       if (c.residents != null) ...[const SizedBox(height: 8), Counts(c)],
     ]);
+  }
+}
+
+/// Figma "Community card" (pick your community): icon disc, teal type
+/// label, name, counts; selected shows a 2pt teal outline and a teal disc.
+class CommunityPickCard extends StatelessWidget {
+  const CommunityPickCard(this.c, {super.key, required this.selected, required this.onTap});
+  final CommunityCard c;
+  final bool selected;
+  final VoidCallback onTap;
+  static const teal = Color(0xFF008080);
+
+  @override
+  Widget build(BuildContext context) {
+    final icon = switch (c.type) {
+      'development' => PhosphorIconsRegular.tree,
+      'building' => PhosphorIconsRegular.buildings,
+      _ => PhosphorIconsRegular.houseLine,
+    };
+    final small = KText.paragraphSmall.copyWith(color: KColors.textSecondary);
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: '${c.typeLabel} ${c.name}',
+      child: Material(
+        color: KColors.surfaceDefault,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: selected ? teal : KColors.surfaceSubtle, width: selected ? 2 : 1)),
+        child: InkWell(
+          onTap: onTap,
+          customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(shape: BoxShape.circle, color: selected ? teal : KColors.surfaceSubtle),
+                child: Icon(icon, size: 22, color: selected ? Colors.white : teal),
+              ),
+              const SizedBox(width: 20),
+              Expanded(
+                child: ExcludeSemantics(
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text(c.typeLabel, style: KText.overline.copyWith(color: teal)),
+                    const SizedBox(height: 8),
+                    Text(c.name, style: KText.paragraphMediumLarge),
+                    // Counts show only past 500 residents (CommunityCard).
+                    if (c.residents != null) ...[
+                      const SizedBox(height: 2),
+                      Row(children: [
+                        Text('${formatCount(c.residents!)} residents', style: small),
+                        Container(width: 1, height: 10, margin: const EdgeInsets.symmetric(horizontal: 12), color: KColors.borderDefault),
+                        Text('${formatCount(c.committee ?? 0)} committee', style: small),
+                      ]),
+                    ],
+                  ]),
+                ),
+              ),
+            ]),
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -176,12 +291,12 @@ class Counts extends StatelessWidget {
     final s = KText.paragraphMedium.copyWith(color: KColors.textSecondary);
     return Row(mainAxisSize: MainAxisSize.min, children: [
       Icon(PhosphorIconsRegular.users, size: 18, color: KColors.textSecondary),
-      const SizedBox(width: 4),
+      const SizedBox(width: 8),
       Text('${formatCount(c.residents!)} residents', style: s),
-      Container(width: 1, height: 10, margin: const EdgeInsets.symmetric(horizontal: 10), color: KColors.borderDefault),
+      Container(width: 1, height: 10, margin: const EdgeInsets.symmetric(horizontal: 12), color: KColors.borderDefault),
       Text('${formatCount(c.committee ?? 0)} committee', style: s),
       if (c.distanceKm != null) ...[
-        Container(width: 1, height: 10, margin: const EdgeInsets.symmetric(horizontal: 10), color: KColors.borderDefault),
+        Container(width: 1, height: 10, margin: const EdgeInsets.symmetric(horizontal: 12), color: KColors.borderDefault),
         Text('${c.distanceKm}km away', style: s),
       ],
     ]);
@@ -239,6 +354,8 @@ class _MatchScreenState extends State<MatchScreen> with Busy {
         _ => 'Your address is not on ${c.name}. You can continue with your own address to find or create the community for your street.',
       };
 
+  static const _pad = EdgeInsets.fromLTRB(16, 20, 16, 36);
+
   @override
   Widget build(BuildContext context) {
     final r = widget.result;
@@ -246,18 +363,32 @@ class _MatchScreenState extends State<MatchScreen> with Busy {
     switch (r.kind) {
       case 'none':
         final street = context.session.me?.address?['street'] ?? 'your street';
+        // Figma 1300:185969: the pioneer block sits centred in the space left.
         return KeysScaffold(
+          gradient: false,
+          fill: true,
           header: header,
+          padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
           body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Intro(overline: 'Community matching', title: "Your area isn't on Keys yet", body: 'No one has set up a community for $street yet.'),
-            const SizedBox(height: 32),
-            const Center(child: CircleImage('assets/images/pioneer_star.png', size: 180)),
-            const SizedBox(height: 24),
-            Center(child: Text('Be the first', style: KText.headingXSmall)),
-            const SizedBox(height: 8),
-            Center(
-              child: Text("As the community's pioneer, you get to create the community and invite your neighbors.",
-                  textAlign: TextAlign.center, style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
+            Intro(small: true, overline: 'Community matching', title: "Your area isn't on Keys yet", body: 'No one has set up a community for $street yet.'),
+            const SizedBox(height: 36),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40),
+                child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  Container(
+                    width: 180,
+                    height: 180,
+                    clipBehavior: Clip.antiAlias,
+                    decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFFCCE6E6)),
+                    child: Image.asset('assets/images/pioneer_star.png', fit: BoxFit.cover),
+                  ),
+                  const SizedBox(height: 32),
+                  Text('Be the first', textAlign: TextAlign.center, style: KText.headingSmall),
+                  const SizedBox(height: 4),
+                  Text("As the community's pioneer, you get to create the community and invite your neighbors.", textAlign: TextAlign.center, style: KText.paragraphLarge.copyWith(color: KColors.textSecondary)),
+                ]),
+              ),
             ),
           ]),
           bottom: KeysButton('Create my community', onPressed: () => context.push('/onboarding/area')),
@@ -265,35 +396,33 @@ class _MatchScreenState extends State<MatchScreen> with Busy {
       case 'multiple':
         final list = r.communities;
         final chosen = list.where((c) => c.id == _selected).firstOrNull;
+        // Figma 1300:185936.
         return KeysScaffold(
+          gradient: false,
           header: header,
+          padding: const EdgeInsets.fromLTRB(16, 20, 16, 4),
           body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Intro(overline: 'Community matching', title: 'Pick your community', body: 'Your address is associated with the communities below. Please choose the one that best reflects your actual living area.'),
-            const SizedBox(height: 24),
+            const Intro(small: true, overline: 'Community matching', title: 'Pick your community', body: 'Your address is associated with the communities below. Please choose the one that best reflects your actual living area.'),
+            const SizedBox(height: 36),
             for (final c in list) ...[
-              OptionTile(
-                overline: c.typeLabel,
-                title: c.name,
-                subtitle: c.residents != null ? '${formatCount(c.residents!)} residents · ${formatCount(c.committee ?? 0)} committee' : null,
-                leading: CircleImage(c.image, size: 56),
-                selected: c.id == _selected,
-                onTap: () => setState(() => _selected = c.id),
-              ),
-              const SizedBox(height: 12),
+              CommunityPickCard(c, selected: c.id == _selected, onTap: () => setState(() => _selected = c.id)),
+              const SizedBox(height: 16),
             ],
           ]),
           bottom: ButtonStack([
-            KeysButton(chosen == null ? 'Join community' : 'Join ${chosen.name}', loading: busy, onPressed: chosen == null ? null : () => _join(chosen)),
+            KeysButton('Join community', loading: busy, onPressed: chosen == null ? null : () => _join(chosen)),
             KeysButton('My community is not listed', variant: ButtonVariant.secondary, onPressed: _notMine),
           ]),
         );
       case 'code_ineligible':
         final c = r.communities.first;
         return KeysScaffold(
+          gradient: false,
           header: header,
+          padding: _pad,
           body: Column(children: [
-            Intro(overline: 'Community matching', title: "You're not eligible for this community", body: _ineligibleBody(c)),
-            const SizedBox(height: 32),
+            Intro(small: true, overline: 'Community matching', title: "You're not eligible for this community", body: _ineligibleBody(c)),
+            const SizedBox(height: 36),
             CommunityHero(c, badge: MarkBadge.cross),
           ]),
           bottom: KeysButton('Proceed with my address', loading: busy, onPressed: _proceedWithAddress),
@@ -301,10 +430,12 @@ class _MatchScreenState extends State<MatchScreen> with Busy {
       default: // single, code_match, code_parent
         final c = r.communities.first;
         return KeysScaffold(
+          gradient: false,
           header: header,
+          padding: _pad,
           body: Column(children: [
-            Intro(overline: 'Community matching', title: 'We found your community', body: _foundBody(c)),
-            const SizedBox(height: 32),
+            Intro(small: true, overline: 'Community matching', title: 'We found your community', body: _foundBody(c)),
+            const SizedBox(height: 36),
             CommunityHero(c),
           ]),
           bottom: ButtonStack([
@@ -326,12 +457,15 @@ class AreaKindScreen extends StatefulWidget {
 class _AreaKindScreenState extends State<AreaKindScreen> {
   String? _kind;
   @override
+  // Figma 1300:185987.
   Widget build(BuildContext context) => KeysScaffold(
+        gradient: false,
         header: const KeysHeader(progress: P.create),
+        padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
         body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Intro(overline: 'Start something new', title: 'What kind of area do you live in?', body: 'Select the community type that best describes where your home is.'),
-          const SizedBox(height: 24),
-          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          const Intro(small: true, overline: 'Start something new', title: 'What kind of area do you live in?', body: 'Select the community type that best describes where your home is.'),
+          const SizedBox(height: 36),
+          IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
             Expanded(
               child: ChoiceCard(
                 asset: 'assets/images/community_street.png',
@@ -351,7 +485,7 @@ class _AreaKindScreenState extends State<AreaKindScreen> {
                 onTap: () => setState(() => _kind = 'development'),
               ),
             ),
-          ]),
+          ])),
         ]),
         // ONB-14.2: inactive until a type is chosen.
         bottom: KeysButton('Proceed', onPressed: _kind == null ? null : () => context.push(_kind == 'street' ? '/onboarding/street' : '/onboarding/development')),
@@ -384,19 +518,25 @@ class _ConfirmStreetScreenState extends State<ConfirmStreetScreen> with Busy {
   @override
   Widget build(BuildContext context) {
     final street = context.session.me?.address?['street'] ?? '';
+    // Figma 1300:186003: street hero centred under the intro.
     return KeysScaffold(
+      gradient: false,
+      fill: true,
       header: const KeysHeader(progress: P.create),
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
       body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Intro(overline: 'Pioneering a street', title: 'Confirm your street', body: 'The community will be anchored to this street. Neighbours with matching addresses will be able to find and join it.'),
-        const SizedBox(height: 24),
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(color: KColors.surfaceDefault, borderRadius: BorderRadius.circular(KRadius.md), border: Border.all(color: KColors.borderDefault)),
-          child: Row(children: [
-            const CircleImage('assets/images/community_street.png', size: 56),
-            const SizedBox(width: 12),
-            Expanded(child: Text(street, style: KText.paragraphMediumLarge)),
-          ]),
+        const Intro(small: true, overline: 'Pioneering a street', title: 'Confirm your street', body: 'The community will be anchored to this street. Neighbours with matching addresses will be able to find and join it.'),
+        const SizedBox(height: 36),
+        Expanded(
+          child: Center(
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              const CircleImage('assets/images/community_street.png', size: 180),
+              const SizedBox(height: 32),
+              Text('STREET COMMUNITY', style: KText.overline, textAlign: TextAlign.center),
+              const SizedBox(height: 4),
+              Text(street, style: KText.headingSmall, textAlign: TextAlign.center),
+            ]),
+          ),
         ),
       ]),
       bottom: KeysButton('Create community', loading: busy, onPressed: _create),
@@ -427,12 +567,24 @@ class _DevelopmentNameScreenState extends State<DevelopmentNameScreen> with Busy
   }
 
   @override
+  // Figma 1300:188171.
   Widget build(BuildContext context) => KeysScaffold(
+        gradient: false,
         header: const KeysHeader(progress: P.create),
+        padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
         body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Intro(overline: 'Pioneering a development', title: 'Name your development', body: "Use the official name of your development. If you're not sure, check your tenancy agreement or documents from your managing agent."),
-          const SizedBox(height: 24),
-          KeysTextField(label: 'Development name', controller: _name, maxLength: 60, textCapitalization: TextCapitalization.words, onChanged: (_) => setState(() {})),
+          const Intro(small: true, overline: 'Pioneering a development', title: 'Name your development', body: "Use the official name of your development. If you're not sure, check your tenancy agreement or documents from your managing agent."),
+          const SizedBox(height: 36),
+          KeysTextField(
+            label: 'Development name',
+            hint: 'Enter name of your development',
+            prefixIcon: PhosphorIconsRegular.tree,
+            controller: _name,
+            maxLength: 60,
+            showCount: false,
+            textCapitalization: TextCapitalization.words,
+            onChanged: (_) => setState(() {}),
+          ),
         ]),
         bottom: KeysButton('Proceed', loading: busy, onPressed: _name.text.trim().isEmpty ? null : _proceed),
       );
@@ -463,50 +615,94 @@ class SimilarDevelopmentsScreen extends StatelessWidget {
     if (go == true && context.mounted) context.push('/onboarding/development/shape', extra: name);
   }
 
+  // Figma 1573:19454.
   @override
   Widget build(BuildContext context) => KeysScaffold(
+        gradient: false,
         header: const KeysHeader(progress: P.create),
+        padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
         body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Intro(
-            overline: 'Development name check',
-            title: 'Developments with a similar name already exists nearby',
-            body: 'If this is the same development, joining it is the correct choice your street will be added to the existing community.',
-          ),
-          const SizedBox(height: 20),
+          // This frame's label is Inter Regular 10 with 3pt tracking.
+          Text('DEVELOPMENT NAME CHECK', style: TextStyle(fontFamily: 'Inter', fontSize: 10, height: 28 / 10, letterSpacing: 3, color: KColors.textPrimary)),
+          const SizedBox(height: 12),
+          Text('Developments with a similar name already exists nearby', style: KText.headingSmall),
+          const SizedBox(height: 8),
+          Text('If this is the same development, joining it is the correct choice your street will be added to the existing community.', style: KText.paragraphLarge.copyWith(color: KColors.textSecondary)),
           for (final s in similar.map(CommunityCard.new)) ...[
-            InkWell(
-              borderRadius: BorderRadius.circular(KRadius.md),
-              onTap: () => context.push('/onboarding/development/join', extra: s.id),
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(color: KColors.surfaceDefault, borderRadius: BorderRadius.circular(KRadius.md), border: Border.all(color: KColors.borderDefault)),
-                child: Row(children: [
-                  CircleImage(s.image, size: 56),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Text(s.name, style: KText.paragraphMediumLarge),
-                      const SizedBox(height: 2),
-                      Text([
-                        // ONB-13.4: counts only above 500 residents (the API leaves them out otherwise).
-                        if (s.residents != null) ...['${formatCount(s.residents!)} residents', '${formatCount(s.committee ?? 0)} committee'],
-                        '${s.distanceKm}km away',
-                      ].join(' · '), style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
+            const SizedBox(height: 20),
+            SimilarDevelopmentCard(s, onTap: () => context.push('/onboarding/development/join', extra: s.id)),
+          ],
+          const SizedBox(height: 20),
+          Container(height: 1, margin: const EdgeInsets.symmetric(vertical: 1), color: KColors.borderDefault),
+          const SizedBox(height: 20),
+          Text('This is a different development', style: KText.headingXSmall.copyWith(height: 26 / 18, letterSpacing: -0.2)),
+          const SizedBox(height: 8),
+          Text("If you're certain this is a separate development that happens to share a similar name, you can proceed to create your community.", style: KText.paragraphLarge.copyWith(color: KColors.textSecondary)),
+          const SizedBox(height: 20),
+          KeysButton('Continue with creation', variant: ButtonVariant.outline, onPressed: () => _confirmCreate(context)),
+        ]),
+      );
+}
+
+/// Figma "Community cards" on the name check: orange disc with a tree,
+/// name, counts (over 500 residents only), distance tag, caret.
+class SimilarDevelopmentCard extends StatelessWidget {
+  const SimilarDevelopmentCard(this.c, {super.key, required this.onTap});
+  final CommunityCard c;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final small = KText.paragraphSmall.copyWith(color: KColors.textSecondary);
+    return Material(
+      color: KColors.surfaceDefault,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: KColors.borderDefault, width: 2)),
+      child: InkWell(
+        onTap: onTap,
+        customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFFFF8327)),
+              child: const Icon(PhosphorIconsRegular.tree, size: 22, color: Colors.white),
+            ),
+            const SizedBox(width: 20),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(c.name, style: KText.paragraphMediumLarge),
+                if (c.residents != null) ...[
+                  const SizedBox(height: 4),
+                  Row(children: [
+                    Text('${formatCount(c.residents!)} residents', style: small),
+                    Container(width: 1, height: 10, margin: const EdgeInsets.symmetric(horizontal: 12), color: KColors.borderDefault),
+                    Flexible(child: Text('${formatCount(c.committee ?? 0)} committee members', style: small, overflow: TextOverflow.ellipsis)),
+                  ]),
+                ],
+                if (c.distanceKm != null) ...[
+                  const SizedBox(height: 4),
+                  Container(
+                    height: 20,
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    decoration: BoxDecoration(color: const Color(0xFFFFEDE0), borderRadius: BorderRadius.circular(8)),
+                    child: Row(mainAxisSize: MainAxisSize.min, children: [
+                      const Icon(PhosphorIconsFill.mapPin, size: 12, color: Color(0xFFAA571A)),
+                      const SizedBox(width: 4),
+                      Text('${c.distanceKm}km away', style: const TextStyle(fontFamily: 'Inter', fontSize: 10, fontWeight: FontWeight.w500, height: 1.5, color: Color(0xFFAA571A))),
                     ]),
                   ),
-                  Icon(PhosphorIconsRegular.caretRight, color: KColors.textSecondary),
-                ]),
-              ),
+                ],
+              ]),
             ),
-            const SizedBox(height: 12),
-          ],
-          const SizedBox(height: 16),
-          Text('This is a different development', style: KText.paragraphMediumLarge),
-          const SizedBox(height: 4),
-          Text("If you're certain this is a separate development that happens to share a similar name, you can proceed to create your community.", style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
-        ]),
-        bottom: KeysButton('Continue with creation', variant: ButtonVariant.secondary, onPressed: () => _confirmCreate(context)),
-      );
+            const SizedBox(width: 20),
+            Icon(PhosphorIconsRegular.caretRight, size: 20, color: KColors.iconDefault),
+          ]),
+        ),
+      ),
+    );
+  }
 }
 
 /// ONB-19.2 / ONB-19.3: add your street to an existing development, no vote.

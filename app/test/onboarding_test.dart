@@ -80,7 +80,10 @@ void main() {
       {...card('New Keys East', type: 'development', residents: 640), 'distanceKm': 3.4},
     ]), meJson: Harness.me(step: 'community'));
     expect(find.text('1.2km away'), findsOneWidget);
-    expect(find.text('640 residents · 12 committee · 3.4km away'), findsOneWidget);
+    expect(find.text('640 residents'), findsOneWidget);
+    expect(find.text('12 committee members'), findsOneWidget);
+    expect(find.text('3.4km away'), findsOneWidget);
+    expect(find.textContaining('residents'), findsOneWidget);
   });
 
   testWidgets('ONB-13.4 building list hides counts at 500 or fewer', (t) async {
@@ -101,7 +104,7 @@ void main() {
     expect(buttonEnabled(t, 'Join community'), isFalse);
     await t.tap(find.text('New Keys Capital'));
     await t.pump();
-    expect(buttonEnabled(t, 'Join New Keys Capital'), isTrue);
+    expect(buttonEnabled(t, 'Join community'), isTrue);
     await t.tap(find.text('My community is not listed'));
     await t.pumpAndSettle();
     expect(find.text('What kind of area do you live in?'), findsOneWidget);
