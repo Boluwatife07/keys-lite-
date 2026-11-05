@@ -94,9 +94,9 @@ class Harness {
     t.view.physicalSize = const Size(1179, 2556);
     t.view.devicePixelRatio = 3;
     addTearDown(t.view.reset);
-    fake.on('GET /me', (_, __) => meJson ?? me());
+    fake.on('GET /me', (_, _) => meJson ?? me());
     if (meJson != null || fake.routes.containsKey('GET /me')) await deps.session.refresh();
-    router = buildRouter(initial: '/test', extraRoutes: [GoRoute(path: '/test', builder: (_, __) => screen)]);
+    router = buildRouter(initial: '/test', extraRoutes: [GoRoute(path: '/test', builder: (_, _) => screen)]);
     await t.pumpWidget(KeysApp(deps: deps, router: router, listenForLinks: false));
     await t.pumpAndSettle();
   }

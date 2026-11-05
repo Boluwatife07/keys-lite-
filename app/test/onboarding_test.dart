@@ -19,7 +19,7 @@ Map<String, dynamic> card(String name, {String type = 'street', int? residents})
 void main() {
   testWidgets('ONB-11.3 typed address that was not picked from suggestions is refused', (t) async {
     final h = Harness();
-    h.fake.on('GET /addresses/autocomplete', (_, __) => {'suggestions': []});
+    h.fake.on('GET /addresses/autocomplete', (_, _) => {'suggestions': []});
     await h.pump(t, const AddressScreen(), meJson: Harness.me(step: 'address'));
     await t.enterText(find.byKey(const Key('address-field')), '1 Nowhere');
     await t.pump(const Duration(milliseconds: 300));
@@ -30,7 +30,7 @@ void main() {
 
   testWidgets('ONB-11.2 / ONB-12.2 picking a suggestion; invalid code shown under the code field', (t) async {
     final h = Harness();
-    h.fake.on('GET /addresses/autocomplete', (_, __) => {'suggestions': [{'placeId': 'p1', 'primary': '12 Maple Road', 'secondary': 'London SE1 7AA'}]});
+    h.fake.on('GET /addresses/autocomplete', (_, _) => {'suggestions': [{'placeId': 'p1', 'primary': '12 Maple Road', 'secondary': 'London SE1 7AA'}]});
     h.fake.on('POST /onboarding/address', (b, _) => b['communityCode'] == 'ZZZZZZ'
         ? ApiException(400, 'INVALID_COMMUNITY_CODE', 'Invalid community code. Please check and try again.', {'field': 'communityCode'})
         : {'match': {'kind': 'none', 'communities': []}});
@@ -55,7 +55,7 @@ void main() {
 
   testWidgets('ONB-13.1 single match: card, counts hidden under 500, join -> home type', (t) async {
     final h = Harness();
-    h.fake.on('POST /onboarding/join', (_, __) => {'onboardingStep': 'home_type'});
+    h.fake.on('POST /onboarding/join', (_, _) => {'onboardingStep': 'home_type'});
     await h.pump(t, MatchScreen(result: MatchResult({'kind': 'single', 'communities': [card('Bellenden Road')]})), meJson: Harness.me(step: 'community'));
     expect(find.text('We found your community'), findsOneWidget);
     expect(find.text('STREET COMMUNITY'), findsOneWidget);
@@ -92,7 +92,7 @@ void main() {
 
   testWidgets('ONB-12.4 code not eligible -> proceed with my address', (t) async {
     final h = Harness();
-    h.fake.on('POST /onboarding/match', (_, __) => {'match': {'kind': 'none', 'communities': []}});
+    h.fake.on('POST /onboarding/match', (_, _) => {'match': {'kind': 'none', 'communities': []}});
     await h.pump(t, MatchScreen(result: MatchResult({'kind': 'code_ineligible', 'codedName': 'Bellenden Road', 'communities': [card('Bellenden Road')]})), meJson: Harness.me(step: 'community'));
     expect(find.text("You're not eligible for this community"), findsOneWidget);
     await t.tap(find.text('Proceed with my address'));
@@ -102,7 +102,7 @@ void main() {
 
   testWidgets('ONB-15.3 street already created by a neighbour -> offered to join it', (t) async {
     final h = Harness();
-    h.fake.on('POST /onboarding/street', (_, __) => ApiException(409, 'STREET_COMMUNITY_EXISTS', 'exists', {'community': card('Maple Road')}));
+    h.fake.on('POST /onboarding/street', (_, _) => ApiException(409, 'STREET_COMMUNITY_EXISTS', 'exists', {'community': card('Maple Road')}));
     await h.pump(t, const ConfirmStreetScreen(), meJson: Harness.me(step: 'community'));
     expect(find.text('Confirm your street'), findsOneWidget);
     expect(find.text('Maple Road'), findsOneWidget);
@@ -113,12 +113,12 @@ void main() {
 
   testWidgets('ONB-20.2 shape development: max 5 streets', (t) async {
     final h = Harness();
-    h.fake.on('GET /onboarding/development/connected-streets', (_, __) => {
+    h.fake.on('GET /onboarding/development/connected-streets', (_, _) => {
           'yourStreet': {'name': 'Elm Street', 'town': 'London'},
           'max': 5,
           'streets': [for (final n in ['A', 'B', 'C', 'D', 'E', 'F']) {'key': n, 'name': '$n Road', 'town': 'London', 'hasStreetCommunity': n == 'A'}],
         });
-    h.fake.on('POST /onboarding/development', (_, __) => {'onboardingStep': 'home_type'});
+    h.fake.on('POST /onboarding/development', (_, _) => {'onboardingStep': 'home_type'});
     await h.pump(t, const ShapeDevelopmentScreen(name: 'Elm Park'), meJson: Harness.me(step: 'community'));
     expect(find.text('Only streets directly connected to your street are shown.'), findsOneWidget);
     for (final n in ['A', 'B', 'C', 'D', 'E']) {
@@ -146,7 +146,7 @@ void main() {
 
   testWidgets('ONB-22 profile: photo required, too-large error, safety tick, preset bio n/160', (t) async {
     final h = Harness();
-    h.fake.on('GET /onboarding/defaults', (_, __) => {'bio': 'Hi neighbours!'});
+    h.fake.on('GET /onboarding/defaults', (_, _) => {'bio': 'Hi neighbours!'});
     await h.pump(t, const ProfileSetupScreen(), meJson: Harness.me(step: 'profile'));
     expect(find.text('Hi neighbours!'), findsOneWidget);
     expect(find.text('14/160'), findsOneWidget);
@@ -167,7 +167,7 @@ void main() {
 
   testWidgets('ONB-24 invite: copy shows "Link copied", share uses the phone share sheet', (t) async {
     final h = Harness();
-    h.fake.on('GET /communities/mine/invite', (_, __) => {'link': 'https://keys.app/c/MAPLE1', 'message': "Hey! I'm using the Keys app to stay connected to our community. Download it and join us! https://keys.app/c/MAPLE1"});
+    h.fake.on('GET /communities/mine/invite', (_, _) => {'link': 'https://keys.app/c/MAPLE1', 'message': "Hey! I'm using the Keys app to stay connected to our community. Download it and join us! https://keys.app/c/MAPLE1"});
     await h.pump(t, const InviteScreen());
     await t.tap(find.byTooltip('Copy link'));
     await t.pump();

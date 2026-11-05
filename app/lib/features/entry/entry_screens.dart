@@ -101,7 +101,7 @@ class _IntroCarouselState extends State<IntroCarousel> {
             Positioned.fill(top: MediaQuery.sizeOf(context).height * 0.3, child: Image.asset(slides[i].image, fit: BoxFit.cover, alignment: Alignment.topCenter)),
             const DecoratedBox(
               decoration: BoxDecoration(
-                gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, stops: [0.25, 0.45], colors: [Color(0xFF1B1F23), Color(0x001B1F23)]),
+                gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, stops: [0.31, 0.5], colors: [Color(0xFF1B1F23), Color(0x001B1F23)]),
               ),
             ),
           ]),
@@ -121,7 +121,7 @@ class _IntroCarouselState extends State<IntroCarousel> {
                 alignment: Alignment.centerRight,
                 child: TextButton(onPressed: _done, child: const Text('Skip', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600))),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 32),
               Text(slides[_i].title, style: KText.headingMedium.copyWith(color: Colors.white)),
               const SizedBox(height: 12),
               Text(slides[_i].body, style: KText.paragraphLarge.copyWith(color: Colors.white)),

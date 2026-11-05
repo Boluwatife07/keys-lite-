@@ -49,8 +49,8 @@ void main() {
 
   testWidgets('ONB-07 code: wrong code shows the error and clears; resend after 60 s', (t) async {
     final h = Harness();
-    h.fake.on('POST /auth/email/verify', (_, __) => ApiException(400, 'INVALID_CODE', 'Invalid verification code. Please check and try again'));
-    h.fake.on('POST /auth/code/resend', (_, __) => {'resendInSeconds': 60});
+    h.fake.on('POST /auth/email/verify', (_, _) => ApiException(400, 'INVALID_CODE', 'Invalid verification code. Please check and try again'));
+    h.fake.on('POST /auth/code/resend', (_, _) => {'resendInSeconds': 60});
     await h.pump(t, const VerifyCodeScreen(email: 'new@keys.test', purpose: 'signup'));
     expect(find.text('Verify email address'), findsOneWidget);
     expect(find.text('Resend code in 60s'), findsOneWidget);
@@ -90,7 +90,7 @@ void main() {
 
   testWidgets('ONB-09.2 wrong password shows "Incorrect password"', (t) async {
     final h = Harness();
-    h.fake.on('POST /auth/login', (_, __) => ApiException(400, 'INCORRECT_PASSWORD', 'Incorrect password', {'field': 'password'}));
+    h.fake.on('POST /auth/login', (_, _) => ApiException(400, 'INCORRECT_PASSWORD', 'Incorrect password', {'field': 'password'}));
     await h.pump(t, const PasswordLoginScreen(email: 'amy@keys.test', firstName: 'Amy'));
     expect(find.text('Signing in as amy@keys.test', findRichText: true), findsOneWidget);
     await t.enterText(find.byType(TextField), 'nope');

@@ -13,7 +13,7 @@ void main() {
   testWidgets('AVW-01.1 methods by device: card always, Apple Pay on iOS only', (t) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     final h = Harness();
-    h.fake.on('GET /verification', (_, __) => unverified());
+    h.fake.on('GET /verification', (_, _) => unverified());
     await h.pump(t, const VerifyMethodScreen());
     expect(find.text('Verify with Bank card'), findsOneWidget);
     expect(find.text('Verify with Apple Pay'), findsOneWidget);
@@ -22,7 +22,7 @@ void main() {
     debugDefaultTargetPlatformOverride = TargetPlatform.android;
     await t.pumpWidget(const SizedBox());
     final h2 = Harness();
-    h2.fake.on('GET /verification', (_, __) => unverified());
+    h2.fake.on('GET /verification', (_, _) => unverified());
     await h2.pump(t, const VerifyMethodScreen());
     expect(find.text('Verify with Google Pay'), findsOneWidget);
     expect(find.text('Verify with Apple Pay'), findsNothing);
@@ -31,7 +31,7 @@ void main() {
 
   testWidgets('AVW-05.4 under review opens the review screen instead', (t) async {
     final h = Harness();
-    h.fake.on('GET /verification', (_, __) => {
+    h.fake.on('GET /verification', (_, _) => {
           'status': 'under_review',
           'reviewCase': {'ref': 'KYS-2026-11-0001', 'documentName': 'bill.pdf', 'submittedAt': '2026-11-05T10:00:00Z', 'estimate': 'Est. 1-2 business days'},
         });
@@ -104,9 +104,9 @@ void main() {
 
   testWidgets('ONB-25 then LRN-01: welcome prompt first, then the 8-step tour; Back, Next and Skip', (t) async {
     final h = Harness();
-    h.fake.on('GET /onboarding/welcome-post', (_, __) => {'community': 'Maple Road', 'text': "Hi neighbours! I'm Amy", 'audience': 'everyone'});
-    h.fake.on('POST /onboarding/welcome-prompt/done', (_, __) => {'ok': true});
-    h.fake.on('POST /learning/done', (_, __) => {'ok': true});
+    h.fake.on('GET /onboarding/welcome-post', (_, _) => {'community': 'Maple Road', 'text': "Hi neighbours! I'm Amy", 'audience': 'everyone'});
+    h.fake.on('POST /onboarding/welcome-prompt/done', (_, _) => {'ok': true});
+    h.fake.on('POST /learning/done', (_, _) => {'ok': true});
     await h.pump(t, const HomeShell(), meJson: Harness.me(welcome: true, learning: true));
     expect(find.text('Welcome to Maple Road'), findsOneWidget);
     await t.tap(find.byTooltip('Close'));

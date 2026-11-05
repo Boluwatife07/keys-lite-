@@ -349,30 +349,12 @@ class _CodeInputState extends State<CodeInput> {
   Widget build(BuildContext context) {
     final hasError = widget.error != null;
     return Column(children: [
-      Stack(children: [
-        // Hidden field that owns the keyboard and paste.
-        Opacity(
-          opacity: 0,
-          child: SizedBox(
-            height: 56,
-            child: TextField(
-              key: const Key('code-field'),
-              controller: _c,
-              focusNode: _focus,
-              autofocus: true,
-              keyboardType: TextInputType.number,
-              autofillHints: const [AutofillHints.oneTimeCode],
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(widget.length)],
-              onChanged: (v) {
-                setState(() {});
-                if (v.length == widget.length) widget.onCompleted(v);
-              },
-            ),
-          ),
-        ),
-        Positioned.fill(
-          child: GestureDetector(
-            onTap: () => _focus.requestFocus(),
+      SizedBox(
+        height: 52,
+        child: Stack(children: [
+          // The six boxes only draw; the transparent field on top owns the
+          // keyboard, paste, one-time-code autofill and screen readers.
+          IgnorePointer(
             child: ValueListenableBuilder(
               valueListenable: _c,
               builder: (_, v, _) => Row(
@@ -396,8 +378,31 @@ class _CodeInputState extends State<CodeInput> {
               ),
             ),
           ),
-        ),
-      ]),
+          Positioned.fill(
+            child: Semantics(
+              label: 'Verification code',
+              child: TextField(
+                key: const Key('code-field'),
+                controller: _c,
+                focusNode: _focus,
+                autofocus: true,
+                showCursor: false,
+                enableInteractiveSelection: false,
+                keyboardType: TextInputType.number,
+                autofillHints: const [AutofillHints.oneTimeCode],
+                style: const TextStyle(color: Colors.transparent, fontSize: 1),
+                decoration: const InputDecoration(border: InputBorder.none, counterText: ''),
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(widget.length)],
+                onTap: () => setState(() {}),
+                onChanged: (v) {
+                  setState(() {});
+                  if (v.length == widget.length) widget.onCompleted(v);
+                },
+              ),
+            ),
+          ),
+        ]),
+      ),
       if (hasError) Padding(padding: const EdgeInsets.only(top: 12), child: ErrorLine(widget.error!)),
     ]);
   }
