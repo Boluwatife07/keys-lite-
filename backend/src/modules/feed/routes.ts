@@ -5,7 +5,7 @@ import { requireUser } from '../../lib/auth.js';
 import { clock } from '../../lib/clock.js';
 import { badRequest, forbidden, notFound } from '../../lib/errors.js';
 import { linkPreview } from '../../lib/linkPreview.js';
-import { notify } from '../../lib/notify.js';
+import { notify, notifyAndEmail } from '../../lib/notify.js';
 import { hiddenAuthorSql, people, requireCommunity } from '../../lib/people.js';
 import { getObject } from '../../services/storage.js';
 import { loadPost, postView, postsFor } from './read.js';
@@ -103,8 +103,20 @@ export async function feedRoutes(app: FastifyInstance) {
       document: z.object({ mediaId: uuid, title: z.string().trim().min(1, 'Add a document title').max(100) }).optional(),
       linkUrl: z.string().url('Enter a valid link').optional(),
       mentionIds: z.array(uuid).optional(),
+      // CLB-13: a club announcement for everyone or members only.
+      clubId: uuid.optional(),
+      audience: z.enum(['all', 'members']).optional(),
     }).parse(req.body);
     const community = await requireCommunity(u.id);
+    let club: { id: string; name: string } | undefined;
+    if (b.clubId) {
+      club = await one<{ id: string; name: string }>(
+        `select c.id, c.name from clubs c join club_members m on m.club_id = c.id and m.user_id = $2 and m.role in ('president','admin')
+          where c.id = $1 and c.community_id = $3 and c.status <> 'closed'`,
+        [b.clubId, u.id, community],
+      );
+      if (!club) throw forbidden('NOT_CLUB_ADMIN', 'Only the President and admins can post club announcements.');
+    }
     const types = [b.photoIds?.length ? 'photos' : null, b.videoId ? 'video' : null, b.document ? 'document' : null, b.linkUrl ? 'link' : null].filter(Boolean);
     if (types.length > 1) throw badRequest('ONE_ATTACHMENT_TYPE', 'A post can have photos, one video, one document or one link, not a mix.');
     const text = b.text.trim();
@@ -124,10 +136,10 @@ export async function feedRoutes(app: FastifyInstance) {
     const mentions = await validMentions(b.mentionIds, u.id, community);
     const post = await tx(async (c) => {
       const p = (await one<any>(
-        `insert into posts(community_id, author_id, text, attachment, document_media_id, document_title, document_pages, link_url, link_title, link_description, link_image, created_at)
-         values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) returning *`,
+        `insert into posts(community_id, author_id, text, attachment, document_media_id, document_title, document_pages, link_url, link_title, link_description, link_image, created_at, club_id, club_audience)
+         values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) returning *`,
         [community, u.id, text, types[0] ?? 'none', b.document?.mediaId ?? null, b.document?.title ?? null, pages,
-          b.linkUrl ?? null, link.title ?? null, link.description ?? null, link.image ?? null, clock.now()], c,
+          b.linkUrl ?? null, link.title ?? null, link.description ?? null, link.image ?? null, clock.now(), club?.id ?? null, club ? b.audience ?? 'all' : null], c,
       ))!;
       const media = b.photoIds ?? (b.videoId ? [b.videoId] : []);
       for (const [i, m] of media.entries()) await q('insert into post_media(post_id, media_id, position) values ($1,$2,$3)', [p.id, m, i], c);
@@ -136,6 +148,16 @@ export async function feedRoutes(app: FastifyInstance) {
     });
     // FED-05.3: no notification to the community; only tagged residents.
     for (const m of mentions) await notify(m, 'mention', u.id, { type: 'post', id: post.id });
+    // CLB-13.2: club members hear about new announcements.
+    if (club) {
+      const members = await q<{ user_id: string; muted_until: Date | null }>('select user_id, muted_until from club_members where club_id = $1', [club.id]);
+      for (const m of members) {
+        if (m.muted_until && m.muted_until > clock.now()) continue;
+        await notifyAndEmail(m.user_id, 'club_announcement', u.id, { type: 'post', id: post.id }, { club: club.name }, {
+          subject: `New announcement in ${club.name}`, text: `${club.name} has a new announcement: ${text.slice(0, 120)}`,
+        });
+      }
+    }
     return { post: await postView(post, u.id), message: 'Your post has been sent' };
   });
 
@@ -171,7 +193,8 @@ export async function feedRoutes(app: FastifyInstance) {
     const u = requireUser(req);
     const { id } = z.object({ id: uuid }).parse(req.params);
     const p = await loadPost(id, u.id);
-    if (p.author_id !== u.id) throw forbidden('NOT_AUTHOR', 'Only the author can delete this post.');
+    const president = p.club_id && (await one(`select 1 from club_members where club_id = $1 and user_id = $2 and role = 'president'`, [p.club_id, u.id]));
+    if (p.author_id !== u.id && !president) throw forbidden('NOT_AUTHOR', 'Only the author can delete this post.');
     await tx(async (c) => {
       await q(`update posts set status = 'deleted', deleted_at = $2 where id = $1`, [id, clock.now()], c);
       await q('delete from poll_votes where post_id = $1', [id], c);
@@ -253,6 +276,7 @@ export async function feedRoutes(app: FastifyInstance) {
       mentionIds: z.array(uuid).optional(),
     }).parse(req.body);
     const p = await loadPost(id, u.id);
+    if (p.club_id) throw forbidden('NO_COMMENTS', 'Club announcements take likes only.');
     if (!b.text.trim() && !b.mediaId) throw badRequest('EMPTY_COMMENT', 'Write a comment or add an image.');
     if (b.mediaId) await ownMedia([b.mediaId], u.id, 'photo');
     let parent: any;

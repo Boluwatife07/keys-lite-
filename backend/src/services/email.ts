@@ -7,7 +7,9 @@ export type EmailTemplate =
   | 'change_email_code'
   | 'create_password_code'
   | 'verification_approved'
-  | 'verification_rejected';
+  | 'verification_rejected'
+  // Event and club emails: data carries subject and text (EVT-26, CLB-16).
+  | 'notice';
 
 const subjects: Record<EmailTemplate, string> = {
   signup_code: 'Your Keys verification code',
@@ -16,6 +18,7 @@ const subjects: Record<EmailTemplate, string> = {
   create_password_code: 'Your Keys verification code',
   verification_approved: 'Your address is verified',
   verification_rejected: 'We could not verify your address',
+  notice: 'Keys',
 };
 
 function body(t: EmailTemplate, d: Record<string, unknown>): string {
@@ -30,6 +33,8 @@ function body(t: EmailTemplate, d: Record<string, unknown>): string {
       return `Hi ${d.firstName}, good news: your home address has been verified. You now have full access to your community on Keys.`;
     case 'verification_rejected':
       return `Hi ${d.firstName}, we reviewed your document (ref ${d.ref}) but could not verify your home address. Your account stays unverified.`;
+    case 'notice':
+      return String(d.text ?? '');
   }
 }
 
@@ -45,7 +50,7 @@ export async function sendEmail(to: string, template: EmailTemplate, data: Recor
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { Authorization: `Bearer ${config.resendApiKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from: config.emailFrom, to, subject: subjects[template], text: body(template, data) }),
+    body: JSON.stringify({ from: config.emailFrom, to, subject: template === 'notice' ? String(data.subject) : subjects[template], text: body(template, data) }),
   });
   if (!res.ok) throw new Error(`Resend failed: ${res.status} ${await res.text()}`);
 }

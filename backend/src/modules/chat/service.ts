@@ -106,6 +106,11 @@ export async function addMember(chatId: string, userId: string, role: 'admin' | 
 
 export async function removeMember(chatId: string, userId: string, reason: 'left' | 'removed', db?: Db) {
   await q(`update chat_members set left_at = $3, left_reason = $4 where chat_id = $1 and user_id = $2 and left_at is null`, [chatId, userId, clock.now(), reason], db);
+  // EVT-17.3: leaving the event chat ends volunteering; removal also stops them volunteering again.
+  await q(
+    `update event_volunteers set status = $3 where user_id = $2 and status = 'active' and event_id in (select id from events where chat_id = $1)`,
+    [chatId, userId, reason], db,
+  );
 }
 
 // ------------------------------------------------------------ sending

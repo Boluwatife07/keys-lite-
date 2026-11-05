@@ -551,6 +551,7 @@ export async function chatRoutes(app: FastifyInstance) {
     if (m.left_at) throw forbidden('NOT_A_MEMBER', 'You are no longer a member of this group.');
     if (c.type === 'direct') throw badRequest('NOT_A_GROUP', 'This is not a group.');
     if (c.type === 'update') throw forbidden('UPDATE_CHAT', 'Residents join update chats from the update.');
+    if (c.type === 'club' || c.type === 'event') throw forbidden('MIRRORED_CHAT', c.type === 'club' ? 'Members join this chat by joining the club.' : 'Co-hosts and volunteers join this chat from the event.');
     const admin = m.role === 'admin';
     if (!admin && !c.members_can_invite) throw forbidden('ADMINS_ADD_ONLY', 'Only admins can add others to this group');
     const ids = await allowedMembers(u.id, userIds, c.committee_only);
@@ -572,6 +573,7 @@ export async function chatRoutes(app: FastifyInstance) {
     const { id, userId } = z.object({ id: uuid, userId: uuid }).parse(req.params);
     const { c } = await requireAdmin(id, u.id);
     const target = (await person(userId))!;
+    if (c.type === 'club') throw forbidden('CLUB_CHAT', 'Remove members from the club page.');
     if (c.created_by === userId) throw forbidden('CREATOR', `You can't remove ${target.name} as admin because they created this group chat`);
     if (!(await activeMember(id, userId))) throw notFound('This member is not in the group.');
     await removeMember(id, userId, 'removed');
@@ -606,6 +608,7 @@ export async function chatRoutes(app: FastifyInstance) {
     const { c, m } = await requireMember(id, u.id);
     if (c.type === 'direct') throw badRequest('NOT_A_GROUP', 'This is not a group.');
     if (m.left_at) throw badRequest('ALREADY_LEFT', 'You are no longer a member of this group');
+    if (c.type === 'club') throw badRequest('CLUB_CHAT', 'Leave the club to leave its group chat.');
     const others = (await activeMemberIds(id)).filter((x) => x !== u.id);
     if (m.role === 'admin' && others.length) {
       const admins = await q('select 1 from chat_members where chat_id = $1 and role = $2 and left_at is null and user_id <> $3', [id, 'admin', u.id]);

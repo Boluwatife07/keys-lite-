@@ -19,6 +19,9 @@ import { pollRoutes } from './modules/feed/polls.js';
 import { boardRoutes } from './modules/board/routes.js';
 import { chatRoutes } from './modules/chat/routes.js';
 import { updateRoutes } from './modules/updates/routes.js';
+import { eventRoutes } from './modules/events/routes.js';
+import { clubRoutes } from './modules/clubs/routes.js';
+import { calendarRoutes } from './modules/calendar/routes.js';
 
 export async function buildApp(): Promise<FastifyInstance> {
   const app = Fastify({ logger: process.env.NODE_ENV === 'test' ? false : { level: 'info' }, bodyLimit: 2 * MB });
@@ -72,5 +75,8 @@ export async function buildApp(): Promise<FastifyInstance> {
   await app.register(boardRoutes);
   await app.register(chatRoutes);
   await app.register(updateRoutes);
+  await app.register(eventRoutes);
+  await app.register(clubRoutes);
+  await app.register(calendarRoutes);
   return app;
 }

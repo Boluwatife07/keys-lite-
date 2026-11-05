@@ -88,6 +88,11 @@ export async function postView(r: any, viewer: string) {
     createdAt: r.created_at,
     editedAt: r.edited_at,
     shareLink: shareLink(r.kind === 'poll' ? 'poll' : 'post', r.id),
+    club: r.club_id ? { id: r.club_id, name: (await one<{ name: string }>('select name from clubs where id = $1', [r.club_id]))?.name ?? '', audience: r.club_audience } : null,
+    // CLB-13.3: club announcements take likes only.
+    canComment: !r.club_id,
+    // CLB-13.4: the club President may delete any announcement.
+    canDelete: r.author_id === viewer || (!!r.club_id && !!(await one(`select 1 from club_members where club_id = $1 and user_id = $2 and role = 'president'`, [r.club_id, viewer]))),
   };
 }
 
@@ -97,7 +102,7 @@ export async function postsFor(viewer: string, opts: { authorId?: string; cursor
   if (!c) return { posts: [], nextCursor: null };
   const cur = dec(opts.cursor);
   const params: unknown[] = [c, viewer, cur?.t ?? null, cur?.id ?? null, PAGE + 1];
-  let where = `p.community_id = $1 and p.status = 'live' and not ${hiddenAuthorSql('p.author_id', '$2')}
+  let where = `p.community_id = $1 and p.status = 'live' and p.club_id is null and not ${hiddenAuthorSql('p.author_id', '$2')}
     and ($3::timestamptz is null or (p.created_at, p.id) < ($3::timestamptz, $4::uuid))`;
   if (opts.authorId) {
     params.push(opts.authorId);
@@ -124,5 +129,9 @@ export async function loadPost(id: string, viewer: string, { allowGone = false }
     if (r.status === 'removed') throw new AppError(410, 'POST_REMOVED', REMOVED_MSG, { title: 'Post unavailable' });
   }
   if (await one(`select 1 where ${hiddenAuthorSql('$1::uuid', '$2::uuid')}`, [r.author_id, viewer])) throw notFound('This post is not available.');
+  // CLB-13.1: members-only announcements.
+  if (r.club_id && r.club_audience === 'members' && !(await one('select 1 from club_members where club_id = $1 and user_id = $2', [r.club_id, viewer]))) {
+    throw notFound('This post is not available.');
+  }
   return r;
 }

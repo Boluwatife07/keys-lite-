@@ -4,6 +4,7 @@ import { clock, DAY } from '../../lib/clock.js';
 import { notify } from '../../lib/notify.js';
 import { person } from '../../lib/people.js';
 import { leaveUpdateChats } from '../chat/service.js';
+import { passEvents } from '../events/service.js';
 
 export const PRESET_ROLES = [
   'Chair', 'Vice Chair', 'Treasurer', 'Secretary', 'Projects Lead', 'Events Lead', 'Clubs Lead', 'Communications Lead',
@@ -163,6 +164,11 @@ export async function leaveBoard(userId: string, opts: { reason?: string; why: '
     return { board, notes, seat };
   });
   if (out.board) await broadcast(out.board, out.notes);
+  // EVT-27.2: administrative events of a removed member pass to the Chair.
+  if (out.board && opts.why === 'removed') {
+    const chair = await one<{ occupant_id: string }>(`select occupant_id from board_seats where board_id = $1 and role = 'Chair' and occupant_id is not null`, [out.board.id]);
+    if (chair && chair.occupant_id !== userId) await passEvents(userId, chair.occupant_id, { category: 'administrative' });
+  }
   // UCH-04.2: leaving the board (or the community) also leaves update chats.
   const community = out.board?.community_id ?? (await one<{ community_id: string }>('select community_id from memberships where user_id = $1', [userId]))?.community_id;
   if (community) await leaveUpdateChats(userId, community);

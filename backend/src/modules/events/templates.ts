@@ -1,0 +1,71 @@
+// EVT-11.1: ready-made templates. Phase 1 creates every event as free (EVT-11.3).
+export const EVENT_TEMPLATES = [
+  {
+    id: 'wine-tasting',
+    name: 'Wine tasting',
+    category: 'residential',
+    image: 'template_wine.jpg',
+    data: {
+      title: 'Wine tasting evening',
+      description: 'Join your neighbours for a relaxed evening tasting a selection of red, white and rosé wines. Bring a friend, meet new people and discover a new favourite bottle.',
+      tags: ['Food & Drink', 'Social'],
+      capacity: 30,
+      format: 'physical',
+    },
+  },
+  {
+    id: 'football-tournament',
+    name: 'Football tournament',
+    category: 'residential',
+    image: 'template_football.jpg',
+    data: {
+      title: 'Community football tournament',
+      description: 'Five-a-side football for all ages and abilities. Form a team with your neighbours or join one on the day. Water and snacks provided.',
+      tags: ['Social'],
+      capacity: 40,
+      format: 'physical',
+      acceptVolunteers: true,
+      volunteerCap: 4,
+    },
+  },
+  {
+    id: 'mum2mum-market',
+    name: 'Mum2Mum market',
+    category: 'residential',
+    image: 'template_mum2mum.jpg',
+    data: {
+      title: 'Mum2Mum Market',
+      description: 'Buy and sell pre-loved baby and children’s clothes, toys and equipment. A friendly market for parents in the community.',
+      tags: ['Social', 'Fashion'],
+      capacity: 50,
+      format: 'physical',
+    },
+  },
+  {
+    id: 'flea-market',
+    name: 'Flea market',
+    category: 'residential',
+    image: 'template_flea.jpg',
+    data: {
+      title: 'Community flea market',
+      description: 'Clear out your cupboards and find hidden treasures. Residents sell second-hand goods, crafts and collectables.',
+      tags: ['Social', 'Others'],
+      capacity: 60,
+      format: 'physical',
+      acceptVolunteers: true,
+      volunteerCap: 3,
+    },
+  },
+  {
+    id: 'agm',
+    name: 'Annual General Meeting',
+    category: 'administrative',
+    image: 'template_agm.jpg',
+    data: {
+      title: 'Annual General Meeting',
+      description: 'The committee reviews the year, shares plans for the year ahead and answers questions from residents. Everyone in the community is welcome.',
+      tags: ['Networking', 'Education'],
+      format: 'physical',
+    },
+  },
+] as const;

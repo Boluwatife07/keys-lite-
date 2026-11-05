@@ -341,7 +341,8 @@ export async function boardRoutes(app: FastifyInstance) {
     const { reason } = z.object({ reason: z.string().trim().min(1, 'Tell us why you want to exit the committee board').max(LONG) }).parse(req.body);
     if (!(await seatOf(u.id))) throw badRequest('NOT_ON_BOARD', 'You are not on the committee board.');
     const check = await exitCheck(u.id, 'deactivate');
-    const blockers = check.blockers.filter((b) => b.code !== 'COMMITTEE_SEAT');
+    // EVT-27.1: stepping down is blocked while hosting an event with tickets taken.
+    const blockers = check.blockers.filter((b) => b.code === 'EVENT_WITH_TICKETS');
     if (blockers.length) throw forbidden('EXIT_BLOCKED', blockers[0].message);
     await leaveBoard(u.id, { reason, why: 'exit' });
     return { title: 'Sad to see you leave!', message: "Your access in the community has been reverted to a resident's." };

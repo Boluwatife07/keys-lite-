@@ -1,6 +1,7 @@
 import { one, q } from '../db/pool.js';
 import { clock } from './clock.js';
 import { areBlocked, isMuted } from './people.js';
+import { sendEmail } from '../services/email.js';
 
 /** Notification types and the settings toggle that controls each. */
 export const NOTIFICATION_TOGGLES: Record<string, string> = {
@@ -17,6 +18,34 @@ export const NOTIFICATION_TOGGLES: Record<string, string> = {
   tier_up: 'committee',
   update_new: 'updates',
   update_additional: 'updates',
+  event_published: 'events',
+  event_updated: 'events',
+  event_cancelled: 'events',
+  event_draft_reminder: 'events',
+  event_volunteer_joined: 'events',
+  event_completed: 'events',
+  event_feedback: 'events',
+  event_cohost_invite: 'events',
+  event_cohost_accepted: 'events',
+  event_cohost_declined: 'events',
+  event_ticket: 'events',
+  event_reminder: 'events',
+  event_feedback_request: 'events',
+  event_checked_in: 'events',
+  club_invite: 'clubs',
+  club_welcome: 'clubs',
+  club_announcement: 'clubs',
+  club_event: 'clubs',
+  club_role: 'clubs',
+  club_removed: 'clubs',
+  club_closing: 'clubs',
+  club_closed: 'clubs',
+  club_transfer_offer: 'clubs',
+  club_transfer_declined: 'clubs',
+  club_new_president: 'clubs',
+  club_full: 'clubs',
+  club_join_attempts: 'clubs',
+  club_milestone: 'clubs',
 };
 
 /** In-app toggles shown in Settings > Notification (Phase 1 features only). */
@@ -59,4 +88,11 @@ export async function notify(userId: string, type: string, actorId: string | nul
     [userId, type, actorId, item.type, item.id, data, clock.now()],
   );
   return true;
+}
+
+/** Notification plus email to a user by id (event and club messages). */
+export async function notifyAndEmail(userId: string, type: string, actorId: string | null, item: { type: string; id: string }, data: Record<string, unknown>, email: { subject: string; text: string }) {
+  await notify(userId, type, actorId, item, data);
+  const u = await one<{ email: string }>('select email from users where id = $1 and deactivated_at is null', [userId]);
+  if (u) await sendEmail(u.email, 'notice', email);
 }
