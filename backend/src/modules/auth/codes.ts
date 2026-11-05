@@ -1,3 +1,4 @@
+import { config } from '../../config.js';
 import { one, q } from '../../db/pool.js';
 import { clock, SECOND, MINUTE, HOUR } from '../../lib/clock.js';
 import { randomToken, sha256, sixDigitCode } from '../../lib/crypto.js';
@@ -40,7 +41,7 @@ export async function issueCode(opts: { email: string; purpose: CodePurpose; use
     `update email_codes set invalidated_at = $3 where email = $1 and purpose = $2 and consumed_at is null and invalidated_at is null`,
     [opts.email, opts.purpose, now],
   );
-  const code = sixDigitCode();
+  const code = config.demoCode || sixDigitCode();
   await q(
     `insert into email_codes(email, purpose, user_id, code_hash, expires_at, created_at) values ($1,$2,$3,$4,$5,$6)`,
     [opts.email, opts.purpose, opts.userId ?? null, sha256(code), new Date(now.getTime() + LIMITS.codeTtlSeconds * SECOND), now],

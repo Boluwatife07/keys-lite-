@@ -1,0 +1,29 @@
+# Shared demo: Render builds and redeploys the server on every push to the
+# branch below. Connect once in Render: New > Blueprint > this repository.
+databases:
+  - name: keys-lite-db
+    plan: free
+    databaseName: keys
+    user: keys
+
+services:
+  - type: web
+    name: keys-lite-api
+    runtime: node
+    plan: free
+    rootDir: backend
+    branch: claude/hopeful-mccarthy-vdo9v6
+    autoDeploy: true
+    buildCommand: npm ci && npm run build
+    # Migrations run on start; the seed only adds demo data once.
+    startCommand: npx tsx src/db/seed.ts; npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: keys-lite-db
+          property: connectionString
+      - key: DEMO_CODE
+        value: "123456"

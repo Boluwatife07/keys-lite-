@@ -30,6 +30,9 @@ export const config = {
     stripe: bool(env.MOCK_STRIPE, true),
     social: bool(env.MOCK_SOCIAL, true),
   },
+  // Shared demo only: every emailed code is this value so testers can sign
+  // up without an inbox. Leave unset in real environments.
+  demoCode: /^\d{6}$/.test(env.DEMO_CODE ?? '') ? env.DEMO_CODE! : '',
   resendApiKey: env.RESEND_API_KEY ?? '',
   emailFrom: env.EMAIL_FROM ?? 'Keys <hello@keys.app>',
   googlePlacesKey: env.GOOGLE_PLACES_KEY ?? '',
