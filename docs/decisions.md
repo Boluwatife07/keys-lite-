@@ -105,6 +105,31 @@ Answers from Dorcas (5 Nov 2026) and defaults chosen where the sheet says
 | Forwarding | Up to 5 chats, with an optional note | CHT-08.4 |
 | Group system messages | Use the person's name, also for your own actions ("Amy Duncan created this group") | One text for everyone |
 
+## Milestone 5 defaults (please confirm)
+
+| Topic | Default | Why |
+| --- | --- | --- |
+| EVT-Q1: external co-hosts | Included; they count towards the 5 co-host limit and show as "External" | In the design; one limit is simpler |
+| CLB-Q1: club description length | Kept at 300; the 8 templates are written to fit | PRD limit |
+| What launching an event needs | Title, description, at least one photo or video, date and time, a place (physical) or platform and link (online), and 1 to 3 tags | Fields marked required in the design |
+| Event length | Single-day for residential, administrative and club events; multi-day is vendor only | EVT-07.2 |
+| Who can take a ticket | Verified residents, one at a time; the host cannot take one; seats are numbered from 001 | EVT-19 |
+| Capacity after launch | Can change, but not below the tickets already taken | Keeps issued tickets valid |
+| Draft reminder | "Still planning [Event]?" after a draft is untouched for 3 days | EVT-12.5 timing not set |
+| Rating prompt | From the day after the event (UK time); closing it without rating dismisses it for good | EVT-24.2 |
+| Event day for scanning | The event's start date in UK time | EVT-23.5 |
+| Volunteers | Leaving or being removed from the planning chat ends volunteering; removed volunteers cannot volunteer again | EVT-17.3, EVT-22.4 |
+| Stepping down from the board | Blocked while hosting a live event with tickets taken | EVT-27.1 |
+| Club members limit | Required, minimum 10, never below the current member count | CLB-03.1, CLB-09.1 |
+| Club categories | Lifestyle, Sports, Music, Food & Drink, Creative, Gaming, Pets, Wellness, Learning, Others | Design shows part of the list |
+| Club creation steps | Form, then "Add members" (can be skipped), then "Club created!" | CLB-03.4, CLB-03.5 |
+| Ownership transfer | The old President leaves the club once the offer is accepted; their club events pass to the new President; a "New President" announcement is posted for everyone | CLB-11, design |
+| Club chat | Mirrors club membership; it cannot be left or joined on its own | CLB-15.1 |
+| Club announcement delete | The author or the President | CLB-13.4 |
+| Home calendar preview | When nothing is coming up in 4 weeks, only the "Upcoming / Calendar →" row stays | Keeps the calendar reachable |
+| Calendar items | Updates on the day they were posted (gone once resolved or deleted); events for ticket holders, host, co-hosts and volunteers | CAL-04 |
+| Not built | Paid tickets and clubs, vendor events, donations, sub-community event audience, attendee spreadsheet, scheduled announcements, Services calendar items | Money lane or later phase |
+
 ## Shared report reasons (XFR-03.1)
 
 1. Spam or misleading

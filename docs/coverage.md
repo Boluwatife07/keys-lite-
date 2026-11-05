@@ -147,3 +147,37 @@ API tests: `backend/test/updates.test.ts`, `backend/test/chat.test.ts`, `backend
 | CHT-10 - 17 | Groups: create with members, name, icon and settings; info and description; admins; add, remove, invite link, join requests; exit with new-admin handover; system messages | Done |
 | CHT-18 | Shared Media, Links and Documents by month | Done |
 | Push for new messages | Stored push tokens; sending needs Firebase keys | When keys exist |
+
+## Milestone 5
+
+API tests: `backend/test/events.test.ts`, `backend/test/clubs.test.ts`, `backend/test/calendar.test.ts`. App tests: `app/test/events_test.dart`, `app/test/clubs_test.dart`. Checked in the browser against the real API with the demo data.
+
+| Rows | Behaviour | Status |
+| --- | --- | --- |
+| EVT-01 | Discover: trending (top 5 by tickets, auto-advancing), templates, tag filters, happening soon, empty state, event calendar | Done |
+| EVT-02 | My events: Attending, Saved, Hosting, Co-hosting with Upcoming / Completed / Cancelled, empty states, drafts in yellow, bookmarks | Done |
+| EVT-03 | Search by name | Done |
+| EVT-04 | Category sheet with committee, club, vendor and verification checks | Done |
+| EVT-05 - EVT-10 | Form: limits, media (6, 15 MB photos, 60 s / 100 MB video), audience, single-day date and time, physical or online, tags (1-3), capacity (10+), lineup, co-hosts (5, external), volunteers | Done |
+| EVT-11 | Ready-made and personal templates | Done |
+| EVT-12 | Save draft, preview, launch confirmation, "Your event is live!" | Done |
+| EVT-13 | Edit after launch with locked fields; ticket holders told | Done |
+| EVT-14 / EVT-25 | Cancel with reasons; tickets voided; pop-up, notification and email | Done |
+| EVT-15 | Co-host invitation accept / decline | Done |
+| EVT-16 | Attendees: taken vs capacity, recent, search by name or seat; no spreadsheet | Done |
+| EVT-17 | Planning chat; co-hosts as admins, volunteers as members | Done |
+| EVT-18 - EVT-21 | Event page, free tickets, ticket with QR, PDF download, share, cancel | Done |
+| EVT-22 | Volunteering with cap and removal | Done |
+| EVT-23 | QR scanning: valid, used, other event, not the event day; counts | Done |
+| EVT-24 | Completed events, rating prompt, ratings with breakdown and sorting, redo | Done |
+| EVT-26 | Notifications and emails for hosts, co-hosts and attendees | Done (push needs Firebase keys) |
+| EVT-27 | Exit blocks, events passing to the Chair or club President, club close cancels events, blocking and co-hosts | Done |
+| CLB-01 / CLB-02 | Clubs Home, My clubs, announcements, Discover with categories, search | Done |
+| CLB-03 / CLB-04 | Create a free club (unique name, limits, cover), templates, add members, success | Done |
+| CLB-05 / CLB-06 | Visitor view, members-only prompt, join, full club and President alerts | Done |
+| CLB-07 / CLB-08 | Share, report, mute, leave | Done |
+| CLB-09 / CLB-10 | Edit details, members and admins | Done |
+| CLB-11 / CLB-12 | Ownership transfer, delete with 48-hour close | Done |
+| CLB-13 / CLB-14 / CLB-15 | Announcements (likes only), club events, club chat | Done |
+| CLB-16 | Club notifications, emails and milestones | Done (push needs Firebase keys) |
+| CAL-01 - CAL-04 | Shared calendar with Updates and Events, Home preview, month view, who sees which items | Done (Services items arrive with Services) |

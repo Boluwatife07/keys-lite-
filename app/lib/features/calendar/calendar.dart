@@ -102,6 +102,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         backgroundColor: KColors.surfaceDefault,
         surfaceTintColor: Colors.transparent,
         titleSpacing: 0,
+        leading: IconButton(tooltip: 'Back', icon: const Icon(Icons.chevron_left, size: 30), onPressed: () => Navigator.of(context).maybePop()),
         title: Text(widget.eventsOnly ? 'Event calendar' : 'Calendar', style: KText.headingXSmall),
         actions: [TextButton(onPressed: () => _go(today, today), style: TextButton.styleFrom(foregroundColor: KColors.textPrimary), child: const Text('Today'))],
       ),
