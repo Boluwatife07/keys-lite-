@@ -108,12 +108,12 @@ API tests: `backend/test/board.test.ts`. App tests: `app/test/board_test.dart`. 
 | CBM-05 | Preset roles first come, first served; race refused cleanly | Done |
 | CBM-06 | Apply for extra/champion seat; review; one application at a time; new seat protection; below 5 joins straight away | Done |
 | CBM-07 | Board invite link and share | Done (opening the link inside the app comes with deep-link routing for all items) |
-| CBM-08 | Welcome / Get started after joining | Success screen done; the "Getting started" video guide needs the video asset |
+| CBM-08 | Welcome / Get started after joining | Success screen done; video guide waits for videos (none yet) |
 | CBM-09 | Board: All / Members / Champions, Unoccupied seats, empty champions | Done |
 | CBM-10 | Tiers explainer | Done |
 | CBM-11 | Manage seats (Chair only), Tier 1 champions after 8 presets, occupied seats locked | Done |
 | CBM-12 | Tier rise: Chair notified, banner | Done (milestone prompt waits for CBM-Q2) |
-| CBM-13 / 14 | Exit with reason; Chair hands over | Done |
+| CBM-13 / 14 | Exit with reason; Chair hands over to the Vice Chair, otherwise the seat is left empty | Done |
 | CBM-15 / 16 | Reassign (swap) and remove proposals, 5+ only | Done |
 | CBM-17 | Removed member told | Done (notification) |
 | CBM-18 | Announcements with View reason / Apply / Reassign | Done |

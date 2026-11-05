@@ -192,6 +192,17 @@ describe('CBM-13 / CBM-14 exit and Chair handover', () => {
     expect(c.announcements[1].reason).toBe('Moving abroad soon');
     expect(c.announcements[0].text).toMatch(/has been assigned as Chair$/);
   });
+  it('with no Vice Chair the Chair seat is left empty for anyone to take', async () => {
+    const newChair = members[0];
+    await call('POST', '/board/exit', { token: newChair.t, body: { reason: 'Stepping back' } });
+    const seats = (await call('GET', '/board', { token: members[1].t })).body.seats;
+    expect(seats.find((x: any) => x.role === 'Chair')).toMatchObject({ occupant: null, status: 'unoccupied' });
+    // Anyone verified can take it, first come first served.
+    expect((await call('GET', '/board/roles', { token: members[1].t })).body.roles.find((r: any) => r.role === 'Chair').available).toBe(true);
+    const ann = (await call('GET', '/board/announcements', { token: members[1].t })).body.announcements;
+    expect(ann[0].label).toBe('Board exit');
+    members[0] = members[1];
+  });
   it('VOT-05.7 a proposer who moves away makes their proposals no longer applicable', async () => {
     const newChair = members[0];
     const sub = members[3];

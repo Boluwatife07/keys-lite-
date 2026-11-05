@@ -136,7 +136,7 @@ export async function protectSeat(c: pg.PoolClient, seatId: string, exceptPropos
  * The resident leaves their seat: exit, removal, moving home or deactivating.
  * Their pending applications are cancelled and proposals about them become
  * "No longer applicable" (CBM-19.2, VOT-05.7). A leaving Chair hands over to
- * the Vice Chair, otherwise to the longest-serving committee member (CBM-14).
+ * the Vice Chair; with no Vice Chair the Chair seat is left empty (CBM-14).
  */
 export async function leaveBoard(userId: string, opts: { reason?: string; why: 'exit' | 'removed' | 'left_community' }) {
   const out = await tx(async (c) => {
@@ -150,10 +150,9 @@ export async function leaveBoard(userId: string, opts: { reason?: string; why: '
     await q('update board_seats set occupant_id = null, occupied_at = null where id = $1', [seat.id], c);
     if (opts.why !== 'removed') notes.push(await announce(c, board, 'board_exit', userId, seat.role, opts.reason));
     if (seat.role === 'Chair') {
-      const vice = await one<SeatRow>(`select * from board_seats where board_id = $1 and role = 'Vice Chair' and occupant_id is not null`, [board.id], c);
-      const next = vice ?? await one<SeatRow>(
-        `select * from board_seats where board_id = $1 and kind <> 'champion' and occupant_id is not null order by occupied_at limit 1`, [board.id], c,
-      );
+      // Vice Chair steps up (CBM-14.1). With no Vice Chair the Chair seat stays
+      // empty and is filled the normal way (Dorcas, 5 Nov 2026).
+      const next = await one<SeatRow>(`select * from board_seats where board_id = $1 and role = 'Vice Chair' and occupant_id is not null`, [board.id], c);
       if (next) {
         await q('update board_seats set occupant_id = null, occupied_at = null where id = $1', [next.id], c);
         await q('update board_seats set occupant_id = $2, occupied_at = $3 where id = $1', [seat.id, next.occupant_id, clock.now()], c);

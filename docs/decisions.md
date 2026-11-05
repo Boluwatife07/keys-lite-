@@ -68,19 +68,20 @@ Answers from Dorcas (5 Nov 2026) and defaults chosen where the sheet says
 | --- | --- | --- |
 | CBM-Q1: applications below 5 members | Join straight away, no vote (Dorcas) | Decided 5 Nov |
 | VOT-Q1: champion offer after a declined application | None (Dorcas) | Decided 5 Nov |
-| Chair leaves with no Vice Chair | The longest-serving committee member becomes Chair; if nobody is left the seat stays empty | Member exit rules file not shared with me |
+| Chair leaves with no Vice Chair | The Chair seat is left empty and filled the normal way (any verified resident can take it, first come first served) | Dorcas, 5 Nov 2026 |
 | Who is an eligible voter | Committee members (preset and extra seats). Champions never vote. The subject of a removal cannot vote | VOT-04.3, VOT-05.5 |
 | Early close | More than half of eligible voters cast the same vote | VOT-05.3 |
 | At 7 days | Only cast votes count; ties pass, including 0-0 | VOT-05.4 |
 | Votes | Final once cast | Baseline |
 | Reason for No | Required on reassign and remove; optional on join | VOT-03.2 |
 | Reassign | Committee members only (not champions); into a vacant seat or swap with the holder | CBM-15, CBM-16.1 |
-| Removing yourself | Not a proposal; use Exit committee | Avoids a member voting on their own exit |
+| Removing yourself | Not a proposal; use Exit committee | Confirmed by Dorcas, 5 Nov 2026 |
 | One open proposal per member and type | A second remove/reassign for the same person is refused while one is open | Avoids duplicate votes |
 | Tier drop | Nobody is removed; seats above the new allowance cannot be activated or applied for | CBM-12.4 |
 | Moving home or deactivating | Seat ends (with a Board exit card), applications are cancelled, proposals by or about the person become "No longer applicable" | CBM-19.2, VOT-05.7 |
-| Role descriptions ("About the role") | Short Phase 1 texts without wallet or project powers | CBM-20.1; design text mentions the Virtual Card |
-| CBM-Q2: milestone prompt (e.g. "400 members strong") | Not built until thresholds are agreed | Open question |
+| Role descriptions ("About the role") | Short Phase 1 texts without wallet or project powers | Confirmed by Dorcas, 5 Nov 2026 |
+| CBM-Q2: milestone prompt (e.g. "400 members strong") | Not built until thresholds are agreed | Confirmed by Dorcas, 5 Nov 2026 |
+| CBM-08.2: "Getting started" video guide | Not built; no videos yet. New members see the success screen | Dorcas, 5 Nov 2026 |
 | Board announcement copy | Uses "their" where the design says "his" | Neutral copy |
 
 ## Shared report reasons (XFR-03.1)
