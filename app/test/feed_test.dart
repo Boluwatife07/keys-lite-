@@ -221,9 +221,10 @@ void main() {
     await t.enterText(find.byType(TextField).first, 'Bins on Tuesday?');
     await t.pump();
     h.media.photo = fakePng(50);
-    await t.tap(find.text('Add image').first);
+    expect(find.byTooltip('Add image'), findsNWidgets(2));
+    await t.tap(find.byTooltip('Add image').first);
     await t.pumpAndSettle();
-    expect(find.text('Change image'), findsOneWidget);
+    expect(find.byTooltip('Add image'), findsOneWidget); // option 1 now shows its picture
     for (var i = 0; i < 3; i++) {
       final add = find.widgetWithText(OutlinedButton, 'Add option');
       await t.ensureVisible(add);
@@ -231,12 +232,12 @@ void main() {
       await t.pump();
     }
     expect(find.widgetWithText(OutlinedButton, 'Add option'), findsNothing);
-    expect(find.text('Option 5 *'), findsOneWidget);
+    expect(find.text('Option 5 *', findRichText: true), findsOneWidget);
     await t.ensureVisible(find.text('Delete').last);
     await t.tap(find.text('Delete').last);
     await t.pump();
-    expect(find.text('Option 4 *'), findsOneWidget);
-    expect(find.text('Option 5 *'), findsNothing);
+    expect(find.text('Option 4 *', findRichText: true), findsOneWidget);
+    expect(find.text('Option 5 *', findRichText: true), findsNothing);
     for (var i = 0; i < 4; i++) {
       await t.enterText(find.byKey(Key('option-$i')), 'Choice $i');
     }

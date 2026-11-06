@@ -3,6 +3,7 @@ import 'package:keys_lite/theme/phosphor.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/api.dart';
 import '../../core/feed_models.dart';
+import '../../core/models.dart' show formatCount;
 import '../../core/scope.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/widgets.dart';
@@ -93,7 +94,7 @@ class _PollBlockState extends State<PollBlock> with Busy {
         const SizedBox(height: 8),
       ],
       Row(children: [
-        Text(plural(p.totalVotes, 'Vote'), style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
+        Text('${formatCount(p.totalVotes)} ${p.totalVotes == 1 ? 'Vote' : 'Votes'}', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
         const Spacer(),
         if (p.myVote != null)
           Text('Already voted', style: KText.paragraphMediumSmall.copyWith(color: KColors.textTertiary))
@@ -129,12 +130,14 @@ class _ChoiceRow extends StatelessWidget {
           child: Container(
             constraints: const BoxConstraints(minHeight: 54),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(borderRadius: BorderRadius.circular(KRadius.sm), border: Border.all(color: selected ? KColors.textPrimary : KColors.borderDefault)),
+            // Figma: a picked option turns grey; the rest keep a light outline.
+            decoration: BoxDecoration(
+              color: selected ? KColors.surfaceSubtle : KColors.surfaceDefault,
+              borderRadius: BorderRadius.circular(KRadius.sm),
+              border: Border.all(color: selected ? KColors.surfaceSubtle : KColors.borderDefault),
+            ),
             child: Row(children: [
-              Icon(
-                multi ? (selected ? PhosphorIconsFill.checkSquare : PhosphorIconsRegular.square) : (selected ? PhosphorIconsFill.radioButton : PhosphorIconsRegular.circle),
-                color: enabled ? KColors.textPrimary : KColors.textTertiary,
-              ),
+              multi ? KCheckbox(value: selected, enabled: enabled) : KRadio(selected: selected),
               const SizedBox(width: 12),
               Expanded(child: Text(o.text, style: KText.paragraphMedium.copyWith(fontSize: 15))),
               if (o.imageUrl != null) _OptionImage(o),

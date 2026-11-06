@@ -323,6 +323,7 @@ class KeysTextField extends StatefulWidget {
     this.prefixIcon,
     this.showCount = true,
     this.labelNote,
+    this.required = false,
     this.error,
     this.obscure = false,
     this.maxLength,
@@ -348,6 +349,8 @@ class KeysTextField extends StatefulWidget {
   final bool showCount;
   /// Grey text after the label, e.g. " (Optional)".
   final String? labelNote;
+  /// Red asterisk after the label (Figma required field).
+  final bool required;
   final String? error;
   final bool obscure;
   final int? maxLength;
@@ -381,7 +384,7 @@ class _KeysTextFieldState extends State<KeysTextField> {
             padding: const EdgeInsets.only(bottom: 8),
             child: Row(children: [
               // Figma "Input element/Heading": a 20pt row whose 24pt text hangs from the bottom.
-              if (widget.label != null) Expanded(child: SizedBox(height: 20, child: OverflowBox(maxHeight: 24, alignment: Alignment.bottomLeft, child: Text.rich(TextSpan(text: widget.label!, children: [if (widget.labelNote != null) TextSpan(text: widget.labelNote, style: TextStyle(color: KColors.textSecondary))]), style: KText.paragraphMediumLarge)))),
+              if (widget.label != null) Expanded(child: SizedBox(height: 20, child: OverflowBox(maxHeight: 24, alignment: Alignment.bottomLeft, child: Text.rich(TextSpan(text: widget.label!, children: [if (widget.required) TextSpan(text: ' *', style: TextStyle(color: KColors.error)), if (widget.labelNote != null) TextSpan(text: widget.labelNote, style: TextStyle(color: KColors.textSecondary))]), style: KText.paragraphMediumLarge)))),
               if (widget.maxLength != null && widget.showCount)
                 ValueListenableBuilder(
                   valueListenable: widget.controller,

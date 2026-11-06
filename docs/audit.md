@@ -6,8 +6,8 @@ catalogue test (`app/test/catalog`, run with
 `flutter test --update-goldens test/catalog`) at the iPhone 15 frame used in
 Figma (393 x 852).
 
-Status: **Onboarding, Address verification, Learning and Profile/Settings
-done.** Next: Feed, Polls, Committee board, Voting, Updates, Update chat,
+Status: **Onboarding, Address verification, Learning, Profile/Settings,
+Home feed and Polls done.** Next: Feed, Polls, Committee board, Voting, Updates, Update chat,
 Chat, Events, Clubs, Calendar.
 
 ## Onboarding
@@ -188,3 +188,16 @@ Kept on purpose: the photo viewer has no Like/Comment/Share row (those stay
 on the post); photos are shown whole (not cropped) so they can be zoomed;
 the post detail has no second options button in the header (the post's own
 options button is right below it).
+
+## Polls
+
+| Item | Fixes |
+| --- | --- |
+| Create poll | Red required asterisks; 3-line question and promise boxes; option label and counter across the top with the image button left of the field |
+| Voting | Picked option turns grey (Figma), Figma radio and checkbox controls |
+| Totals | Vote totals use thousands separators ("1,650 Votes") |
+| Results, closed, promise, time left | Already matched |
+
+Kept on purpose: option limit stays 40 characters (sheet POL-03.1; Figma
+counter shows /50); no schedule, audience "Modify" or comment-management
+rows (later phase / Phase 1 decisions); results ring and bars unchanged.

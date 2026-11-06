@@ -119,40 +119,56 @@ class _CreatePollScreenState extends State<CreatePollScreen> {
           ]),
         ),
         body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          KeysTextField(label: 'Question *', controller: _question, hint: 'What question would like to get opinions on?', maxLength: kQuestionMax, maxLines: 3, onChanged: (_) => setState(() {})),
+          KeysTextField(label: 'Question', required: true, controller: _question, hint: 'What question would like to get opinions on?', maxLength: kQuestionMax, maxLines: 3, minLines: 3, onChanged: (_) => setState(() {})),
           const SizedBox(height: 20),
-          KeysTextField(label: 'Poll promise', controller: _promise, hint: 'What does this poll result stand to achieve?', maxLength: kPromiseMax, maxLines: 3, onChanged: (_) => setState(() {})),
+          KeysTextField(label: 'Poll promise', controller: _promise, hint: 'What does this poll result stand to achieve?', maxLength: kPromiseMax, maxLines: 3, minLines: 3, onChanged: (_) => setState(() {})),
           for (var i = 0; i < _options.length; i++) ...[
             const SizedBox(height: 20),
-            Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
+            // Figma: label and counter across the top, then the image button
+            // left of the field.
+            Row(children: [
+              Expanded(child: Text.rich(TextSpan(text: 'Option ${i + 1}', children: [TextSpan(text: ' *', style: TextStyle(color: KColors.error))]), style: KText.paragraphMedium.copyWith(fontWeight: FontWeight.w500))),
+              ValueListenableBuilder(
+                valueListenable: _options[i].text,
+                builder: (_, v, _) => Text('${v.text.characters.length}/$kOptionMax', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
+              ),
+            ]),
+            const SizedBox(height: 8),
+            Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Padding(
+                padding: const EdgeInsets.only(right: 8, top: 6),
+                child: _options[i].image != null
+                    ? GestureDetector(
+                        onTap: () => _pickImage(_options[i]),
+                        child: ClipRRect(borderRadius: BorderRadius.circular(6), child: Image.memory(_options[i].image!.bytes, width: 36, height: 36, fit: BoxFit.cover)),
+                      )
+                    : SizedBox.square(
+                        dimension: 36,
+                        child: IconButton(
+                          tooltip: 'Add image',
+                          padding: EdgeInsets.zero,
+                          onPressed: () => _pickImage(_options[i]),
+                          icon: Icon(PhosphorIconsRegular.image, size: 24, color: KColors.iconDefault),
+                        ),
+                      ),
+              ),
               Expanded(
                 child: KeysTextField(
-                  label: 'Option ${i + 1} *',
                   controller: _options[i].text,
                   hint: 'Add option',
                   maxLength: kOptionMax,
+                  showCount: false,
                   error: _options[i].error,
                   onChanged: (_) => setState(() => _options[i].error = null),
                   fieldKey: Key('option-$i'),
                 ),
               ),
             ]),
-            Row(children: [
-              if (_options[i].image != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8, right: 8),
-                  child: ClipRRect(borderRadius: BorderRadius.circular(6), child: Image.memory(_options[i].image!.bytes, width: 48, height: 48, fit: BoxFit.cover)),
-                ),
-              TextButton.icon(
-                onPressed: () => _pickImage(_options[i]),
-                icon: const Icon(PhosphorIconsRegular.image, size: 18),
-                label: Text(_options[i].image == null ? 'Add image' : 'Change image'),
-                style: TextButton.styleFrom(foregroundColor: KColors.textSecondary),
+            if (_options.length > 2)
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(onPressed: () => setState(() => _options.removeAt(i)), style: TextButton.styleFrom(foregroundColor: KColors.error), child: const Text('Delete')),
               ),
-              const Spacer(),
-              if (_options.length > 2)
-                TextButton(onPressed: () => setState(() => _options.removeAt(i)), style: TextButton.styleFrom(foregroundColor: KColors.error), child: const Text('Delete')),
-            ]),
           ],
           if (_options.length < kOptionsMax)
             Align(
