@@ -185,12 +185,15 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> with Busy {
   }
 
   @override
+  // Figma 1300:187371 (empty) and 3155:314757 (filled).
   Widget build(BuildContext context) {
     return KeysScaffold(
+      gradient: false,
       header: KeysHeader(progress: P.profile, showBack: false),
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
       body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Intro(overline: 'Profile setup', title: 'Add a profile picture and bio', body: 'Your profile picture is required so neighbours can recognise you. Your bio is optional and can be edited later.'),
-        const SizedBox(height: 24),
+        const Intro(small: true, overline: 'Profile setup', title: 'Add a profile picture and bio', body: 'Your profile picture is required so neighbours can recognise you. Your bio is optional and can be edited later.'),
+        const SizedBox(height: 36),
         Center(
           child: Semantics(
             container: true,
@@ -206,50 +209,80 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> with Busy {
                   ]),
                 ),
               ),
-              child: Stack(children: [
-                CircleAvatar(
-                  radius: 60,
-                  backgroundColor: KColors.surfaceSubtle,
-                  backgroundImage: _photo == null ? null : MemoryImage(_photo!.bytes),
-                  child: _photo == null ? Icon(PhosphorIconsRegular.user, size: 48, color: KColors.textTertiary) : null,
-                ),
-                Positioned(
-                  right: 0,
-                  bottom: 0,
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(color: KColors.surfaceInverted, shape: BoxShape.circle, border: Border.all(color: KColors.surfaceDefault, width: 2)),
-                    child: Icon(PhosphorIconsRegular.camera, color: KColors.textInverse, size: 18),
+              child: SizedBox.square(
+                dimension: 120,
+                child: Stack(clipBehavior: Clip.none, children: [
+                  Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: KColors.surfaceSubtle,
+                      border: Border.all(color: KColors.surfaceDefault, width: 3),
+                      image: _photo == null ? null : DecorationImage(image: MemoryImage(_photo!.bytes), fit: BoxFit.cover),
+                    ),
+                    child: _photo == null ? Icon(PhosphorIconsRegular.user, size: 48, color: KColors.textTertiary) : null,
                   ),
-                ),
-              ]),
+                  // Figma: 44pt white ring holding a 36pt yellow camera button.
+                  Positioned(
+                    right: 0,
+                    bottom: -1,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(color: KColors.surfaceDefault, shape: BoxShape.circle),
+                      child: Container(
+                        width: 36,
+                        height: 36,
+                        decoration: const BoxDecoration(color: Color(0xFFFFD12A), shape: BoxShape.circle),
+                        child: const Icon(PhosphorIconsFill.camera, color: Color(0xFF171717), size: 18),
+                      ),
+                    ),
+                  ),
+                ]),
+              ),
             ),
           ),
         ),
-        if (_photoError != null) Padding(padding: const EdgeInsets.only(top: 12), child: Center(child: ErrorLine(_photoError!))),
+        const SizedBox(height: 15),
+        Center(child: Text('JPG or PNG, up to 15MB', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary))),
+        if (_photoError != null) Padding(padding: const EdgeInsets.only(top: 12), child: Center(child: FieldHint(_photoError!))),
         const SizedBox(height: 24),
-        KeysTextField(label: 'Bio', controller: _bio, maxLength: kBioMax, maxLines: 4),
-        const SizedBox(height: 16),
-        Row(children: [
-          Checkbox(
-            key: const Key('safety-checkbox'),
-            value: _ack,
-            activeColor: KColors.surfaceInverted,
-            onChanged: (v) => setState(() => _ack = v ?? false),
-          ),
-          Expanded(
-            child: Wrap(children: [
-              Text('I have read the ', style: KText.paragraphMedium),
-              GestureDetector(
-                onTap: () => showSafetyGuidelines(context),
-                child: Text('Keys safety guidelines', style: KText.paragraphMedium.copyWith(color: KColors.textLink)),
-              ),
-            ]),
-          ),
-        ]),
+        KeysTextField(label: 'Bio', controller: _bio, maxLength: kBioMax, maxLines: 4, minLines: 4),
       ]),
       // ONB-22.1 / ONB-22.6: needs a photo and the safety tick.
-      bottom: KeysButton('Continue', loading: busy, onPressed: _photo != null && _ack ? _continue : null),
+      bottom: Column(mainAxisSize: MainAxisSize.min, children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Row(children: [
+            Semantics(
+              checked: _ack,
+              label: 'I have read the Keys safety guidelines',
+              child: GestureDetector(
+                key: const Key('safety-checkbox'),
+                behavior: HitTestBehavior.opaque,
+                onTap: () => setState(() => _ack = !_ack),
+                child: SizedBox(height: 40, child: KCheckbox(value: _ack)),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text.rich(TextSpan(style: KText.paragraphMedium, children: [
+                const TextSpan(text: 'I have read the '),
+                WidgetSpan(
+                  alignment: PlaceholderAlignment.baseline,
+                  baseline: TextBaseline.alphabetic,
+                  child: GestureDetector(
+                    onTap: () => showSafetyGuidelines(context),
+                    child: Text('Keys safety guidelines', style: KText.paragraphMedium.copyWith(color: KColors.textLink)),
+                  ),
+                ),
+              ])),
+            ),
+          ]),
+        ),
+        const SizedBox(height: 10),
+        KeysButton('Continue', loading: busy, onPressed: _photo != null && _ack ? _continue : null),
+      ]),
     );
   }
 }
@@ -258,22 +291,45 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> with Busy {
 class VerifyPromptScreen extends StatelessWidget {
   const VerifyPromptScreen({super.key});
   @override
+  // Figma 1300:186227.
   Widget build(BuildContext context) => KeysScaffold(
+        gradient: false,
+        fill: true,
         header: const KeysHeader(progress: P.verify, showBack: false),
+        padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
         body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           const Intro(
-            overline: "You're almost done",
+            small: true,
+            overline: 'You’re almost done',
             title: 'Verify your home address.',
             body: 'We need to verify your home address using your bank card. Your card will not be charged. Please ensure that your home address and billing address are exactly the same.',
           ),
-          const SizedBox(height: 24),
-          Center(child: Image.asset('assets/images/verify_identification.png', width: 200)),
-          Center(child: LinkText('How does address verification protect me?', onTap: () => context.push('/verify/why'))),
+          const SizedBox(height: 12),
+          Semantics(
+            link: true,
+            child: InkWell(
+              onTap: () => context.push('/verify/why'),
+              child: SizedBox(
+                height: 24,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    widthFactor: 1,
+                    child: Text('How does address verification protect me?',
+                        style: TextStyle(fontFamily: 'Inter', fontSize: 14, fontWeight: FontWeight.w500, height: 15 / 14, color: KColors.textLink, decoration: TextDecoration.underline, decorationColor: KColors.textLink)),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 36),
+          Expanded(child: Center(child: Image.asset('assets/images/verify_identification.png', width: 200))),
         ]),
         bottom: ButtonStack([
           KeysButton('Verify my address', onPressed: () => context.push('/verify', extra: 'onboarding')),
           // ONB-23.2: stays unverified with the "Unverified" badge.
-          KeysButton('Skip for now', variant: ButtonVariant.ghost, onPressed: () => context.go('/onboarding/invite')),
+          KeysButton('Skip for now', variant: ButtonVariant.secondary, onPressed: () => context.go('/onboarding/invite')),
         ]),
       );
 }
@@ -295,55 +351,87 @@ class _InviteScreenState extends State<InviteScreen> {
     context.api.get('/communities/mine/invite').then((r) => mounted ? setState(() => _invite = r) : null);
   }
 
+  Future<void> _share(Map<String, dynamic> inv) async {
+    await context.deps.sharer.share(inv['message']);
+    if (mounted) setState(() => _shared = true);
+  }
+
   @override
   Widget build(BuildContext context) {
     final inv = _invite;
     final sharer = context.deps.sharer;
+    void done() => context.go('/home');
+    // Figma 1300:187763: close and Skip in the header, a dark share card.
     return KeysScaffold(
-      header: const KeysHeader(progress: P.invite, showBack: false),
+      gradient: false,
+      header: KeysHeader(
+        showBack: false,
+        trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+          InkWell(
+            borderRadius: BorderRadius.circular(KRadius.pill),
+            onTap: done,
+            child: const SizedBox(
+              height: 36,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: Center(widthFactor: 1, child: Text('Skip', style: TextStyle(fontFamily: 'Inter', fontSize: 12, fontWeight: FontWeight.w600))),
+              ),
+            ),
+          ),
+        ]),
+        leading: Semantics(
+          button: true,
+          label: 'Close',
+          child: InkResponse(radius: 22, onTap: done, child: Icon(PhosphorIconsRegular.x, size: 26, color: KColors.iconDefault)),
+        ),
+      ),
+      padding: const EdgeInsets.fromLTRB(28, 52, 28, 20),
       body: Column(children: [
-        const Intro(center: true, title: 'Bring your neighbors closer', body: 'Now that you are in the community, share your community link with your neighbours to further grow the community.'),
-        const SizedBox(height: 24),
-        const CircleImage('assets/images/invite_neighbours.png', size: 200),
+        Text('COMMUNITY INVITE', style: KText.overline, textAlign: TextAlign.center),
+        const SizedBox(height: 12),
+        Text('Bring your\nneighbors closer', textAlign: TextAlign.center, style: KText.headingMedium.copyWith(fontSize: 36, height: 48 / 36, letterSpacing: -0.8)),
+        const SizedBox(height: 20),
+        const SizedBox(height: 227, child: Center(child: CircleImage('assets/images/invite_neighbours.png', size: 200))),
+        const SizedBox(height: 20),
+        Text('Now that you are in the community, share your community link with your neighbours to further grow the community.', textAlign: TextAlign.center, style: KText.paragraphLarge.copyWith(color: KColors.textSecondary)),
         const SizedBox(height: 24),
         if (inv != null)
-          Container(
-            padding: const EdgeInsets.only(left: 16),
-            decoration: BoxDecoration(color: KColors.surfaceSubtle, borderRadius: BorderRadius.circular(KRadius.sm)),
-            child: Row(children: [
-              Expanded(
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  const SizedBox(height: 10),
-                  Text('Community link', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
-                  Text(inv['link'], style: KText.paragraphMediumLarge, overflow: TextOverflow.ellipsis),
-                  const SizedBox(height: 10),
-                ]),
-              ),
-              IconButton(
-                tooltip: 'Copy link',
-                icon: const Icon(PhosphorIconsRegular.copy),
-                onPressed: () async {
+          Semantics(
+            button: true,
+            label: 'Tap to share ${inv['link']}',
+            hint: 'Long press to copy',
+            child: Material(
+              color: const Color(0xFF282828),
+              borderRadius: BorderRadius.circular(16),
+              child: InkWell(
+                key: const Key('invite-card'),
+                borderRadius: BorderRadius.circular(16),
+                onTap: () => _share(inv),
+                onLongPress: () async {
                   await sharer.copy(inv['link']);
                   if (context.mounted) showToast(context, 'Link copied');
                 },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  child: Row(children: [
+                    Expanded(
+                      child: ExcludeSemantics(
+                        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Text('Tap to share', style: KText.paragraphMediumSmall.copyWith(color: const Color(0xFFA6A6A6))),
+                          const SizedBox(height: 2),
+                          Text(inv['link'], overflow: TextOverflow.ellipsis, style: KText.paragraphMedium.copyWith(fontWeight: FontWeight.w500, color: Colors.white)),
+                        ]),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    const Icon(PhosphorIconsRegular.shareFat, size: 24, color: Colors.white),
+                  ]),
+                ),
               ),
-            ]),
+            ),
           ),
       ]),
-      bottom: ButtonStack([
-        KeysButton(
-          _shared ? 'Continue' : 'Tap to share',
-          onPressed: inv == null
-              ? null
-              : _shared
-                  ? () => context.go('/home')
-                  : () async {
-                      await sharer.share(inv['message']);
-                      if (mounted) setState(() => _shared = true);
-                    },
-        ),
-        if (!_shared) KeysButton('Skip', variant: ButtonVariant.ghost, onPressed: () => context.go('/home')),
-      ]),
+      bottom: _shared ? KeysButton('Continue', onPressed: done) : null,
     );
   }
 }

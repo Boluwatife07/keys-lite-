@@ -201,7 +201,7 @@ void main() {
     final h = Harness();
     h.fake.on('GET /communities/mine/invite', (_, _) => {'link': 'https://keys.app/c/MAPLE1', 'message': "Hey! I'm using the Keys app to stay connected to our community. Download it and join us! https://keys.app/c/MAPLE1"});
     await h.pump(t, const InviteScreen());
-    await t.tap(find.byTooltip('Copy link'));
+    await t.longPress(find.byKey(const Key('invite-card')));
     await t.pump();
     expect(find.text('Link copied'), findsOneWidget);
     expect(h.sharer.copied.single, 'https://keys.app/c/MAPLE1');

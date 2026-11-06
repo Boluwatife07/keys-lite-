@@ -56,7 +56,9 @@ class KeysScaffold extends StatelessWidget {
 }
 
 class KeysHeader extends StatelessWidget {
-  const KeysHeader({super.key, this.onBack, this.progress, this.showBack = true, this.trailing});
+  const KeysHeader({super.key, this.onBack, this.progress, this.showBack = true, this.trailing, this.leading});
+  /// Replaces the back caret (e.g. a close X).
+  final Widget? leading;
   final VoidCallback? onBack;
   final double? progress;
   final bool showBack;
@@ -73,7 +75,8 @@ class KeysHeader extends StatelessWidget {
           SizedBox(
             height: 48,
             child: Row(children: [
-              if (showBack)
+              ?leading,
+              if (leading == null && showBack)
                 Semantics(
                   button: true,
                   label: 'Back',
@@ -321,6 +324,7 @@ class KeysTextField extends StatefulWidget {
     this.obscure = false,
     this.maxLength,
     this.maxLines = 1,
+    this.minLines,
     this.keyboardType,
     this.onChanged,
     this.autofocus = false,
@@ -345,6 +349,7 @@ class KeysTextField extends StatefulWidget {
   final bool obscure;
   final int? maxLength;
   final int maxLines;
+  final int? minLines;
   final TextInputType? keyboardType;
   final ValueChanged<String>? onChanged;
   final bool autofocus;
@@ -400,7 +405,7 @@ class _KeysTextFieldState extends State<KeysTextField> {
                 enabled: widget.enabled,
                 obscureText: _hidden,
                 maxLines: widget.obscure ? 1 : widget.maxLines,
-                minLines: 1,
+                minLines: widget.minLines ?? 1,
                 autofocus: widget.autofocus,
                 keyboardType: widget.keyboardType,
                 textCapitalization: widget.textCapitalization,
