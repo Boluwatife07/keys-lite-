@@ -96,17 +96,38 @@ class _ChatListScreenState extends State<ChatListScreen> {
         leading: IconButton(tooltip: 'Back', icon: const Icon(PhosphorIconsRegular.caretLeft, size: 30), onPressed: () => context.pop()),
         title: Text('Chat', style: KText.headingXSmall),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        heroTag: 'new-chat',
-        backgroundColor: KColors.brand,
-        foregroundColor: KColors.staticBlack,
-        shape: const StadiumBorder(),
-        onPressed: () async {
-          await context.push('/chats/new');
-          _load();
-        },
-        icon: const Icon(PhosphorIconsRegular.plus),
-        label: Text('New Chat', style: KText.labelSemibold.copyWith(fontSize: 15, color: KColors.staticBlack)),
+      // Figma yellow pill with soft shadows (no outline).
+      floatingActionButton: Semantics(
+        button: true,
+        label: 'New Chat',
+        child: Container(
+          height: 52,
+          decoration: const BoxDecoration(
+            borderRadius: BorderRadius.all(Radius.circular(9999)),
+            boxShadow: [BoxShadow(color: Color(0x33000000), blurRadius: 5, offset: Offset(0, 1)), BoxShadow(color: Color(0x24000000), blurRadius: 10, offset: Offset(0, 2))],
+          ),
+          child: Material(
+            color: KColors.brand,
+            shape: const StadiumBorder(),
+            child: InkWell(
+              customBorder: const StadiumBorder(),
+              onTap: () async {
+                await context.push('/chats/new');
+                _load();
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: ExcludeSemantics(
+                  child: Row(mainAxisSize: MainAxisSize.min, children: [
+                    const Icon(PhosphorIconsRegular.plus, size: 22, color: Color(0xFF171717)),
+                    const SizedBox(width: 8),
+                    Text('New Chat', style: KText.labelSemibold.copyWith(fontSize: 15, color: const Color(0xFF171717))),
+                  ]),
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
       body: Column(children: [
         Padding(padding: const EdgeInsets.fromLTRB(16, 4, 16, 8), child: SearchField(controller: _search, hint: 'Search...')),

@@ -7,7 +7,7 @@ catalogue test (`app/test/catalog`, run with
 Figma (393 x 852).
 
 Status: **Onboarding, Address verification, Learning, Profile/Settings,
-Home feed, Polls, Committee board, Voting and Updates done.** Next: Feed, Polls, Committee board, Voting, Updates, Update chat,
+Home feed, Polls, Committee board, Voting, Updates and Chat done.** Next: Feed, Polls, Committee board, Voting, Updates, Update chat,
 Chat, Events, Clubs, Calendar.
 
 ## Onboarding
@@ -248,3 +248,15 @@ Kept on purpose: the Upcoming row stays above the tabs on both Feed and
 Updates (Figma shows it on Feed only), so switching tabs doesn't move the
 page; "Relevant documents" stays (UPD-03); scheduling is later phase. The
 update's group chat uses the main chat screen and is audited with Chat.
+
+## Chat
+
+| Item | Fixes |
+| --- | --- |
+| Chat list | Already matched (search, rows with time, yellow unread count, muted icon, blocked text); New Chat is now a plain yellow pill with soft shadows (the dark outline is gone) |
+| Conversation | Short conversations start at the top as in Figma (long ones still open at the newest message); bubbles, times and date divider already matched |
+| Composer | The idle mic is a dark disc with a white icon (Figma); send stays yellow |
+| Message request | Already matched ("Do you want to let … message you?", Delete / Accept) |
+
+Kept on purpose: the chat tabs (All, Primary, Groups, Clubs, Events) stay
+(CHT-01); photos, presence and typing dots are as built.

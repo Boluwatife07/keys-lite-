@@ -506,12 +506,18 @@ class _ConversationScreenState extends State<ConversationScreen> {
     }
     if (_hasMore) items.insert(0, const Padding(padding: EdgeInsets.all(16), child: Center(child: CircularProgressIndicator(strokeWidth: 2))));
     final reversed = items.reversed.toList();
-    return ListView.builder(
+    // Figma: a short conversation starts at the top; longer ones scroll
+    // from the newest message at the bottom.
+    return Align(
+      alignment: Alignment.topCenter,
+      child: ListView.builder(
+      shrinkWrap: true,
       controller: _scroll,
       reverse: true,
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
       itemCount: reversed.length,
       itemBuilder: (_, i) => reversed[i],
+    ),
     );
   }
 
@@ -1203,7 +1209,7 @@ class _ComposerState extends State<Composer> with Busy {
                     else if (_ready || context.deps.recorder == null)
                       _RoundButton(icon: PhosphorIconsFill.paperPlaneRight, tooltip: 'Send message', onTap: _ready ? () => _send() : null)
                     else
-                      _RoundButton(icon: PhosphorIconsFill.microphone, tooltip: 'Record voice message', onTap: _startVoice),
+                      _RoundButton(icon: PhosphorIconsFill.microphone, tooltip: 'Record voice message', onTap: _startVoice, dark: true),
                   ]),
           ),
         ]),
@@ -1213,7 +1219,9 @@ class _ComposerState extends State<Composer> with Busy {
 }
 
 class _RoundButton extends StatelessWidget {
-  const _RoundButton({required this.icon, required this.tooltip, required this.onTap});
+  const _RoundButton({required this.icon, required this.tooltip, required this.onTap, this.dark = false});
+  /// Figma: the idle mic is a dark disc with a white icon.
+  final bool dark;
   final IconData icon;
   final String tooltip;
   final VoidCallback? onTap;
@@ -1225,9 +1233,9 @@ class _RoundButton extends StatelessWidget {
           enabled: onTap != null,
           label: tooltip,
           child: Material(
-            color: onTap == null ? KColors.surfaceMuted : KColors.brand,
+            color: onTap == null ? KColors.surfaceMuted : (dark ? const Color(0xFF2B2100) : KColors.brand),
             shape: const CircleBorder(),
-            child: InkWell(customBorder: const CircleBorder(), onTap: onTap, child: SizedBox(width: 44, height: 44, child: Icon(icon, size: 22, color: KColors.textPrimary))),
+            child: InkWell(customBorder: const CircleBorder(), onTap: onTap, child: SizedBox(width: 44, height: 44, child: Icon(icon, size: 22, color: dark ? Colors.white : const Color(0xFF171717)))),
           ),
         ),
       );
