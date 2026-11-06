@@ -7,7 +7,7 @@ catalogue test (`app/test/catalog`, run with
 Figma (393 x 852).
 
 Status: **Onboarding, Address verification, Learning, Profile/Settings,
-Home feed, Polls and Committee board done.** Next: Feed, Polls, Committee board, Voting, Updates, Update chat,
+Home feed, Polls, Committee board and Voting done.** Next: Feed, Polls, Committee board, Voting, Updates, Update chat,
 Chat, Events, Clubs, Calendar.
 
 ## Onboarding
@@ -215,3 +215,22 @@ rows (later phase / Phase 1 decisions); results ring and bars unchanged.
 Kept on purpose: Budget, Resources and Communal services sections are later
 phase; the Hub / Proposals tabs stay for committee members (VOT-01.5); the
 chair's "Manage seats" row stays on the board list (CBM-08).
+
+## Voting (rebuilt)
+
+| Screen | Before | Figma / now |
+| --- | --- | --- |
+| Proposals list | Plain row, chip filter | "n items" with a grey Filter pill over an 8pt band; cards with a yellow title band, yellow committee tab, 2-line reason, grey subject box (reassign shows "from -> to"), time left with clock, "Created by" and a black Vote pill |
+| Filter | Radio list with Apply | Sheet with title + close, text rows with a check; picking applies at once |
+| View proposal | Plain label/value list, side-by-side buttons, thin coloured bars | "View proposal" header; two-column facts grid (created by, category, status tag, action, vote close, date) with Show less / more; Subject with 64pt photo; Role / Current role / Proposed role (with the swap person and yellow "Role swapping" note); reason; "Do you approve of this request?" with stacked grey Yes ✓ / No ✕ pills |
+| Results | Green/red thin bars, list of voters | 48pt grey pills with yellow fill, icon, label and %; turnout line; two-column Yes / No voter table in a grey frame (no-vote reasons under the name) |
+| Status tags | Grey chip | Pending (yellow), Awaiting Approval (dark grey), Approved / Added (green), Declined (red) |
+
+Logic checked: VOT-01 filter and "Closes today"; VOT-02.3 results after you
+vote or once closed; VOT-03.2 a No on reassign/remove asks for a reason;
+VOT-03.3 role swap note; new-seat protection note on declined joins.
+
+Kept on purpose: the proposals list stays inside the Community tab's
+Proposals tab (committee only), so it has no page header of its own; the
+turnout line ("n of m eligible voters have voted") is extra information
+the PRD asks for.
