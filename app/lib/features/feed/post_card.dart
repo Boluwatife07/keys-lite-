@@ -67,7 +67,7 @@ class _PostCardState extends State<PostCard> {
     await showActionSheet(context, [
       if (p.canDelete) SheetAction(PhosphorIconsRegular.trash, 'Delete post', _delete, destructive: true),
       SheetAction(PhosphorIconsRegular.speakerSimpleSlash, 'Mute ${a.firstName}', () => muteFromPost(context, a, () => widget.onChanged(null)), subtitle: 'Stop seeing posts from this user for 30 days'),
-      SheetAction(PhosphorIconsRegular.flag, 'Report this post', () => showReportSheet(context, itemType: p.isPoll ? 'poll' : 'post', itemId: p.id, title: 'Report this post'), subtitle: "${a.firstName} won't know you reported."),
+      SheetAction(PhosphorIconsRegular.flag, 'Report this post', () => showReportSheet(context, itemType: p.isPoll ? 'poll' : 'post', itemId: p.id, title: 'Report', intro: 'Tell us why you are reporting this post'), subtitle: "${a.firstName} won't know you reported."),
       SheetAction(PhosphorIconsRegular.prohibit, 'Block ${a.firstName}', () async {
         if (await blockPerson(context, a)) widget.onChanged(null);
       }, subtitle: "${a.firstName} won't be able to message you. They won't know you blocked them."),

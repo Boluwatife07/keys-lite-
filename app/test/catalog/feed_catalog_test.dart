@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keys_lite/features/feed/compose.dart';
+import 'package:keys_lite/features/feed/feed_screens.dart';
 import 'package:keys_lite/features/home/home_shell.dart';
 import '../harness.dart';
 import 'catalog.dart';
@@ -47,5 +48,31 @@ void main() {
   }, act: (t, h) async {
     await t.tap(find.text('Comment').first);
     await t.pumpAndSettle();
+  });
+  shot('post_options', () => const HomeShell(), setup: (h) => home(h, [post('p1', 'Hey everyone, I was wondering, what’s your go-to spot nearby for coffee?')]), act: (t, h) async {
+    await t.tap(find.byTooltip('More options').first);
+    await t.pumpAndSettle();
+  });
+  shot('report_sheet', () => const HomeShell(), setup: (h) {
+    home(h, [post('p1', 'Hey everyone, I was wondering, what’s your go-to spot nearby for coffee?')]);
+    h.fake.on('GET /reports/reasons', (_, _) => {'reasons': ['Misinformation', 'Violent or repulsive', 'Hateful or abusive content', 'Harassment or bullying', 'Sexual or nude activities', 'Suicide or self-harm', 'Scam, spam or fraudulent', 'Impersonation', 'Other']});
+  }, act: (t, h) async {
+    await t.tap(find.byTooltip('More options').first);
+    await t.pumpAndSettle();
+    await t.tap(find.textContaining('Report').first);
+    await t.pumpAndSettle();
+  });
+  shot('share_sheet', () => const HomeShell(), setup: (h) => home(h, [post('p1', 'Which one of these projects would improve Thames street?')]), act: (t, h) async {
+    await t.tap(find.text('Share').first);
+    await t.pumpAndSettle();
+  });
+  shot('likes_list', () => const LikesScreen(path: '/posts/p1/likes'), setup: (h) {
+    h.fake.on('GET /posts/p1/likes', (_, _) => {
+          'people': [
+            who('a', 'Jules Winnfield', role: 'Chair'), who('b', 'Tory Elsron'), who('c', 'Ajani Kimathi', role: 'Treasurer'), who('d', 'Roland Bourdon'), who('e', 'Ella White'),
+            who('f', 'Alan Everette', role: 'Communications Lead'), who('g', 'Alana Devrow'), who('h', 'Omari Norris', role: 'Secretary'),
+          ],
+          'total': 143,
+        });
   });
 }

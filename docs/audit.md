@@ -163,3 +163,16 @@ Kept on purpose: no News tab (later phase); no schedule clock in compose
 (scheduled posts are later phase); the compose bar keeps a separate video
 button and has no marketplace button (later phase); the character counter
 stays (FED-02).
+
+## Home feed (part 2: post options, report, share, likes)
+
+| Item | Fixes |
+| --- | --- |
+| Report form (shared by posts, comments, people, clubs, events, chats) | Inter 18 title with copy and close X, ruled 52pt radio rows with the Figma radio, Submit under a rule |
+| Share | Figma share sheet: title over a row of targets (Copy link, Share via) |
+| Likes | "Likes" page header, yellow count band, ruled 60pt rows with committee badge, role and red heart marker |
+| Post options | Already matched |
+
+Kept on purpose: the share row offers Copy link and the phone's share sheet
+only (Message, Facebook and WhatsApp are reached through the phone's sheet);
+reports keep the "Other" reason with a text box (XFR-03).

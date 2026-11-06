@@ -237,17 +237,54 @@ class LikesScreen extends StatelessWidget {
   const LikesScreen({super.key, required this.path});
   final String path;
   @override
+  // Figma 3430:178689: count band, ruled rows with a red heart marker.
   Widget build(BuildContext context) => Scaffold(
         backgroundColor: KColors.surfaceDefault,
-        appBar: AppBar(backgroundColor: KColors.surfaceDefault, surfaceTintColor: Colors.transparent, title: Text('Likes', style: KText.headingXSmall)),
+        appBar: const PageHeader('Likes', bottomBorder: true),
         body: FutureBuilder(
           future: context.api.get(path),
           builder: (context, s) {
             if (!s.hasData) return const Center(child: CircularProgressIndicator());
             final people = (s.data!['people'] as List).map((e) => PersonRef(Map<String, dynamic>.from(e))).toList();
+            final total = (s.data!['total'] as int?) ?? people.length;
             return ListView(children: [
+              Container(
+                color: KColors.brandSubtle,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                child: Text.rich(TextSpan(style: KText.paragraphMedium, children: [
+                  TextSpan(text: '$total', style: const TextStyle(fontWeight: FontWeight.w600)),
+                  TextSpan(text: total == 1 ? ' like' : ' likes'),
+                ])),
+              ),
+              const SizedBox(height: 8),
               for (final p in people)
-                ListTile(leading: Avatar(p.photoUrl), title: Text(p.name, style: KText.paragraphMediumLarge), subtitle: p.role == null ? null : Text(p.role!), onTap: () => context.push('/users/${p.id}')),
+                InkWell(
+                  onTap: () => context.push('/users/${p.id}'),
+                  child: Container(
+                    height: 60,
+                    margin: const EdgeInsets.symmetric(horizontal: 12),
+                    decoration: BoxDecoration(border: Border(bottom: BorderSide(color: KColors.borderDefault))),
+                    child: Row(children: [
+                      Avatar(p.photoUrl, size: 36),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Row(children: [
+                            Flexible(child: Text(p.name, overflow: TextOverflow.ellipsis, style: KText.paragraphMedium.copyWith(fontWeight: FontWeight.w500))),
+                            if (p.isCommittee) ...[const SizedBox(width: 4), const CommitteeMark(size: 14)],
+                          ]),
+                          if (p.role != null) Text(p.role!, style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
+                        ]),
+                      ),
+                      Container(
+                        width: 18,
+                        height: 18,
+                        decoration: BoxDecoration(color: KColors.error, shape: BoxShape.circle),
+                        child: const Icon(PhosphorIconsFill.heart, size: 10, color: Colors.white),
+                      ),
+                    ]),
+                  ),
+                ),
             ]);
           },
         ),

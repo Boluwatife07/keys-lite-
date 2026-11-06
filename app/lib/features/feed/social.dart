@@ -258,26 +258,56 @@ class _ReportFormState extends State<_ReportForm> with Busy {
 
   @override
   Widget build(BuildContext context) {
+    // Figma 3430:178477: title + copy with a close X, ruled radio list,
+    // Submit under a rule.
     return Padding(
-      padding: EdgeInsets.fromLTRB(20, 0, 20, 20 + MediaQuery.viewInsetsOf(context).bottom),
-      child: SingleChildScrollView(
+      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+      child: SafeArea(
+        top: false,
         child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(widget.title, style: KText.headingSmall),
-          const SizedBox(height: 8),
-          Text(widget.intro ?? "Tell us why you are reporting this. They won't be notified that you reported them.", style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
-          const SizedBox(height: 12),
-          RadioGroup<String>(
-            groupValue: _reason,
-            onChanged: (v) => setState(() => _reason = v),
-            child: Column(children: [
-              for (final r in widget.reasons)
-                RadioListTile<String>(value: r, title: Text(r, style: KText.paragraphMedium), dense: true, contentPadding: EdgeInsets.zero, activeColor: KColors.surfaceInverted),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 8, 8),
+            child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Expanded(
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(widget.title, style: TextStyle(fontFamily: 'Inter', fontSize: 18, height: 26 / 18, letterSpacing: -0.2, color: KColors.textPrimary)),
+                  const SizedBox(height: 2),
+                  Text(widget.intro ?? 'Tell us why you are reporting this', style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
+                ]),
+              ),
+              IconButton(tooltip: 'Close', onPressed: () => Navigator.pop(context), icon: Icon(PhosphorIconsRegular.x, size: 24, color: KColors.iconDefault)),
             ]),
           ),
-          if (_reason == 'Other') KeysTextField(controller: _text, hint: 'Tell us more', maxLength: 500, maxLines: 3, onChanged: (_) => setState(() {})),
-          if (_error != null) Padding(padding: const EdgeInsets.only(top: 8), child: ErrorLine(_error!)),
-          const SizedBox(height: 16),
-          KeysButton('Submit', loading: busy, onPressed: _ready ? _submit : null),
+          Container(height: 1, color: KColors.borderDefault),
+          Flexible(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                for (final r in widget.reasons)
+                  Semantics(
+                    button: true,
+                    selected: _reason == r,
+                    label: r,
+                    child: InkWell(
+                      onTap: () => setState(() => _reason = r),
+                      child: SizedBox(
+                        height: 52,
+                        child: Row(children: [
+                          KRadio(selected: _reason == r),
+                          const SizedBox(width: 8),
+                          Expanded(child: ExcludeSemantics(child: Text(r, style: KText.paragraphLarge))),
+                        ]),
+                      ),
+                    ),
+                  ),
+                if (_reason == 'Other') KeysTextField(controller: _text, hint: 'Tell us more', maxLength: 500, maxLines: 3, onChanged: (_) => setState(() {})),
+                if (_error != null) Padding(padding: const EdgeInsets.only(top: 8), child: ErrorLine(_error!)),
+                const SizedBox(height: 8),
+              ]),
+            ),
+          ),
+          Container(height: 1, color: KColors.borderDefault),
+          Padding(padding: const EdgeInsets.fromLTRB(16, 12, 16, 12), child: KeysButton('Submit', loading: busy, onPressed: _ready ? _submit : null)),
         ]),
       ),
     );
@@ -322,13 +352,56 @@ Future<bool> blockPerson(BuildContext context, PersonRef p) async {
 }
 
 /// FED-16: copy link or the phone's share sheet.
-Future<void> showShareSheet(BuildContext context, String link) => showActionSheet(context, [
-      SheetAction(PhosphorIconsRegular.link, 'Copy link', () async {
-        await context.deps.sharer.copy(link);
-        if (context.mounted) showToast(context, 'Link copied');
-      }),
-      SheetAction(PhosphorIconsRegular.shareFat, 'Share via', () => context.deps.sharer.share(link)),
-    ]);
+/// Figma "Share" sheet (3430:178707): a title over a row of share targets.
+/// Phase 1 offers Copy link and the phone's share sheet.
+Future<void> showShareSheet(BuildContext context, String link, {String title = 'Share post'}) => showModalBottomSheet(
+      context: context,
+      backgroundColor: KColors.surfaceDefault,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+      builder: (c) {
+        Widget target(IconData icon, String label, VoidCallback onTap) => Semantics(
+              button: true,
+              label: label,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(12),
+                onTap: () {
+                  Navigator.pop(c);
+                  onTap();
+                },
+                child: SizedBox(
+                  width: 74,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: ExcludeSemantics(
+                      child: Column(children: [
+                        Icon(icon, size: 36, color: KColors.iconDefault),
+                        const SizedBox(height: 8),
+                        Text(label, style: KText.paragraphSmall),
+                      ]),
+                    ),
+                  ),
+                ),
+              ),
+            );
+        return SafeArea(
+          top: false,
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            Padding(padding: const EdgeInsets.fromLTRB(16, 0, 16, 16), child: Text(title, style: KText.paragraphMedium)),
+            Container(height: 1, color: KColors.borderDefault),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+              child: Row(children: [
+                target(PhosphorIconsRegular.copy, 'Copy link', () async {
+                  await context.deps.sharer.copy(link);
+                  if (context.mounted) showToast(context, 'Link copied');
+                }),
+                target(PhosphorIconsRegular.shareFat, 'Share via', () => context.deps.sharer.share(link)),
+              ]),
+            ),
+          ]),
+        );
+      },
+    );
 
 const kMuteDurations = {'1h': 'For 1 hour', '24h': 'For 24 hours', '1w': 'For 1 week', 'forever': 'Until I turn it back on'};
 
