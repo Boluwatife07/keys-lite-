@@ -96,8 +96,9 @@ class _PostCardState extends State<PostCard> {
   Widget build(BuildContext context) {
     final long = p.text.length > 140 || '\n'.allMatches(p.text).length > 2;
     return Container(
+      // Figma "Post Sections" (3430:176470).
       color: KColors.surfaceDefault,
-      padding: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.only(top: 16),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         if (p.club != null && widget.showClub)
           Padding(
@@ -112,8 +113,8 @@ class _PostCardState extends State<PostCard> {
             ),
           ),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          padding: const EdgeInsets.fromLTRB(16, 4, 4, 4),
+          child: Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
             Expanded(
               child: Semantics(
                 container: true,
@@ -122,7 +123,7 @@ class _PostCardState extends State<PostCard> {
                 child: GestureDetector(
                   onTap: () => context.push('/users/${p.author.id}'),
                   child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Avatar(p.author.photoUrl, size: 40),
+                    Avatar(p.author.photoUrl, size: 36),
                     const SizedBox(width: 10),
                     Expanded(
                       child: AuthorLine(p.author,
@@ -132,11 +133,12 @@ class _PostCardState extends State<PostCard> {
                 ),
               ),
             ),
+            const SizedBox(width: 16),
             Text(timeAgo(p.createdAt), style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
-            SizedBox(width: 32, height: 24, child: IconButton(padding: EdgeInsets.zero, tooltip: 'More options', icon: const Icon(PhosphorIconsRegular.dotsThreeVertical, size: 20), onPressed: _openMenu)),
+            SizedBox.square(dimension: 36, child: IconButton(padding: EdgeInsets.zero, tooltip: 'More options', icon: Icon(PhosphorIconsBold.dotsThreeVertical, size: 20, color: KColors.iconDefault), onPressed: _openMenu)),
           ]),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 4),
         if (p.isPoll)
           Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: PollBlock(post: p, onChanged: _set))
         else if (p.text.isNotEmpty)
@@ -153,33 +155,32 @@ class _PostCardState extends State<PostCard> {
             ),
           ),
         if (!p.isPoll) _Attachment(p),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
-          child: Row(children: [
-            GestureDetector(
-              onTap: p.likeCount == 0 ? null : () => context.push('/posts/${p.id}/likes'),
-              child: Text(plural(p.likeCount, 'like'), style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
-            ),
-            if (p.canComment) ...[
-              const SizedBox(width: 12),
-              Text(plural(p.commentCount, 'comment'), style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
-            ],
-          ]),
+        // Stats: 36pt row, Medium count + Regular label in grey.
+        SizedBox(
+          height: 44,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: Row(children: [
+              GestureDetector(onTap: p.likeCount == 0 ? null : () => context.push('/posts/${p.id}/likes'), child: _Stat(p.likeCount, 'like')),
+              if (p.canComment) ...[const SizedBox(width: 12), _Stat(p.commentCount, 'comment')],
+            ]),
+          ),
         ),
-        Divider(height: 16, indent: 16, endIndent: 16, color: KColors.borderDefault),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
-          child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-            _Action(icon: p.likedByMe ? PhosphorIconsFill.heart : PhosphorIconsRegular.heart, color: p.likedByMe ? KColors.error : null, label: 'Like', onTap: _toggleLike, selected: p.likedByMe),
-            if (p.canComment) _Action(icon: PhosphorIconsRegular.chatCircle, label: 'Comment', onTap: () async {
+        // Actions: 48pt row under a surface/subtle rule.
+        Container(
+          height: 48,
+          decoration: BoxDecoration(border: Border(top: BorderSide(color: KColors.surfaceSubtle))),
+          child: Row(children: [
+            Expanded(child: _Action(icon: p.likedByMe ? PhosphorIconsFill.heart : PhosphorIconsRegular.heart, color: p.likedByMe ? KColors.error : null, label: 'Like', onTap: _toggleLike, selected: p.likedByMe)),
+            if (p.canComment) Expanded(child: _Action(icon: PhosphorIconsRegular.chatCircleDots, label: 'Comment', onTap: () async {
               final api = context.api;
               await showCommentsSheet(context, p);
               if (!mounted) return;
               try {
                 _set(Post(Map<String, dynamic>.from((await api.get('/posts/${p.id}'))['post'])));
               } catch (_) {}
-            }),
-            _Action(icon: PhosphorIconsRegular.arrowBendUpLeft, label: 'Share', onTap: () => showShareSheet(context, p.shareLink), flip: true),
+            })),
+            Expanded(child: _Action(icon: PhosphorIconsRegular.shareFat, label: 'Share', onTap: () => showShareSheet(context, p.shareLink))),
           ]),
         ),
       ]),
@@ -187,13 +188,26 @@ class _PostCardState extends State<PostCard> {
   }
 }
 
+class _Stat extends StatelessWidget {
+  const _Stat(this.n, this.noun);
+  final int n;
+  final String noun;
+  @override
+  Widget build(BuildContext context) {
+    final st = KText.paragraphMedium.copyWith(height: 1, color: KColors.textSecondary);
+    return Text.rich(TextSpan(children: [
+      TextSpan(text: '$n', style: st.copyWith(fontWeight: FontWeight.w500)),
+      TextSpan(text: ' ${n == 1 ? noun : '${noun}s'}', style: st),
+    ]));
+  }
+}
+
 class _Action extends StatelessWidget {
-  const _Action({required this.icon, required this.label, required this.onTap, this.color, this.flip = false, this.selected = false});
+  const _Action({required this.icon, required this.label, required this.onTap, this.color, this.selected = false});
   final IconData icon;
   final String label;
   final VoidCallback onTap;
   final Color? color;
-  final bool flip;
   final bool selected;
   @override
   Widget build(BuildContext context) => Semantics(
@@ -205,12 +219,12 @@ class _Action extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: ExcludeSemantics(
-              child: Row(children: [
-                Transform.flip(flipX: flip, child: Icon(icon, size: 20, color: color ?? KColors.textSecondary)),
-                const SizedBox(width: 6),
-                Text(label, style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
+              child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                Icon(icon, size: 20, color: color ?? KColors.textSecondary),
+                const SizedBox(width: 4),
+                Text(label, style: KText.paragraphMedium.copyWith(height: 1, color: KColors.textSecondary)),
               ]),
             ),
           ),

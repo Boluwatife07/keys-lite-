@@ -119,7 +119,7 @@ Future<void> showCommentsSheet(BuildContext context, Post post) => showModalBott
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 0, 8, 0),
             child: Row(children: [
-              Expanded(child: Text('Comments', style: KText.headingSmall)),
+              Expanded(child: Text('Comments', style: TextStyle(fontFamily: 'Inter', fontSize: 18, fontWeight: FontWeight.w500, height: 26 / 18, letterSpacing: -0.2, color: KColors.textPrimary))),
               IconButton(tooltip: 'Close', icon: const Icon(PhosphorIconsRegular.x), onPressed: () => Navigator.pop(c)),
             ]),
           ),

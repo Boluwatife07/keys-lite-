@@ -147,3 +147,19 @@ Phase 1 notification types (the Figma rows are later-phase features);
 profile; Edit profile keeps Home address and Verify rows (PRF-11, AVW-08);
 the bio limit stays 160 characters (ONB-22), Figma shows 200; My Activities
 shows "My post" only (other tabs are later phase).
+
+## Home feed (part 1: home, post card, compose, comments)
+
+| Item | Fixes |
+| --- | --- |
+| Home header | 36 avatar; 36pt round buttons with 28pt ChatCircleText and BellSimple; red count badge |
+| Compose button | 52pt yellow disc with the two Figma shadows (no outline) |
+| Empty feed | 137pt grey disc with the mailbox, 18pt title, 14pt copy, small outlined "Create post", on white |
+| Post card | 16 top inset, 36 avatar, 12pt time, 36pt options; 16/24 text; stats row with Medium counts; 48pt action row under a rule with Heart, ChatCircleDots and ShareFat; posts 4pt apart on grey |
+| Compose | X, avatar, "Everyone ⌄", small Post button; 20/28 text; 56pt typing bar with 36pt buttons and 24pt icons |
+| Comments sheet | Inter 18 title |
+
+Kept on purpose: no News tab (later phase); no schedule clock in compose
+(scheduled posts are later phase); the compose bar keeps a separate video
+button and has no marketplace button (later phase); the character counter
+stays (FED-02).

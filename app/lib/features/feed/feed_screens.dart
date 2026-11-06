@@ -87,11 +87,12 @@ class PostListState extends State<PostList> {
           }
         }),
       ));
-      items.add(Container(height: 8, color: KColors.surfaceSubtle));
+      // Figma: posts sit 4pt apart on the grey feed.
+      items.add(Container(height: 4, color: KColors.surfaceSubtle));
     }
     if (_loading) items.add(const Padding(padding: EdgeInsets.all(24), child: Center(child: CircularProgressIndicator())));
     if (_error != null) items.add(Padding(padding: const EdgeInsets.all(16), child: Column(children: [ErrorLine(_error!), TextButton(onPressed: _more, child: const Text('Retry'))])));
-    return NotificationListener<ScrollNotification>(
+    final list = NotificationListener<ScrollNotification>(
       onNotification: (n) {
         if (n.metrics.extentAfter < 600) _more();
         return false;
@@ -102,22 +103,62 @@ class PostListState extends State<PostList> {
         child: ListView(padding: const EdgeInsets.only(bottom: 96), shrinkWrap: widget.shrinkWrap, physics: widget.shrinkWrap ? const NeverScrollableScrollPhysics() : const AlwaysScrollableScrollPhysics(), children: items),
       ),
     );
+    // The empty state sits on white, like the Figma empty feed.
+    return _posts.isEmpty && _done && !widget.shrinkWrap ? ColoredBox(color: KColors.surfaceDefault, child: list) : list;
   }
 }
 
 class EmptyState extends StatelessWidget {
-  const EmptyState({super.key, required this.title, required this.body, this.action});
+  const EmptyState({super.key, required this.title, required this.body, this.action, this.icon, this.actionLabel, this.onAction, this.top = 64});
+  final double top;
   final String title;
   final String body;
   final Widget? action;
+  /// Figma empty state: 137pt grey disc holding an 82pt icon.
+  final IconData? icon;
+  /// Small outlined button (Figma "Button / Small / Secondary").
+  final String? actionLabel;
+  final VoidCallback? onAction;
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 64),
+        padding: EdgeInsets.fromLTRB(32, top, 32, 64),
         child: Column(children: [
-          Text(title, style: KText.headingXSmall, textAlign: TextAlign.center),
-          const SizedBox(height: 8),
-          Text(body, style: KText.paragraphMedium.copyWith(color: KColors.textSecondary), textAlign: TextAlign.center),
-          if (action != null) ...[const SizedBox(height: 20), SizedBox(width: 180, child: action!)],
+          if (icon != null) ...[
+            Container(
+              width: 137,
+              height: 137,
+              decoration: BoxDecoration(color: KColors.surfaceSubtle, shape: BoxShape.circle),
+              child: Icon(icon, size: 82, color: KColors.iconDefault),
+            ),
+            const SizedBox(height: 32),
+          ],
+          Text(title, style: KText.headingXSmall.copyWith(height: 26 / 18), textAlign: TextAlign.center),
+          const SizedBox(height: 4),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 260),
+            child: Text(body, style: KText.paragraphMedium.copyWith(color: KColors.textSecondary), textAlign: TextAlign.center),
+          ),
+          if (actionLabel != null) ...[
+            const SizedBox(height: 20),
+            Semantics(
+              button: true,
+              child: Material(
+                color: Colors.transparent,
+                shape: StadiumBorder(side: BorderSide(color: KColors.borderStrong)),
+                child: InkWell(
+                  customBorder: const StadiumBorder(),
+                  onTap: onAction,
+                  child: SizedBox(
+                    height: 36,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Center(widthFactor: 1, child: Text(actionLabel!, style: TextStyle(fontFamily: 'Inter', fontSize: 12, fontWeight: FontWeight.w600, height: 1, color: KColors.textPrimary))),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ] else if (action != null) ...[const SizedBox(height: 20), SizedBox(width: 180, child: action!)],
         ]),
       );
 }

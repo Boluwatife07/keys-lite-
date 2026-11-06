@@ -201,6 +201,19 @@ class _ComposeScreenState extends State<ComposeScreen> with Busy {
     }
   }
 
+  Widget _tool(String tip, IconData icon, VoidCallback? onTap) => Padding(
+        padding: const EdgeInsets.only(right: 4),
+        child: SizedBox.square(
+          dimension: 36,
+          child: IconButton(
+            tooltip: tip,
+            padding: EdgeInsets.zero,
+            icon: Icon(icon, size: 24, color: onTap == null ? KColors.iconDisabled : KColors.iconDefault),
+            onPressed: onTap,
+          ),
+        ),
+      );
+
   @override
   Widget build(BuildContext context) {
     final me = context.session.me;
@@ -216,26 +229,34 @@ class _ComposeScreenState extends State<ComposeScreen> with Busy {
         backgroundColor: KColors.surfaceDefault,
         body: SafeArea(
           child: Column(children: [
+            // Figma 3430:177014 header: X, avatar + audience, Post.
             Padding(
-              padding: const EdgeInsets.fromLTRB(4, 4, 16, 4),
+              padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
               child: Row(children: [
-                IconButton(
-                  tooltip: 'Close',
-                  icon: const Icon(PhosphorIconsRegular.x),
-                  onPressed: () async {
-                    if (await _confirmDiscard() && context.mounted) context.pop();
-                  },
+                Tooltip(
+                  message: 'Close',
+                  child: InkResponse(
+                    radius: 20,
+                    onTap: () async {
+                      if (await _confirmDiscard() && context.mounted) context.pop();
+                    },
+                    child: Icon(PhosphorIconsRegular.x, size: 26, color: KColors.iconDefault),
+                  ),
                 ),
+                const SizedBox(width: 16),
                 Avatar(me?.photoUrl, size: 36),
-                const SizedBox(width: 8),
+                const SizedBox(width: 4),
                 // FED-02.4: audience is everyone and cannot change in Phase 1; club announcements choose (CLB-13.1).
                 if (widget.clubId == null)
                   Semantics(
                     label: 'Audience: Everyone',
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(border: Border.all(color: KColors.borderDefault), borderRadius: BorderRadius.circular(KRadius.pill)),
-                      child: Text('Everyone', style: KText.paragraphMedium),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Row(mainAxisSize: MainAxisSize.min, children: [
+                        Text('Everyone', style: KText.paragraphMedium),
+                        const SizedBox(width: 4),
+                        Icon(PhosphorIconsRegular.caretDown, size: 14, color: KColors.iconDefault),
+                      ]),
                     ),
                   )
                 else if (!_editing)
@@ -272,7 +293,15 @@ class _ComposeScreenState extends State<ComposeScreen> with Busy {
                   height: 36,
                   child: FilledButton(
                     key: const Key('post-button'),
-                    style: FilledButton.styleFrom(backgroundColor: KColors.surfaceInverted, disabledBackgroundColor: KColors.surfaceInverted.withValues(alpha: 0.25), shape: const StadiumBorder()),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: KColors.surfaceInverted,
+                      foregroundColor: KColors.textInverse,
+                      disabledBackgroundColor: KColors.surfaceSubtle,
+                      disabledForegroundColor: KColors.textDisabled,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      textStyle: const TextStyle(fontFamily: 'Inter', fontSize: 12, fontWeight: FontWeight.w600),
+                      shape: const StadiumBorder(),
+                    ),
                     onPressed: (_editing ? _text.text.trim().isNotEmpty || widget.edit!.attachment != 'none' : _hasInput) && !busy ? _post : null,
                     child: busy ? SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: KColors.textInverse)) : Text(_editing ? 'Save' : 'Post'),
                   ),
@@ -280,7 +309,7 @@ class _ComposeScreenState extends State<ComposeScreen> with Busy {
               ]),
             ),
             Expanded(
-              child: ListView(padding: const EdgeInsets.symmetric(horizontal: 16), children: [
+              child: ListView(padding: const EdgeInsets.fromLTRB(16, 12, 16, 16), children: [
                 TextField(
                   key: const Key('compose-field'),
                   controller: _text,
@@ -313,17 +342,19 @@ class _ComposeScreenState extends State<ComposeScreen> with Busy {
                 ]),
               ),
             Container(
-              decoration: BoxDecoration(border: Border(top: BorderSide(color: KColors.borderDefault))),
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              // Figma "Typing bar": 56pt, #dddddd rule, 36pt buttons with 24pt icons.
+              height: 56,
+              decoration: BoxDecoration(color: KColors.surfaceDefault, border: Border(top: BorderSide(color: KColors.palette.brightness == Brightness.dark ? KColors.borderDefault : const Color(0xFFDDDDDD)))),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(children: [
                 // FED-04.1: once one attachment type is used, the others are unavailable.
                 if (!_editing) ...[
-                  IconButton(tooltip: 'Add photos', icon: const Icon(PhosphorIconsRegular.image), onPressed: t == 'none' || t == 'photos' ? _addPhotos : null),
-                  IconButton(tooltip: 'Add video', icon: const Icon(PhosphorIconsRegular.videoCamera), onPressed: t == 'none' ? _addVideo : null),
-                  IconButton(tooltip: 'Add document', icon: const Icon(PhosphorIconsRegular.paperclip), onPressed: t == 'none' ? _addDocument : null),
+                  _tool('Add photos', PhosphorIconsRegular.image, t == 'none' || t == 'photos' ? _addPhotos : null),
+                  _tool('Add video', PhosphorIconsRegular.videoCamera, t == 'none' ? _addVideo : null),
+                  _tool('Add document', PhosphorIconsRegular.paperclip, t == 'none' ? _addDocument : null),
                 ],
-                IconButton(tooltip: 'Tag someone', icon: const Icon(PhosphorIconsRegular.at), onPressed: _tag),
-                if (!_editing) IconButton(tooltip: 'Add link', icon: const Icon(PhosphorIconsRegular.link), onPressed: t == 'none' ? _addLink : null),
+                _tool('Tag someone', PhosphorIconsRegular.at, _tag),
+                if (!_editing) _tool('Add link', PhosphorIconsRegular.link, t == 'none' ? _addLink : null),
               ]),
             ),
           ]),

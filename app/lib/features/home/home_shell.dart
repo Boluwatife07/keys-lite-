@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/models.dart';
 import '../../core/scope.dart';
 import '../feed/feed_screens.dart';
+import '../feed/social.dart' show Avatar;
 import '../community/community_tab.dart';
 import '../updates/updates_list.dart';
 import '../events/events_tab.dart';
@@ -131,48 +132,52 @@ class _HomeShellState extends State<HomeShell> {
     return Stack(children: [
       Scaffold(
         backgroundColor: KColors.surfaceDefault,
-        appBar: AppBar(
-          backgroundColor: KColors.surfaceDefault,
-          surfaceTintColor: Colors.transparent,
-          titleSpacing: 16,
-          title: Row(children: [
-            GestureDetector(
-              key: keys.profile,
-              onTap: () => context.push('/profile'),
-              child: Semantics(
-                container: true,
-                button: true,
-                label: 'Profile',
-                child: CircleAvatar(
-                  radius: 18,
-                  backgroundColor: KColors.surfaceSubtle,
-                  backgroundImage: me?.photoUrl == null ? null : NetworkImage(context.api.absolute(me!.photoUrl!)),
-                  child: me?.photoUrl == null ? const Icon(PhosphorIconsRegular.user, size: 18) : null,
+        // Figma "Home page header": 36 avatar, 36pt round buttons with 28pt
+        // ChatCircleText and BellSimple, red count badges.
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(54),
+          child: SafeArea(
+            bottom: false,
+            child: Container(
+              color: KColors.surfaceDefault,
+              padding: const EdgeInsets.fromLTRB(16, 6, 16, 12),
+              child: Row(children: [
+                GestureDetector(
+                  key: keys.profile,
+                  onTap: () => context.push('/profile'),
+                  child: Semantics(container: true, button: true, label: 'Profile', child: Avatar(me?.photoUrl, size: 36)),
                 ),
-              ),
+                const Spacer(),
+                _HeaderButton(icon: PhosphorIconsRegular.chatCircleText, label: _unreadChats > 0 ? 'Chats, $_unreadChats unread' : 'Chats', count: _unreadChats, onTap: _openChats),
+                const SizedBox(width: 8),
+                _HeaderButton(icon: PhosphorIconsRegular.bellSimple, label: 'Notifications', onTap: () => context.push('/notifications')),
+              ]),
             ),
-            const Spacer(),
-          ]),
-          actions: [
-            IconButton(
-              tooltip: _unreadChats > 0 ? 'Chats, $_unreadChats unread' : 'Chats',
-              icon: Badge(isLabelVisible: _unreadChats > 0, label: Text('$_unreadChats'), backgroundColor: KColors.error, child: const Icon(PhosphorIconsRegular.chatCircle)),
-              onPressed: _openChats,
-            ),
-            IconButton(tooltip: 'Notifications', icon: const Icon(PhosphorIconsRegular.bell), onPressed: () => context.push('/notifications')),
-            const SizedBox(width: 4),
-          ],
+          ),
         ),
         body: pages[_tab],
         floatingActionButton: _tab == 0 && _homeTab == 0
-            ? FloatingActionButton(
+            // Figma "FAB Button": 52pt yellow disc, 28pt plus, two soft shadows.
+            ? Semantics(
                 key: keys.compose,
-                tooltip: 'Create post',
-                backgroundColor: KColors.brand,
-                foregroundColor: KColors.staticBlack,
-                shape: const CircleBorder(),
-                onPressed: _create,
-                child: const Icon(PhosphorIconsRegular.plus, size: 28),
+                button: true,
+                label: 'Create post',
+                child: Tooltip(
+                  message: 'Create post',
+                  child: Container(
+                    width: 52,
+                    height: 52,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [BoxShadow(color: Color(0x33000000), blurRadius: 5, offset: Offset(0, 1)), BoxShadow(color: Color(0x24000000), blurRadius: 10, offset: Offset(0, 2))],
+                    ),
+                    child: Material(
+                      color: KColors.brand,
+                      shape: const CircleBorder(),
+                      child: InkWell(customBorder: const CircleBorder(), onTap: _create, child: const Icon(PhosphorIconsRegular.plus, size: 28, color: Color(0xFF171717))),
+                    ),
+                  ),
+                ),
               )
             : null,
         bottomNavigationBar: KeysTabBar(
@@ -238,10 +243,14 @@ class _HomeTab extends StatelessWidget {
                 child: PostList(
                   key: feedKey,
                   path: '/feed',
+                  // Figma 3430:176990.
                   empty: EmptyState(
+                    icon: PhosphorIconsRegular.mailbox,
+                    top: 150,
                     title: 'No posts yet',
                     body: 'Posts and activities of your neighbors would be shown here',
-                    action: KeysButton('Create post', onPressed: onCreate),
+                    actionLabel: 'Create post',
+                    onAction: onCreate,
                   ),
                 ),
               )
@@ -364,6 +373,41 @@ class KeysTabBar extends StatelessWidget {
                         ),
                       ),
                     ),
+                  ),
+                ),
+            ]),
+          ),
+        ),
+      );
+}
+
+class _HeaderButton extends StatelessWidget {
+  const _HeaderButton({required this.icon, required this.label, required this.onTap, this.count = 0});
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final int count;
+  @override
+  Widget build(BuildContext context) => Semantics(
+        button: true,
+        label: label,
+        child: InkResponse(
+          onTap: onTap,
+          radius: 22,
+          child: SizedBox.square(
+            dimension: 36,
+            child: Stack(clipBehavior: Clip.none, alignment: Alignment.center, children: [
+              Icon(icon, size: 28, color: KColors.iconDefault),
+              if (count > 0)
+                Positioned(
+                  right: -2,
+                  top: -2,
+                  child: Container(
+                    constraints: const BoxConstraints(minWidth: 16),
+                    height: 16,
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    decoration: BoxDecoration(color: KColors.error, borderRadius: BorderRadius.circular(20), border: Border.all(color: KColors.surfaceDefault, width: 1)),
+                    child: Center(child: Text('$count', style: const TextStyle(fontFamily: 'Inter', fontSize: 10, fontWeight: FontWeight.w600, height: 1, color: Colors.white))),
                   ),
                 ),
             ]),
