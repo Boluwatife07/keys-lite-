@@ -406,6 +406,9 @@ class _MyEventsState extends State<_MyEvents> {
           const Padding(padding: EdgeInsets.all(32), child: Center(child: CircularProgressIndicator()))
         else if (items.isEmpty)
           EmptyState(
+            icon: PhosphorIconsRegular.calendarDots,
+            iconSize: 64,
+            top: 120,
             title: 'No events yet',
             body: _status == 'cancelled' && _tab != 'saved'
                 ? 'Events you have cancelled would be shown here.'

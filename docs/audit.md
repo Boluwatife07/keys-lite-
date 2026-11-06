@@ -273,7 +273,7 @@ wallets are later phase.
 | + button | Shared 52pt yellow FAB with soft shadows (the dark ring is gone), also used on Home and the event scan button |
 | Event templates | 329pt cards 12pt apart, 123pt picture, 16pt name, 3-line 14pt description, 36pt "Use template" |
 | Tag chips | 48pt discs, 12pt labels, 81pt apart, 46pt below the templates |
-| Discover empty state | 136pt disc with CalendarDots and 14/24 body |
+| Empty states | Discover and My events: 136pt disc with CalendarDots and 14/24 body |
 | Event page | ShareFat icon; 20pt medium title; 48pt grey chat disc; 14pt date / time / place rows; no gap when there are no attendee faces; tickets card with £ disc and 24pt "Free" ("Tickets sales" for hosts) |
 | Clubs home | "My clubs" cards (149pt, 76pt picture, 11pt name, border); 8pt section band; template cards as for events |
 | Club posts | Club tag is a grey pill with a users icon; audience shows a globe (All) or lock (Members only) |
