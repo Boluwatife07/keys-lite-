@@ -134,7 +134,8 @@ class _HomeShellState extends State<HomeShell> {
         backgroundColor: KColors.surfaceDefault,
         // Figma "Home page header": 36 avatar, 36pt round buttons with 28pt
         // ChatCircleText and BellSimple, red count badges.
-        appBar: PreferredSize(
+        // The Community tab draws its own Figma header (title + share).
+        appBar: _tab == 1 ? null : PreferredSize(
           preferredSize: const Size.fromHeight(54),
           child: SafeArea(
             bottom: false,

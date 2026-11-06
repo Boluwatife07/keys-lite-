@@ -7,7 +7,7 @@ catalogue test (`app/test/catalog`, run with
 Figma (393 x 852).
 
 Status: **Onboarding, Address verification, Learning, Profile/Settings,
-Home feed and Polls done.** Next: Feed, Polls, Committee board, Voting, Updates, Update chat,
+Home feed, Polls and Committee board done.** Next: Feed, Polls, Committee board, Voting, Updates, Update chat,
 Chat, Events, Clubs, Calendar.
 
 ## Onboarding
@@ -201,3 +201,17 @@ options button is right below it).
 Kept on purpose: option limit stays 40 characters (sheet POL-03.1; Figma
 counter shows /50); no schedule, audience "Modify" or comment-management
 rows (later phase / Phase 1 decisions); results ring and bars unchanged.
+
+## Committee board
+
+| Item | Fixes |
+| --- | --- |
+| Community tab header | Own Figma header: avatar, centred "Community", share; the home chat/bell header no longer shows on this tab |
+| Community row | 46pt grey disc with the teal type icon (tree, house, buildings), SemiBold 18 name, location, caret, 8pt grey band below |
+| Board preview | Geist 16 "Committee board", Medium link "View all", 48pt photos with 12pt grey names, dark "Join" disc first when you can join (replaces the outlined button) |
+| Leadership question | Two grey Yes / No pills side by side |
+| Board list | Already close (title, filter chips, members band, rows) |
+
+Kept on purpose: Budget, Resources and Communal services sections are later
+phase; the Hub / Proposals tabs stay for committee members (VOT-01.5); the
+chair's "Manage seats" row stays on the board list (CBM-08).

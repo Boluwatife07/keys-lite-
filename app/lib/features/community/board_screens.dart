@@ -270,15 +270,40 @@ class _JoinBoardScreenState extends State<JoinBoardScreen> with Busy {
       case 1:
         body = Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           const Intro(title: 'Do you currently hold a leadership position in your community?'),
-          const SizedBox(height: 16),
-          RadioGroup<bool>(
-            groupValue: _leader,
-            onChanged: (v) => setState(() => _leader = v),
-            child: Column(children: [
-              RadioListTile<bool>(value: true, title: Text('Yes'), activeColor: KColors.surfaceInverted),
-              RadioListTile<bool>(value: false, title: Text('No'), activeColor: KColors.surfaceInverted),
-            ]),
-          ),
+          const SizedBox(height: 36),
+          // Figma 3577:676004: two grey pills side by side.
+          Row(children: [
+            for (final (v, label) in [(true, 'Yes'), (false, 'No')]) ...[
+              if (!v) const SizedBox(width: 16),
+              Expanded(
+                child: Semantics(
+                  button: true,
+                  selected: _leader == v,
+                  label: label,
+                  child: Material(
+                    color: KColors.surfaceSubtle,
+                    shape: StadiumBorder(side: BorderSide(color: _leader == v ? KColors.textPrimary : Colors.transparent)),
+                    child: InkWell(
+                      customBorder: const StadiumBorder(),
+                      onTap: () => setState(() => _leader = v),
+                      child: SizedBox(
+                        height: 48,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Row(children: [
+                            KRadio(selected: _leader == v),
+                            const SizedBox(width: 8),
+                            ExcludeSemantics(child: Text(label, style: KText.paragraphMedium)),
+                          ]),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ]),
+          const SizedBox(height: 24),
           if (_leader == true) ...[
             KeysTextField(label: 'Role title', controller: _title, error: _err['title'], maxLength: 100),
             const SizedBox(height: 16),

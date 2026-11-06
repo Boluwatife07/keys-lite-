@@ -50,12 +50,53 @@ class CommunityTabState extends State<CommunityTab> {
     if (c == null) return const Center(child: CircularProgressIndicator());
     final com = c['community'];
     final showProposals = c['proposalsTab'] == true;
+    final me = context.session.me;
+    final typeIcon = switch (com['type']) { 'development' => PhosphorIconsRegular.tree, 'building' => PhosphorIconsRegular.buildings, _ => PhosphorIconsRegular.houseLine };
+    // Figma 3577:676338: avatar, centred "Community", share; then the
+    // community row with a teal icon disc and a caret.
     return Column(children: [
-      ListTile(
-        leading: CircleAvatar(backgroundColor: KColors.surfaceSubtle, child: Icon(PhosphorIconsRegular.buildings, color: KColors.selected)),
-        title: Text(com['name'], style: KText.paragraphMediumLarge),
-        subtitle: Text(com['location'], style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
-        trailing: IconButton(tooltip: 'Share community', icon: const Icon(PhosphorIconsRegular.shareNetwork), onPressed: () => showShareCommunity(context, com['code'], c['shareLink'])),
+      SafeArea(
+        bottom: false,
+        child: SizedBox(
+          height: 56,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Stack(alignment: Alignment.center, children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: GestureDetector(onTap: () => context.push('/profile'), child: Semantics(button: true, label: 'Profile', child: Avatar(me?.photoUrl, size: 36))),
+              ),
+              Text('Community', style: PageHeader.titleStyle.copyWith(color: KColors.textPrimary)),
+              Align(
+                alignment: Alignment.centerRight,
+                child: IconButton(tooltip: 'Share community', icon: Icon(PhosphorIconsRegular.shareNetwork, size: 28, color: KColors.iconDefault), onPressed: () => showShareCommunity(context, com['code'], c['shareLink'])),
+              ),
+            ]),
+          ),
+        ),
+      ),
+      InkWell(
+        onTap: () => context.push('/community/new-members'),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
+          decoration: BoxDecoration(border: Border(bottom: BorderSide(color: KColors.surfaceSubtle, width: 8))),
+          child: Row(children: [
+            Container(
+              width: 46,
+              height: 46,
+              decoration: BoxDecoration(color: KColors.surfaceSubtle, shape: BoxShape.circle),
+              child: Icon(typeIcon, size: 24, color: const Color(0xFF008080)),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(com['name'], style: KText.paragraphMediumLarge.copyWith(fontSize: 18, fontWeight: FontWeight.w600)),
+                Text(com['location'], style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
+              ]),
+            ),
+            Icon(PhosphorIconsRegular.caretRight, size: 24, color: KColors.iconDefault),
+          ]),
+        ),
       ),
       // VOT-01.5: Proposals tab for committee members only.
       if (showProposals)
@@ -128,38 +169,54 @@ class _Hub extends StatelessWidget {
         )
       else ...[
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 8, 8),
+          padding: const EdgeInsets.fromLTRB(16, 20, 8, 8),
           child: Row(children: [
-            Text('Committee board', style: KText.headingXSmall),
+            Text('Committee board', style: TextStyle(fontFamily: 'Geist', fontSize: 16, fontWeight: FontWeight.w600, color: KColors.textPrimary)),
             const Spacer(),
             TextButton(onPressed: () async {
               await context.push('/board');
               onChanged();
-            }, child: Text('View all', style: TextStyle(color: KColors.textLink))),
+            }, child: Text('View all', style: KText.paragraphMedium.copyWith(fontWeight: FontWeight.w500, color: KColors.textLink))),
           ]),
         ),
+        // Figma: 48pt photos with 12pt names; a dark "Join" disc first when
+        // you can still join.
         SizedBox(
-          height: 92,
-          child: ListView(scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 12), children: [
+          height: 84,
+          child: ListView(scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 10), children: [
+            if (c['me']['role'] == null)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6),
+                child: Semantics(
+                  button: true,
+                  label: 'Join the committee',
+                  child: GestureDetector(
+                    onTap: () async {
+                      await context.push('/board');
+                      onChanged();
+                    },
+                    child: Column(children: [
+                      Container(width: 48, height: 48, decoration: BoxDecoration(color: KColors.surfaceInverted, shape: BoxShape.circle), child: Icon(PhosphorIconsRegular.plusCircle, size: 28, color: KColors.textInverse)),
+                      const SizedBox(height: 6),
+                      ExcludeSemantics(child: Text('Join', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary))),
+                    ]),
+                  ),
+                ),
+              ),
             for (final p in List<Map<String, dynamic>>.from(board['preview']))
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 6),
-                child: Column(children: [
-                  Avatar(p['photoUrl'], size: 56),
-                  const SizedBox(height: 6),
-                  Text(p['isYou'] == true ? 'You' : PersonRef(p).firstName, style: KText.paragraphSmall),
-                ]),
+                child: SizedBox(
+                  width: 56,
+                  child: Column(children: [
+                    Avatar(p['photoUrl'], size: 48),
+                    const SizedBox(height: 6),
+                    Text(p['isYou'] == true ? 'You' : PersonRef(p).firstName, maxLines: 1, overflow: TextOverflow.ellipsis, style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
+                  ]),
+                ),
               ),
           ]),
         ),
-        if (c['me']['role'] == null)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-            child: KeysButton('Join the committee', variant: ButtonVariant.outline, onPressed: () async {
-              await context.push('/board');
-              onChanged();
-            }),
-          ),
       ],
       if (ann.isNotEmpty) ...[
         Padding(padding: const EdgeInsets.fromLTRB(16, 24, 16, 8), child: Text('Committee announcements', style: KText.headingXSmall)),
