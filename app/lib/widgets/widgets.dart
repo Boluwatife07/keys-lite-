@@ -7,6 +7,7 @@ import '../theme/tokens.dart';
 export 'keys_logo.dart';
 export 'street_map.dart';
 export 'brand_marks.dart';
+export 'nav_icons.dart';
 
 // ---------------------------------------------------------------- layout
 

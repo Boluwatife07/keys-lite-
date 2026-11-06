@@ -6,7 +6,7 @@ catalogue test (`app/test/catalog`, run with
 `flutter test --update-goldens test/catalog`) at the iPhone 15 frame used in
 Figma (393 x 852).
 
-Status: **Onboarding and Address verification done.** Next: Learning,
+Status: **Onboarding, Address verification and Learning done.** Next:
 Profile/Settings, Feed, Polls, Committee board, Voting, Updates, Update chat,
 Chat, Events, Clubs, Calendar.
 
@@ -104,3 +104,22 @@ Kept on purpose: the wallet row shows Apple Pay on iPhone and Google Pay on
 Android only (Figma shows both; each only works on its own platform). The CVV
 is shown as typed, as in Figma. The explainer illustrations are 1x exports
 from Figma until 3x files are available.
+
+## Learning tour
+
+| Item | Before | Figma / now |
+| --- | --- | --- |
+| Overlay | 60% black, plain cut-out | 50% #171717 with a 2pt yellow ring round the highlighted area |
+| Card | Material buttons, Skip at the top | Radius 12, soft shadow, "Step n of 8" + close X, 18pt title, 14pt copy, Skip bottom-left, Back (outlined) and Next on the right; widths per step from Figma |
+| Sample cards | None | Feed post, committee board, club, service and event samples exported from the Figma frames |
+| Bottom bar | Material bar with a yellow pill | Figma "Floating Nav bar": top rule, 28pt ic28 icons (filled when active), SemiBold 12 labels, 20pt top inset; each tab is one labelled button for screen readers |
+
+Logic checked: LRN-01 Next / Back / Skip / close, completion and skip are
+recorded; LRN-02 later-phase items (News, scheduled posts, projects, budgets)
+stay out of the copy and samples, so step 2 keeps "Feed and Updates" and step
+4 shows the committee board only (the Figma Budget card is later phase).
+
+Kept on purpose: the last step's button reads "Finish" (Figma repeats
+"Next"); step 1 highlights the yellow compose button rather than the empty
+state's "Create post"; Services has no filled icon in Figma, so it stays
+outlined when active.

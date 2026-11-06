@@ -175,17 +175,15 @@ class _HomeShellState extends State<HomeShell> {
                 child: const Icon(PhosphorIconsRegular.plus, size: 28),
               )
             : null,
-        bottomNavigationBar: NavigationBar(
-          selectedIndex: _tab,
-          backgroundColor: KColors.surfaceDefault,
-          indicatorColor: KColors.brandSubtle,
-          onDestinationSelected: (i) => setState(() => _tab = i),
-          destinations: [
-            const NavigationDestination(icon: Icon(PhosphorIconsRegular.house), selectedIcon: Icon(PhosphorIconsFill.house), label: 'Home'),
-            NavigationDestination(icon: Icon(PhosphorIconsRegular.buildings, key: keys.community), selectedIcon: const Icon(PhosphorIconsFill.buildings), label: 'Community'),
-            NavigationDestination(icon: Icon(PhosphorIconsRegular.wrench, key: keys.services), selectedIcon: const Icon(PhosphorIconsFill.wrench), label: 'Services'),
-            NavigationDestination(icon: Icon(PhosphorIconsRegular.calendarDots, key: keys.events), selectedIcon: const Icon(PhosphorIconsFill.calendarDots), label: 'Events'),
-            NavigationDestination(icon: Icon(PhosphorIconsRegular.shapes, key: keys.clubs), selectedIcon: const Icon(PhosphorIconsFill.shapes), label: 'Clubs'),
+        bottomNavigationBar: KeysTabBar(
+          index: _tab,
+          onTap: (i) => setState(() => _tab = i),
+          items: [
+            const KeysTab('Home', Ic28.homeOff, Ic28.homeOn),
+            KeysTab('Community', Ic28.buildingOff, Ic28.buildingOn, key: keys.community, evenOdd: true),
+            KeysTab('Services', Ic28.servicesOff, Ic28.servicesOff, key: keys.services),
+            KeysTab('Events', Ic28.calendarOff, Ic28.calendarOn, key: keys.events),
+            KeysTab('Clubs', Ic28.usersOff, Ic28.usersOn, key: keys.clubs),
           ],
         ),
       ),
@@ -311,3 +309,66 @@ Future<void> showWelcomePrompt(BuildContext context, Me me) async {
     await context.push('/feed/compose', extra: {'text': t['text'], 'welcomeImage': true});
   }
 }
+
+/// One bottom bar destination.
+class KeysTab {
+  const KeysTab(this.label, this.icon, this.activeIcon, {this.key, this.evenOdd = false});
+  final String label;
+  final String icon;
+  final String activeIcon;
+  final GlobalKey? key;
+  final bool evenOdd;
+}
+
+/// Figma "Floating Nav bar": white bar with a top rule, five 49pt tabs,
+/// 28pt ic28 icons, Inter SemiBold 12 labels (active #171717, rest #5e5e5e).
+class KeysTabBar extends StatelessWidget {
+  const KeysTabBar({super.key, required this.index, required this.items, required this.onTap});
+  final int index;
+  final List<KeysTab> items;
+  final ValueChanged<int> onTap;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        decoration: BoxDecoration(
+          color: KColors.surfaceDefault,
+          border: Border(top: BorderSide(color: KColors.palette.brightness == Brightness.dark ? KColors.borderDefault : const Color(0xFFDDDDDD))),
+        ),
+        padding: const EdgeInsets.only(top: 20),
+        child: SafeArea(
+          top: false,
+          child: SizedBox(
+            height: 49,
+            child: Row(children: [
+              for (var i = 0; i < items.length; i++)
+                Expanded(
+                  child: Semantics(
+                    button: true,
+                    selected: i == index,
+                    label: items[i].label,
+                    child: InkResponse(
+                      key: items[i].key,
+                      onTap: () => onTap(i),
+                      containedInkWell: true,
+                      highlightShape: BoxShape.rectangle,
+                      child: ExcludeSemantics(
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 5),
+                          child: Column(children: [
+                            NavIcon(i == index ? items[i].activeIcon : items[i].icon, evenOdd: items[i].evenOdd && i != index, color: i == index ? KColors.textPrimary : KColors.textSecondary),
+                            const SizedBox(height: 2),
+                            Text(items[i].label,
+                                maxLines: 1,
+                                style: TextStyle(fontFamily: 'Inter', fontSize: 12, fontWeight: FontWeight.w600, height: 14 / 12, color: i == index ? KColors.textPrimary : KColors.textSecondary)),
+                          ]),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ]),
+          ),
+        ),
+      );
+}
+
