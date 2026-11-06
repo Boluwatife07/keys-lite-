@@ -7,11 +7,12 @@ import '../../core/feed_models.dart';
 import '../../core/scope.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/widgets.dart';
+import '../../widgets/tab_header.dart';
 import '../feed/feed_screens.dart' show EmptyState;
 import '../feed/post_card.dart';
 import '../updates/updates_list.dart' show SearchField;
 import '../verification/verification_screens.dart' show showVerifySheet;
-import '../feed/social.dart' show confirmSheet;
+import '../feed/social.dart' show confirmSheet, Avatar;
 
 /// A club card from the API.
 class ClubItem {
@@ -30,6 +31,7 @@ class ClubItem {
   String get status => json['status'] ?? 'active';
   String? get othersText => json['othersText'];
   Map<String, dynamic>? get president => json['president'];
+  List<Map<String, dynamic>> get faces => List<Map<String, dynamic>>.from((json['membersPreview'] as List?)?.whereType<Map>() ?? const []);
 }
 
 /// CLB-03.6: verified residents create clubs; others see the verify sheet.
@@ -56,35 +58,20 @@ class _ClubsTabState extends State<ClubsTab> with SingleTickerProviderStateMixin
   @override
   Widget build(BuildContext context) => Stack(children: [
         Column(children: [
-          Row(children: [
-            Expanded(
-              child: TabBar(
-                controller: _tabs,
-                labelColor: KColors.textPrimary,
-                unselectedLabelColor: KColors.textSecondary,
-                indicatorColor: KColors.textPrimary,
-                labelStyle: KText.labelSemibold,
-                tabs: const [Tab(text: 'Home'), Tab(text: 'Discover')],
-              ),
-            ),
-            IconButton(tooltip: 'Search clubs', icon: const Icon(PhosphorIconsRegular.magnifyingGlass), onPressed: () => context.push('/clubs/search')),
-          ]),
+          // Figma 4497:157218: avatar, centred "Clubs", search; Home / Discover.
+          TabPageHeader('Clubs', actionIcon: PhosphorIconsRegular.magnifyingGlass, actionLabel: 'Search clubs', onAction: () => context.push('/clubs/search')),
+          KeysTabs(controller: _tabs, labels: const ['Home', 'Discover']),
           Expanded(child: TabBarView(controller: _tabs, children: [_ClubsHome(key: _home), const _Discover()])),
         ]),
         Positioned(
           right: 16,
-          bottom: 16,
-          child: FloatingActionButton(
-            heroTag: 'club-fab',
-            tooltip: 'Create club',
-            backgroundColor: KColors.brand,
-            foregroundColor: KColors.staticBlack,
-            shape: const CircleBorder(),
-            onPressed: () async {
+          bottom: 24,
+          child: KeysFab(
+            label: 'Create club',
+            onTap: () async {
               await startClub(context);
               _home.currentState?._load();
             },
-            child: const Icon(PhosphorIconsRegular.plus, size: 28),
           ),
         ),
       ]);
@@ -140,10 +127,14 @@ class _ClubsHomeState extends State<_ClubsHome> {
           ]),
         ),
         SizedBox(
-          height: 270,
-          child: ListView(scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 12), children: [
-            for (final t in _templates) Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: ClubTemplateCard(t, width: 290)),
-          ]),
+          height: 284,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemCount: _templates.length,
+            separatorBuilder: (_, _) => const SizedBox(width: 12),
+            itemBuilder: (_, i) => ClubTemplateCard(_templates[i], width: 329),
+          ),
         ),
       ]),
     );
@@ -151,10 +142,14 @@ class _ClubsHomeState extends State<_ClubsHome> {
       onRefresh: _load,
       child: ListView(padding: const EdgeInsets.only(bottom: 96), children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 8, 8),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
           child: Row(children: [
-            Expanded(child: Text('My clubs', style: KText.paragraphMediumLarge.copyWith(fontWeight: FontWeight.w600))),
-            if (mine.isNotEmpty) TextButton(onPressed: () => context.push('/clubs/mine'), style: TextButton.styleFrom(foregroundColor: KColors.textPrimary), child: const Text('view all →')),
+            Expanded(child: Text('My clubs', style: KText.paragraphMedium.copyWith(fontWeight: FontWeight.w600))),
+            if (mine.isNotEmpty)
+              Semantics(
+                button: true,
+                child: InkWell(onTap: () => context.push('/clubs/mine'), child: Text('view all →', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary))),
+              ),
           ]),
         ),
         if (mine.isEmpty)
@@ -163,9 +158,10 @@ class _ClubsHomeState extends State<_ClubsHome> {
             child: Text('Click on the + button to create a new club or use one of the provided templates below.', textAlign: TextAlign.center, style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
           )
         else
+          // Figma "My clubs": 149pt cards, 76pt picture, 11pt name, 16pt apart.
           SizedBox(
-            height: 128,
-            child: ListView(scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 12), children: [
+            height: 114,
+            child: ListView(scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 8), children: [
               for (final c in mine)
                 Semantics(
                   container: true,
@@ -174,14 +170,17 @@ class _ClubsHomeState extends State<_ClubsHome> {
                   child: InkWell(
                     onTap: () => context.push('/clubs/${c.id}').then((_) => _load()),
                     child: Container(
-                      width: 120,
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      width: 149,
+                      margin: const EdgeInsets.symmetric(horizontal: 8),
+                      clipBehavior: Clip.antiAlias,
+                      decoration: BoxDecoration(color: KColors.surfaceDefault, borderRadius: BorderRadius.circular(8), border: Border.all(color: KColors.borderDefault)),
                       child: ExcludeSemantics(
                         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                          ClipRRect(borderRadius: BorderRadius.circular(KRadius.sm), child: _Cover(c.coverUrl, height: 80)),
-                          const SizedBox(height: 6),
-                          Text(c.name, style: KText.paragraphMediumSmall, maxLines: 1, overflow: TextOverflow.ellipsis),
-                          Text('${c.memberCount} members', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary, fontSize: 11)),
+                          _Cover(c.coverUrl, height: 76),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(8, 10, 8, 10),
+                            child: Text(c.name, style: KText.paragraphSmall.copyWith(fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
+                          ),
                         ]),
                       ),
                     ),
@@ -189,11 +188,12 @@ class _ClubsHomeState extends State<_ClubsHome> {
                 ),
             ]),
           ),
-        Divider(height: 24, thickness: 6, color: KColors.surfaceSubtle),
+        const SizedBox(height: 16),
+        Container(height: 8, color: KColors.surfaceSubtle),
         if (posts.isEmpty) templates,
         for (var i = 0; i < posts.length; i++) ...[
           PostCard(post: posts[i], onChanged: (_) => _load()),
-          Divider(height: 8, thickness: 6, color: KColors.surfaceSubtle),
+          Container(height: 8, color: KColors.surfaceSubtle),
           if (i == 1 || (posts.length < 2 && i == posts.length - 1)) templates,
         ],
       ]),
@@ -220,21 +220,22 @@ class ClubTemplateCard extends StatelessWidget {
         width: width,
         child: Container(
           clipBehavior: Clip.antiAlias,
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(KRadius.md), border: Border.all(color: KColors.borderDefault), color: KColors.surfaceDefault),
+          // Same Figma card as the event templates.
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), border: Border.all(color: KColors.borderDefault), color: KColors.surfaceDefault),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Image.asset('assets/images/${t['image']}', height: 110, width: double.infinity, fit: BoxFit.cover),
+            Image.asset('assets/images/${t['image']}', height: 123, width: double.infinity, fit: BoxFit.cover),
             Padding(
-              padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+              padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('${t['label']} Club Template', style: KText.paragraphMediumLarge),
-                const SizedBox(height: 4),
-                Text(t['description'] ?? 'Start a ${t['name']} club for your neighbours.', maxLines: 3, overflow: TextOverflow.ellipsis, style: KText.paragraphSmall.copyWith(color: KColors.textSecondary, fontSize: 13)),
-                const SizedBox(height: 10),
+                Text('${t['label']} Club Template', style: KText.paragraphLarge, maxLines: 1, overflow: TextOverflow.ellipsis),
+                const SizedBox(height: 6),
+                Text(t['description'] ?? 'Start a ${t['name']} club for your neighbours.', maxLines: 3, overflow: TextOverflow.ellipsis, style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
+                const SizedBox(height: 9),
                 SizedBox(
                   height: 36,
                   width: double.infinity,
                   child: FilledButton(
-                    style: FilledButton.styleFrom(backgroundColor: KColors.surfaceInverted, shape: const StadiumBorder()),
+                    style: FilledButton.styleFrom(backgroundColor: KColors.surfaceInverted, foregroundColor: KColors.textInverse, shape: const StadiumBorder(), textStyle: KText.labelSemibold.copyWith(fontSize: 13)),
                     onPressed: () => startClub(context, template: t),
                     child: const Text('Use template'),
                   ),
@@ -259,32 +260,50 @@ class ClubCard extends StatelessWidget {
         child: Material(
           color: KColors.surfaceDefault,
           clipBehavior: Clip.antiAlias,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(KRadius.md), side: BorderSide(color: KColors.borderDefault)),
+          // Figma club card: 12pt corners, 123pt cover, 16pt name, tags,
+          // 14/20 description, member faces and a small Join pill.
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: KColors.borderDefault)),
           child: InkWell(
             onTap: () => context.push('/clubs/${c.id}').then((_) => onChanged()),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              _Cover(c.coverUrl, height: 150),
+              _Cover(c.coverUrl, height: 123),
               Padding(
-                padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+                padding: const EdgeInsets.fromLTRB(12, 14, 12, 12),
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(c.name, style: KText.paragraphMediumLarge),
-                  const SizedBox(height: 4),
+                  Text(c.name, style: KText.paragraphLarge),
+                  const SizedBox(height: 6),
                   Row(children: [
                     _Tag('Free club', KColors.successSubtle, KColors.success),
                     const SizedBox(width: 6),
-                    _Tag(c.category, KColors.isDark ? const Color(0xFF201932) : const Color(0xFFEDE7FF), KColors.isDark ? const Color(0xFFBEA9FC) : const Color(0xFF6941C6)),
+                    _categoryTag(c.category),
                     if (c.status == 'closing') ...[const SizedBox(width: 6), _Tag('Closing', KColors.errorSubtle, KColors.error)],
                   ]),
-                  const SizedBox(height: 6),
-                  Text(c.description, maxLines: 2, overflow: TextOverflow.ellipsis, style: KText.paragraphSmall.copyWith(color: KColors.textSecondary, fontSize: 13)),
                   const SizedBox(height: 8),
+                  Text(c.description, maxLines: 3, overflow: TextOverflow.ellipsis, style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
+                  const SizedBox(height: 10),
                   Row(children: [
-                    Expanded(child: Text(c.othersText ?? '', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary))),
+                    if (c.faces.isNotEmpty) ...[
+                      SizedBox(
+                        width: 28.0 + 20 * (c.faces.length.clamp(1, 3) - 1),
+                        height: 28,
+                        child: Stack(children: [
+                          for (var i = 0; i < c.faces.length.clamp(0, 3); i++) Positioned(left: i * 20.0, child: Avatar(c.faces[i]['photoUrl'], size: 28)),
+                        ]),
+                      ),
+                      const SizedBox(width: 6),
+                    ],
+                    Expanded(child: Text(c.othersText ?? '', style: KText.paragraphSmall.copyWith(fontSize: 10))),
                     if (!c.isMember)
                       SizedBox(
-                        height: 32,
+                        height: 28,
                         child: FilledButton(
-                          style: FilledButton.styleFrom(backgroundColor: KColors.surfaceInverted, shape: const StadiumBorder()),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: KColors.surfaceInverted,
+                            foregroundColor: KColors.textInverse,
+                            shape: const StadiumBorder(),
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            textStyle: KText.labelSemibold.copyWith(fontSize: 12),
+                          ),
                           onPressed: c.status == 'active' ? () => joinClub(context, c.id, c.name).then((_) => onChanged()) : null,
                           child: const Text('Join'),
                         ),
@@ -300,15 +319,26 @@ class ClubCard extends StatelessWidget {
       );
 }
 
+/// Figma category tags: Sport teal, Lifestyle yellow, others purple.
+Widget _categoryTag(String category) {
+  final dark = KColors.isDark;
+  final (bg, fg) = switch (category) {
+    'Sports' || 'Sport' => dark ? (const Color(0xFF0E2E2E), const Color(0xFF7FD1D1)) : (const Color(0xFFD9F0F0), const Color(0xFF006666)),
+    'Lifestyle' => dark ? (const Color(0xFF332A0B), const Color(0xFFFFD84D)) : (const Color(0xFFFFF4CC), const Color(0xFF6B5300)),
+    _ => dark ? (const Color(0xFF201932), const Color(0xFFBEA9FC)) : (const Color(0xFFEDE7FF), const Color(0xFF6941C6)),
+  };
+  return _Tag(category == 'Sports' ? 'Sport' : category, bg, fg);
+}
+
 class _Tag extends StatelessWidget {
   const _Tag(this.text, this.bg, this.fg);
   final String text;
   final Color bg, fg;
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-        decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(4)),
-        child: Text(text, style: KText.paragraphMediumSmall.copyWith(color: fg, fontSize: 11)),
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+        decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(6)),
+        child: Text(text, style: KText.paragraphSmall.copyWith(color: fg)),
       );
 }
 
@@ -387,7 +417,7 @@ class _DiscoverState extends State<_Discover> {
         ),
         const SizedBox(height: 12),
         if (clubs.isEmpty)
-          const EmptyState(title: 'No Clubs yet', body: 'Discover new clubs created other residents. Click on the + button to create a club.')
+          const EmptyState(icon: PhosphorIconsRegular.usersThree, iconSize: 64, top: 48, title: 'No Clubs yet', body: 'Discover new clubs created other residents. Click on the + button to create a club.')
         else
           for (final c in clubs) Padding(padding: const EdgeInsets.only(bottom: 16), child: ClubCard(c, onChanged: _load)),
       ]),

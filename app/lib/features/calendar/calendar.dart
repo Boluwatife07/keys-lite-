@@ -90,87 +90,107 @@ class _CalendarScreenState extends State<CalendarScreen> {
   Widget build(BuildContext context) {
     final first = DateTime(_month.year, _month.month);
     final days = DateTime(_month.year, _month.month + 1, 0).day;
-    final lead = (first.weekday + 6) % 7; // Monday first
+    final lead = first.weekday % 7; // Figma: weeks start on Sunday
     final today = _d(DateTime.now());
     final byDay = <DateTime, List<CalItem>>{};
     for (final i in _items) {
       byDay.putIfAbsent(i.day, () => []).add(i);
     }
     final dayItems = byDay[_selected] ?? [];
-    return Scaffold(
-      backgroundColor: KColors.surfaceDefault,
-      appBar: AppBar(
-        backgroundColor: KColors.surfaceDefault,
-        surfaceTintColor: Colors.transparent,
-        titleSpacing: 0,
-        leading: IconButton(tooltip: 'Back', icon: const Icon(PhosphorIconsRegular.caretLeft, size: 30), onPressed: () => Navigator.of(context).maybePop()),
-        title: Text(widget.eventsOnly ? 'Event calendar' : 'Calendar', style: KText.headingXSmall),
-        actions: [TextButton(onPressed: () => _go(today, today), style: TextButton.styleFrom(foregroundColor: KColors.textPrimary), child: const Text('Today'))],
-      ),
-      body: ListView(padding: const EdgeInsets.symmetric(horizontal: 16), children: [
-        Row(children: [
-          IconButton(tooltip: 'Previous month', icon: const Icon(PhosphorIconsRegular.caretLeft), onPressed: () => _go(DateTime(_month.year, _month.month - 1))),
-          Expanded(child: Text(DateFormat('MMMM y').format(_month), textAlign: TextAlign.center, style: KText.paragraphMediumLarge.copyWith(fontWeight: FontWeight.w600))),
-          IconButton(tooltip: 'Next month', icon: const Icon(PhosphorIconsRegular.caretRight), onPressed: () => _go(DateTime(_month.year, _month.month + 1))),
-        ]),
-        Row(children: [
-          for (final w in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'])
-            Expanded(child: Text(w, textAlign: TextAlign.center, style: KText.paragraphSmall.copyWith(color: KColors.textSecondary))),
-        ]),
-        const SizedBox(height: 6),
-        GridView.count(
-          crossAxisCount: 7,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          childAspectRatio: 0.9,
-          children: [
-            for (var i = 0; i < lead; i++) const SizedBox(),
-            for (var d = 1; d <= days; d++)
-              Builder(builder: (_) {
-                final day = DateTime(_month.year, _month.month, d);
-                final marks = byDay[day] ?? [];
-                final sel = day == _selected;
-                final isToday = day == today;
-                return Semantics(
-                  button: true,
-                  selected: sel,
-                  label: '${DateFormat('EEEE d MMMM').format(day)}${marks.isEmpty ? '' : ', ${marks.length} item${marks.length == 1 ? '' : 's'}'}',
-                  child: InkWell(
-                    customBorder: const CircleBorder(),
-                    onTap: () => setState(() => _selected = day),
-                    child: ExcludeSemantics(
-                      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                        Container(
-                          width: 34,
-                          height: 34,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: sel ? KColors.surfaceInverted : null,
-                            border: isToday && !sel ? Border.all(color: KColors.surfaceInverted) : null,
-                          ),
-                          child: Text('$d', style: KText.paragraphMedium.copyWith(color: sel ? KColors.textInverse : null, fontWeight: isToday ? FontWeight.w600 : null)),
-                        ),
-                        const SizedBox(height: 2),
-                        // CAL-03.1: up to 4 markers per day.
-                        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                          for (final m in marks.take(4)) Container(width: 5, height: 5, margin: const EdgeInsets.symmetric(horizontal: 1), decoration: BoxDecoration(color: m.color, shape: BoxShape.circle)),
-                        ]),
-                      ]),
-                    ),
+    final rows = ((lead + days) / 7).ceil();
+    Widget cell(int d) {
+      final day = DateTime(_month.year, _month.month, d);
+      final marks = byDay[day] ?? [];
+      // One line per item colour, at most 4.
+      final colors = {for (final m in marks) m.color}.take(4).toList();
+      final sel = day == _selected;
+      final isToday = day == today;
+      return Semantics(
+        button: true,
+        selected: sel,
+        label: '${DateFormat('EEEE d MMMM').format(day)}${marks.isEmpty ? '' : ', ${marks.length} item${marks.length == 1 ? '' : 's'}'}',
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => setState(() => _selected = day),
+          child: ExcludeSemantics(
+            // Figma: selected day is a 44x48 yellow-outlined box; today is a
+            // 38x24 yellow fill behind the number; items are 2pt lines.
+            child: Center(
+              child: Container(
+                width: 44,
+                height: 48,
+                decoration: sel ? BoxDecoration(borderRadius: BorderRadius.circular(6), border: Border.all(color: KColors.brand, width: 1.5)) : null,
+                child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  Container(
+                    width: 38,
+                    height: 24,
+                    alignment: Alignment.center,
+                    decoration: isToday ? BoxDecoration(color: KColors.brand, borderRadius: BorderRadius.circular(6)) : null,
+                    child: Text('$d', style: KText.paragraphMedium.copyWith(color: isToday ? KColors.staticBlack : null)),
                   ),
-                );
-              }),
-          ],
+                  const SizedBox(height: 4),
+                  SizedBox(
+                    height: 12,
+                    child: Column(mainAxisAlignment: MainAxisAlignment.start, children: [
+                      for (final c in colors) Container(width: 38, height: 2, margin: const EdgeInsets.only(bottom: 1), color: c),
+                    ]),
+                  ),
+                ]),
+              ),
+            ),
+          ),
         ),
-        const Divider(height: 24),
-        Text(DateFormat('EEEE, MMMM d').format(_selected), style: KText.paragraphMediumLarge.copyWith(fontWeight: FontWeight.w600)),
-        const SizedBox(height: 8),
+      );
+    }
+
+    return Scaffold(
+      backgroundColor: KColors.surfaceSubtle,
+      appBar: PageHeader(widget.eventsOnly ? 'Event calendar' : 'Calendar'),
+      body: ListView(padding: EdgeInsets.zero, children: [
+        // Figma 3430:176484: white month panel with 20pt rounded bottom corners.
+        Container(
+          padding: const EdgeInsets.fromLTRB(4, 20, 4, 16),
+          decoration: BoxDecoration(color: KColors.surfaceDefault, borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20))),
+          child: Column(children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 8, 12),
+              child: Row(children: [
+                Expanded(child: Text(DateFormat('MMMM, y').format(_month), style: KText.paragraphLarge.copyWith(fontSize: 18, fontWeight: FontWeight.w600))),
+                IconButton(tooltip: 'Previous month', visualDensity: VisualDensity.compact, icon: Icon(PhosphorIconsRegular.caretLeft, size: 20, color: KColors.iconDefault), onPressed: () => _go(DateTime(_month.year, _month.month - 1))),
+                Semantics(
+                  button: true,
+                  child: InkWell(onTap: () => _go(today, today), child: Padding(padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6), child: Text('Today', style: KText.paragraphMedium))),
+                ),
+                IconButton(tooltip: 'Next month', visualDensity: VisualDensity.compact, icon: Icon(PhosphorIconsRegular.caretRight, size: 20, color: KColors.iconDefault), onPressed: () => _go(DateTime(_month.year, _month.month + 1))),
+              ]),
+            ),
+            Row(children: [
+              for (final w in ['SUN', 'MON', 'TUE', 'WED', 'THUR', 'FRI', 'SAT'])
+                Expanded(child: Text(w, textAlign: TextAlign.center, style: KText.paragraphSmall.copyWith(color: KColors.textSecondary))),
+            ]),
+            const SizedBox(height: 8),
+            for (var r = 0; r < rows; r++)
+              SizedBox(
+                height: 50,
+                child: Row(children: [
+                  for (var c = 0; c < 7; c++)
+                    Expanded(child: () {
+                      final d = r * 7 + c - lead + 1;
+                      return d < 1 || d > days ? const SizedBox() : cell(d);
+                    }()),
+                ]),
+              ),
+          ]),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 24, 16, 10),
+          child: Text(DateFormat('EEEE, MMMM d').format(_selected), style: KText.paragraphMedium.copyWith(fontWeight: FontWeight.w600)),
+        ),
         if (_loading)
           const Padding(padding: EdgeInsets.all(24), child: Center(child: CircularProgressIndicator()))
         else if (dayItems.isEmpty)
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 24),
+            padding: const EdgeInsets.fromLTRB(32, 24, 32, 24),
             child: Column(children: [
               Text(widget.eventsOnly ? 'No event yet' : 'No schedule yet', style: KText.headingXSmall),
               const SizedBox(height: 6),
@@ -181,9 +201,72 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ]),
           )
         else
-          for (final i in dayItems) Padding(padding: const EdgeInsets.only(bottom: 10), child: CalendarCard(i)),
+          for (final i in dayItems) Padding(padding: const EdgeInsets.fromLTRB(16, 0, 16, 10), child: _DayCard(i)),
         const SizedBox(height: 24),
       ]),
+    );
+  }
+}
+
+/// Figma calendar card: white, 12pt corners, 6pt colour bar on the left,
+/// type label with icon, title, grey subtitle, time chip.
+class _DayCard extends StatelessWidget {
+  const _DayCard(this.i);
+  final CalItem i;
+
+  static const _types = <String, (String, IconData)>{
+    'event': ('Event', PhosphorIconsRegular.calendarBlank),
+    'update': ('Update', PhosphorIconsRegular.megaphoneSimple),
+    'post': ('Scheduled post', PhosphorIconsRegular.mailbox),
+    'live': ('LIVE', PhosphorIconsRegular.broadcast),
+    'service': ('Services', PhosphorIconsRegular.briefcase),
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final (label, icon) = _types[i.type] ?? ('Event', PhosphorIconsRegular.calendarBlank);
+    final sub = i.type == 'event' ? i.subtitle.split(' • ').skip(1).join(' • ') : i.subtitle;
+    final timeText = i.type == 'event' ? i.subtitle.split(' • ').first : i.time;
+    return Semantics(
+      container: true,
+      button: true,
+      label: '$label: ${i.title}, ${i.time}',
+      child: Material(
+        color: KColors.surfaceDefault,
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: KColors.borderDefault)),
+        child: InkWell(
+          onTap: () => i.open(context),
+          child: ExcludeSemantics(
+            child: IntrinsicHeight(
+              child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                Container(width: 6, color: i.color),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Row(children: [
+                        Icon(icon, size: 14, color: KColors.textSecondary),
+                        const SizedBox(width: 6),
+                        Text(label, style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
+                      ]),
+                      const SizedBox(height: 8),
+                      Text(i.title, style: KText.paragraphMedium.copyWith(fontWeight: FontWeight.w500), maxLines: 2, overflow: TextOverflow.ellipsis),
+                      if (sub.isNotEmpty) Text(sub, style: KText.paragraphMedium.copyWith(color: KColors.textSecondary), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(color: KColors.surfaceSubtle, borderRadius: BorderRadius.circular(KRadius.pill)),
+                        child: Text(timeText, style: KText.paragraphSmall),
+                      ),
+                    ]),
+                  ),
+                ),
+              ]),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

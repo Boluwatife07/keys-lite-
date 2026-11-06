@@ -260,3 +260,28 @@ update's group chat uses the main chat screen and is audited with Chat.
 
 Kept on purpose: the chat tabs (All, Primary, Groups, Clubs, Events) stay
 (CHT-01); photos, presence and typing dots are as built.
+
+## Events, Clubs and Calendar
+
+Free events and free clubs only (Phase 2 file); paid tickets, tiers and club
+wallets are later phase.
+
+| Item | Fixes |
+| --- | --- |
+| Events and Clubs tab header | Own Figma header: avatar, centred title, search (no chat / bell here) |
+| Tabs | Figma tabs: 48pt, 14pt labels, 3pt rounded black indicator inset 8pt, 1pt divider (Discover / My events, Home / Discover) |
+| + button | Shared 52pt yellow FAB with soft shadows (the dark ring is gone), also used on Home and the event scan button |
+| Event templates | 329pt cards 12pt apart, 123pt picture, 16pt name, 3-line 14pt description, 36pt "Use template" |
+| Tag chips | 48pt discs, 12pt labels, 81pt apart, 46pt below the templates |
+| Discover empty state | 136pt disc with CalendarDots and 14/24 body |
+| Event page | ShareFat icon; 20pt medium title; 48pt grey chat disc; 14pt date / time / place rows; no gap when there are no attendee faces; tickets card with £ disc and 24pt "Free" ("Tickets sales" for hosts) |
+| Clubs home | "My clubs" cards (149pt, 76pt picture, 11pt name, border); 8pt section band; template cards as for events |
+| Club posts | Club tag is a grey pill with a users icon; audience shows a globe (All) or lock (Members only) |
+| Club cards | 123pt cover, 16pt name, Free club / category tags (Sport teal, Lifestyle yellow), 3-line description, member faces, 28pt Join pill; empty state with icon |
+| Calendar | Rebuilt: weeks start on Sunday, SUN–SAT labels, "May, 2025" with < Today > on the right, today in a yellow box, selected day outlined in yellow, items as coloured lines, white month panel with rounded bottom, cards with colour bar, type label, title, place and time chip |
+
+Kept on purpose: "Event calendar →" stays under Discover when there are no
+events (CAL-01.3); videos stay limited to 60 seconds everywhere (shared media
+rule; one Figma note says 30); audience on residential events stays fixed to
+the whole community (EVT-05); the Home "Upcoming" preview keeps its compact
+card.

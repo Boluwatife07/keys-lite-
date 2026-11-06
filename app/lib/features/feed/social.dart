@@ -54,9 +54,11 @@ class UnverifiedChip extends StatelessWidget {
 
 /// Name with committee mark, then role or Unverified label and a subtitle.
 class AuthorLine extends StatelessWidget {
-  const AuthorLine(this.p, {super.key, this.subtitle, this.trailing});
+  const AuthorLine(this.p, {super.key, this.subtitle, this.trailing, this.subtitleIcon});
   final PersonRef p;
   final String? subtitle;
+  /// Small icon before the subtitle (club audience: globe or lock).
+  final IconData? subtitleIcon;
   final Widget? trailing;
   @override
   Widget build(BuildContext context) {
@@ -70,6 +72,7 @@ class AuthorLine extends StatelessWidget {
       const SizedBox(height: 2),
       Row(children: [
         if (!p.verified) ...[const UnverifiedChip(), const SizedBox(width: 6)],
+        if (subtitleIcon != null) ...[Icon(subtitleIcon, size: 14, color: KColors.textSecondary), const SizedBox(width: 4)],
         if (sub.isNotEmpty) Flexible(child: Text(sub, style: KText.paragraphSmall.copyWith(color: KColors.textSecondary), overflow: TextOverflow.ellipsis)),
       ]),
     ]);

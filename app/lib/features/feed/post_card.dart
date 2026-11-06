@@ -103,13 +103,25 @@ class _PostCardState extends State<PostCard> {
         if (p.club != null && widget.showClub)
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-            child: InkWell(
-              onTap: () => context.push('/clubs/${p.club!['id']}'),
-              child: Row(children: [
-                Icon(PhosphorIconsRegular.usersThree, size: 16, color: KColors.textSecondary),
-                const SizedBox(width: 6),
-                Flexible(child: Text(p.club!['name'] ?? '', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary), overflow: TextOverflow.ellipsis)),
-              ]),
+            // Figma club tag: grey pill, 14pt users icon, 11pt name.
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Material(
+                color: KColors.surfaceSubtle,
+                borderRadius: BorderRadius.circular(6),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(6),
+                  onTap: () => context.push('/clubs/${p.club!['id']}'),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    child: Row(mainAxisSize: MainAxisSize.min, children: [
+                      Icon(PhosphorIconsFill.usersThree, size: 14, color: KColors.textSecondary),
+                      const SizedBox(width: 4),
+                      Flexible(child: Text(p.club!['name'] ?? '', style: KText.paragraphSmall.copyWith(fontSize: 11, color: KColors.textSecondary), overflow: TextOverflow.ellipsis)),
+                    ]),
+                  ),
+                ),
+              ),
             ),
           ),
         Padding(
@@ -127,7 +139,8 @@ class _PostCardState extends State<PostCard> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: AuthorLine(p.author,
-                          subtitle: p.club != null ? (p.club!['audience'] == 'members' ? 'Members only' : 'All') : context.session.me?.communityName),
+                          subtitle: p.club != null ? (p.club!['audience'] == 'members' ? 'Members only' : 'All') : context.session.me?.communityName,
+                          subtitleIcon: p.club == null ? null : (p.club!['audience'] == 'members' ? PhosphorIconsRegular.lockSimple : PhosphorIconsRegular.globe)),
                     ),
                   ]),
                 ),

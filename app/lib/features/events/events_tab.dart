@@ -6,6 +6,7 @@ import '../../core/api.dart';
 import '../../core/scope.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/widgets.dart';
+import '../../widgets/tab_header.dart';
 import '../feed/feed_screens.dart' show EmptyState;
 import '../updates/updates_list.dart' show SearchField;
 import '../feed/social.dart' show confirmSheet;
@@ -85,35 +86,20 @@ class _EventsTabState extends State<EventsTab> with SingleTickerProviderStateMix
   @override
   Widget build(BuildContext context) => Stack(children: [
         Column(children: [
-          Row(children: [
-            Expanded(
-              child: TabBar(
-                controller: _tabs,
-                labelColor: KColors.textPrimary,
-                unselectedLabelColor: KColors.textSecondary,
-                indicatorColor: KColors.textPrimary,
-                labelStyle: KText.labelSemibold,
-                tabs: const [Tab(text: 'Discover'), Tab(text: 'My events')],
-              ),
-            ),
-            IconButton(tooltip: 'Search events', icon: const Icon(PhosphorIconsRegular.magnifyingGlass), onPressed: () => context.push('/events/search')),
-          ]),
+          // Figma 4031:14770: avatar, centred "Events", search; Discover / My events.
+          TabPageHeader('Events', actionIcon: PhosphorIconsRegular.magnifyingGlass, actionLabel: 'Search events', onAction: () => context.push('/events/search')),
+          KeysTabs(controller: _tabs, labels: const ['Discover', 'My events']),
           Expanded(child: TabBarView(controller: _tabs, children: [_Discover(key: _discover), const _MyEvents()])),
         ]),
         Positioned(
           right: 16,
-          bottom: 16,
-          child: FloatingActionButton(
-            heroTag: 'event-fab',
-            tooltip: 'Create event',
-            backgroundColor: KColors.brand,
-            foregroundColor: KColors.staticBlack,
-            shape: const CircleBorder(),
-            onPressed: () async {
+          bottom: 24,
+          child: KeysFab(
+            label: 'Create event',
+            onTap: () async {
               await startEvent(context);
               _discover.currentState?._load();
             },
-            child: const Icon(PhosphorIconsRegular.plus, size: 28),
           ),
         ),
       ]);
@@ -189,17 +175,23 @@ class _DiscoverState extends State<_Discover> {
         ],
         if (_templates.isNotEmpty) ...[
           _Heading('Create your event in one click', subtitle: 'Choose from ready-made event templates.', action: 'View all →', onAction: () => context.push('/events/templates')),
+          // Figma: 329pt cards, 12pt apart, 16pt side margins.
           SizedBox(
-            height: 270,
-            child: ListView(scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 12), children: [
-              for (final t in _templates) Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: TemplateCard(t, width: 290)),
-            ]),
+            height: 284,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: _templates.length,
+              separatorBuilder: (_, _) => const SizedBox(width: 12),
+              itemBuilder: (_, i) => TemplateCard(_templates[i], width: 329),
+            ),
           ),
         ],
-        const SizedBox(height: 12),
+        // Figma: 48pt discs, 12pt labels, 81pt apart, 46pt below the templates.
+        const SizedBox(height: 46),
         SizedBox(
-          height: 84,
-          child: ListView(scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 12), children: [
+          height: 76,
+          child: ListView(scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 8), children: [
             for (final t in tags)
               Semantics(
                 button: true,
@@ -211,14 +203,22 @@ class _DiscoverState extends State<_Discover> {
                     setState(() => _tag = t);
                     _load();
                   },
-                  child: SizedBox(
-                    width: 76,
-                    child: ExcludeSemantics(
-                      child: Column(children: [
-                        CircleAvatar(radius: 22, backgroundColor: _tag == t ? KColors.brand : KColors.surfaceSubtle, child: Icon(kTagIcons[t] ?? PhosphorIconsRegular.tag, color: _tag == t ? KColors.staticBlack : KColors.textPrimary)),
-                        const SizedBox(height: 6),
-                        Text(t, style: KText.paragraphSmall, maxLines: 1, overflow: TextOverflow.ellipsis),
-                      ]),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(minWidth: 81),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                      child: ExcludeSemantics(
+                        child: Column(children: [
+                          Container(
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(shape: BoxShape.circle, color: _tag == t ? KColors.brand : KColors.surfaceSubtle),
+                            child: Icon(kTagIcons[t] ?? PhosphorIconsRegular.tag, size: 24, color: _tag == t ? KColors.staticBlack : KColors.iconDefault),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(t, style: KText.paragraphSmall, maxLines: 1),
+                        ]),
+                      ),
                     ),
                   ),
                 ),
@@ -227,15 +227,15 @@ class _DiscoverState extends State<_Discover> {
         ),
         _Heading('Happening soon', action: 'Event calendar →', onAction: () => context.push('/calendar', extra: {'eventsOnly': true})),
         if (soon.isEmpty)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
-            child: Column(children: [
-              CircleAvatar(radius: 56, backgroundColor: KColors.surfaceSubtle, child: Icon(PhosphorIconsRegular.calendarDots, size: 48, color: KColors.textPrimary)),
-              const SizedBox(height: 16),
-              Text('No events yet', style: KText.headingXSmall),
-              const SizedBox(height: 6),
-              Text('Discover new events hosted by other residents. Click on the + button to create an event.', textAlign: TextAlign.center, style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
-            ]),
+          // Figma: 136pt disc, 64pt CalendarDots, 14/24 body.
+          const EmptyState(
+            icon: PhosphorIconsRegular.calendarDots,
+            iconSize: 64,
+            top: 48,
+            bodyWidth: 320,
+            bodyHeight: 24 / 14,
+            title: 'No events yet',
+            body: 'Discover new events hosted by other residents. Click on the + button to create an event.',
           )
         else
           Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Column(children: [for (final e in soon) EventRow(e)])),
@@ -252,7 +252,7 @@ class _Heading extends StatelessWidget {
   final VoidCallback? onAction;
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 8, 8),
+        padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
         child: Row(children: [
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -260,7 +260,12 @@ class _Heading extends StatelessWidget {
               if (subtitle != null) Text(subtitle!, style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
             ]),
           ),
-          if (action != null) TextButton(onPressed: onAction, style: TextButton.styleFrom(foregroundColor: KColors.textPrimary), child: Text(action!)),
+          // Figma "View all →": 13pt secondary link.
+          if (action != null)
+            Semantics(
+              button: true,
+              child: InkWell(onTap: onAction, child: Padding(padding: const EdgeInsets.symmetric(vertical: 8), child: Text(action!, style: KText.paragraphMedium.copyWith(fontSize: 13, color: KColors.textSecondary)))),
+            ),
         ]),
       );
 }
@@ -275,21 +280,22 @@ class TemplateCard extends StatelessWidget {
         width: width,
         child: Container(
           clipBehavior: Clip.antiAlias,
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(KRadius.md), border: Border.all(color: KColors.borderDefault), color: KColors.surfaceDefault),
+          // Figma template card: 12pt corners, 123pt picture, 16pt name, 14/20 description.
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), border: Border.all(color: KColors.borderDefault), color: KColors.surfaceDefault),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            if (t['image'] != null) Image.asset('assets/images/${t['image']}', height: 110, width: double.infinity, fit: BoxFit.cover),
+            if (t['image'] != null) Image.asset('assets/images/${t['image']}', height: 123, width: double.infinity, fit: BoxFit.cover),
             Padding(
-              padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+              padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('${t['name']}${t['personal'] == true ? '' : ' template'}', style: KText.paragraphMediumLarge),
-                const SizedBox(height: 4),
-                Text(t['data']?['description'] ?? '', maxLines: 3, overflow: TextOverflow.ellipsis, style: KText.paragraphSmall.copyWith(color: KColors.textSecondary, fontSize: 13)),
-                const SizedBox(height: 10),
+                Text('${t['name']}${t['personal'] == true ? '' : ' template'}', style: KText.paragraphLarge, maxLines: 1, overflow: TextOverflow.ellipsis),
+                const SizedBox(height: 6),
+                Text(t['data']?['description'] ?? '', maxLines: 3, overflow: TextOverflow.ellipsis, style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
+                const SizedBox(height: 9),
                 SizedBox(
                   height: 36,
                   width: double.infinity,
                   child: FilledButton(
-                    style: FilledButton.styleFrom(backgroundColor: KColors.surfaceInverted, shape: const StadiumBorder()),
+                    style: FilledButton.styleFrom(backgroundColor: KColors.surfaceInverted, foregroundColor: KColors.textInverse, shape: const StadiumBorder(), textStyle: KText.labelSemibold.copyWith(fontSize: 13)),
                     onPressed: () => startEvent(context, template: t),
                     child: const Text('Use template'),
                   ),

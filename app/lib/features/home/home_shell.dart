@@ -13,6 +13,7 @@ import '../calendar/calendar.dart';
 import 'dart:async';
 import '../../theme/tokens.dart';
 import '../../widgets/widgets.dart';
+import '../../widgets/tab_header.dart';
 import 'learning_tour.dart';
 
 /// Home: Feed | Updates (News is out of Phase 1, polls live in the Feed).
@@ -134,8 +135,8 @@ class _HomeShellState extends State<HomeShell> {
         backgroundColor: KColors.surfaceDefault,
         // Figma "Home page header": 36 avatar, 36pt round buttons with 28pt
         // ChatCircleText and BellSimple, red count badges.
-        // The Community tab draws its own Figma header (title + share).
-        appBar: _tab == 1 ? null : PreferredSize(
+        // Community, Events and Clubs draw their own Figma header (centred title).
+        appBar: const {1, 3, 4}.contains(_tab) ? null : PreferredSize(
           preferredSize: const Size.fromHeight(54),
           child: SafeArea(
             bottom: false,
@@ -159,27 +160,7 @@ class _HomeShellState extends State<HomeShell> {
         body: pages[_tab],
         floatingActionButton: _tab == 0 && _homeTab == 0
             // Figma "FAB Button": 52pt yellow disc, 28pt plus, two soft shadows.
-            ? Semantics(
-                key: keys.compose,
-                button: true,
-                label: 'Create post',
-                child: Tooltip(
-                  message: 'Create post',
-                  child: Container(
-                    width: 52,
-                    height: 52,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      boxShadow: [BoxShadow(color: Color(0x33000000), blurRadius: 5, offset: Offset(0, 1)), BoxShadow(color: Color(0x24000000), blurRadius: 10, offset: Offset(0, 2))],
-                    ),
-                    child: Material(
-                      color: KColors.brand,
-                      shape: const CircleBorder(),
-                      child: InkWell(customBorder: const CircleBorder(), onTap: _create, child: const Icon(PhosphorIconsRegular.plus, size: 28, color: Color(0xFF171717))),
-                    ),
-                  ),
-                ),
-              )
+            ? KeysFab(key: keys.compose, label: 'Create post', onTap: _create)
             : null,
         bottomNavigationBar: KeysTabBar(
           index: _tab,

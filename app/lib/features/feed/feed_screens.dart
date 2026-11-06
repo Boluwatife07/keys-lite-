@@ -109,8 +109,11 @@ class PostListState extends State<PostList> {
 }
 
 class EmptyState extends StatelessWidget {
-  const EmptyState({super.key, required this.title, required this.body, this.action, this.icon, this.actionLabel, this.onAction, this.top = 64});
+  const EmptyState({super.key, required this.title, required this.body, this.action, this.icon, this.actionLabel, this.onAction, this.top = 64, this.iconSize = 82, this.bodyWidth = 260, this.bodyHeight});
   final double top;
+  final double iconSize;
+  final double bodyWidth;
+  final double? bodyHeight;
   final String title;
   final String body;
   final Widget? action;
@@ -128,15 +131,15 @@ class EmptyState extends StatelessWidget {
               width: 137,
               height: 137,
               decoration: BoxDecoration(color: KColors.surfaceSubtle, shape: BoxShape.circle),
-              child: Icon(icon, size: 82, color: KColors.iconDefault),
+              child: Icon(icon, size: iconSize, color: KColors.iconDefault),
             ),
             const SizedBox(height: 32),
           ],
           Text(title, style: KText.headingXSmall.copyWith(height: 26 / 18), textAlign: TextAlign.center),
           const SizedBox(height: 4),
           ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 260),
-            child: Text(body, style: KText.paragraphMedium.copyWith(color: KColors.textSecondary), textAlign: TextAlign.center),
+            constraints: BoxConstraints(maxWidth: bodyWidth),
+            child: Text(body, style: KText.paragraphMedium.copyWith(color: KColors.textSecondary, height: bodyHeight), textAlign: TextAlign.center),
           ),
           if (actionLabel != null) ...[
             const SizedBox(height: 20),

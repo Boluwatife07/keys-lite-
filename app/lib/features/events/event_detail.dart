@@ -13,6 +13,7 @@ import '../../core/feed_models.dart';
 import '../../core/scope.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/widgets.dart';
+import '../../widgets/tab_header.dart';
 import '../feed/feed_screens.dart' show EmptyState;
 import '../feed/social.dart';
 import '../updates/updates_list.dart' show SearchField;
@@ -277,20 +278,12 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
         surfaceTintColor: Colors.transparent,
         leading: IconButton(tooltip: 'Back', icon: const Icon(PhosphorIconsRegular.caretLeft, size: 30), onPressed: () => context.pop()),
         actions: [
-          if (status == 'live' || status == 'draft') IconButton(tooltip: 'Share event', icon: const Icon(PhosphorIconsRegular.shareNetwork), onPressed: _share),
+          if (status == 'live' || status == 'draft') IconButton(tooltip: 'Share event', icon: const Icon(PhosphorIconsRegular.shareFat), onPressed: _share),
           if (status != 'cancelled' || _team) IconButton(tooltip: 'Event options', icon: const Icon(PhosphorIconsRegular.dotsThreeVertical), onPressed: _menu),
         ],
       ),
       floatingActionButton: e['canScan'] == true && status == 'live'
-          ? FloatingActionButton(
-              heroTag: 'scan',
-              tooltip: 'QR Scan',
-              backgroundColor: KColors.brand,
-              foregroundColor: KColors.staticBlack,
-              shape: const CircleBorder(),
-              onPressed: () => context.push('/events/${widget.id}/scan'),
-              child: const Icon(PhosphorIconsRegular.scan),
-            )
+          ? KeysFab(label: 'QR Scan', icon: PhosphorIconsRegular.scan, onTap: () => context.push('/events/${widget.id}/scan'))
           : null,
       body: RefreshIndicator(
         onRefresh: _load,
@@ -346,9 +339,25 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Expanded(child: Text(item.title, style: KText.headingSmall)),
+                // Figma: 20pt medium title, 48pt grey chat disc on the right.
+                Expanded(child: Padding(padding: const EdgeInsets.only(top: 10), child: Text(item.title, style: KText.paragraphLarge.copyWith(fontSize: 20, fontWeight: FontWeight.w500, height: 28 / 20)))),
                 if (e['chatId'] != null)
-                  IconButton.filledTonal(tooltip: 'Event group chat', icon: const Icon(PhosphorIconsRegular.chatText), onPressed: () => context.push('/chats/${e['chatId']}')),
+                  Semantics(
+                    button: true,
+                    label: 'Event group chat',
+                    child: Tooltip(
+                      message: 'Event group chat',
+                      child: Material(
+                        color: KColors.surfaceSubtle,
+                        shape: const CircleBorder(),
+                        child: InkWell(
+                          customBorder: const CircleBorder(),
+                          onTap: () => context.push('/chats/${e['chatId']}'),
+                          child: SizedBox(width: 48, height: 48, child: Icon(PhosphorIconsRegular.chatCircleText, size: 26, color: KColors.iconDefault)),
+                        ),
+                      ),
+                    ),
+                  ),
               ]),
               const SizedBox(height: 10),
               _Info(PhosphorIconsRegular.calendarBlank, item.startAt == null ? 'Date to be set' : eventDay(item.startAt!)),
@@ -390,14 +399,16 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               if (item.going > 0) ...[
                 const SizedBox(height: 10),
                 Row(children: [
-                  SizedBox(
-                    width: 24.0 + 18 * (attending.length.clamp(1, 3) - 1),
-                    height: 28,
-                    child: Stack(children: [
-                      for (var i = 0; i < attending.length.clamp(0, 3); i++) Positioned(left: i * 18.0, child: Avatar(attending[i]['photoUrl'], size: 28)),
-                    ]),
-                  ),
-                  const SizedBox(width: 8),
+                  if (attending.isNotEmpty) ...[
+                    SizedBox(
+                      width: 28.0 + 20 * (attending.length.clamp(1, 3) - 1),
+                      height: 28,
+                      child: Stack(children: [
+                        for (var i = 0; i < attending.length.clamp(0, 3); i++) Positioned(left: i * 20.0, child: Avatar(attending[i]['photoUrl'], size: 28)),
+                      ]),
+                    ),
+                    const SizedBox(width: 8),
+                  ],
                   Text('+${item.going} attending', style: KText.paragraphMedium),
                 ]),
               ],
@@ -408,14 +419,26 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
           section(
             'Tickets',
             Container(
-              padding: const EdgeInsets.all(14),
+              margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(color: KColors.surfaceSubtle, borderRadius: BorderRadius.circular(KRadius.md)),
               child: Row(children: [
                 Expanded(
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text('Tickets', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
-                    const SizedBox(height: 4),
-                    Text('Free', style: KText.headingSmall),
+                    Text(_team ? 'Tickets sales' : 'Tickets', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
+                    const SizedBox(height: 6),
+                    // Figma: 28pt black pound disc, 24pt "Free".
+                    Row(children: [
+                      Container(
+                        width: 28,
+                        height: 28,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(color: KColors.surfaceInverted, shape: BoxShape.circle),
+                        child: Text('£', style: KText.paragraphLarge.copyWith(color: KColors.textInverse, fontWeight: FontWeight.w600, height: 1)),
+                      ),
+                      const SizedBox(width: 8),
+                      Text('Free', style: KText.paragraphLarge.copyWith(fontSize: 24, fontWeight: FontWeight.w600, height: 32 / 24)),
+                    ]),
                     if (item.capacity != null) Text('${item.going}/${item.capacity} taken', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
                   ]),
                 ),
@@ -541,7 +564,7 @@ class _Info extends StatelessWidget {
           child: Row(children: [
             Icon(icon, size: 20, color: KColors.textSecondary),
             const SizedBox(width: 10),
-            Expanded(child: Text(text, style: KText.paragraphLarge.copyWith(color: link == null ? null : KColors.textLink))),
+            Expanded(child: Text(text, style: KText.paragraphMedium.copyWith(height: 24 / 14, color: link == null ? null : KColors.textLink))),
           ]),
         ),
       );
