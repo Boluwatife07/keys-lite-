@@ -6,8 +6,8 @@ catalogue test (`app/test/catalog`, run with
 `flutter test --update-goldens test/catalog`) at the iPhone 15 frame used in
 Figma (393 x 852).
 
-Status: **Onboarding, Address verification and Learning done.** Next:
-Profile/Settings, Feed, Polls, Committee board, Voting, Updates, Update chat,
+Status: **Onboarding, Address verification, Learning and Profile/Settings
+done.** Next: Feed, Polls, Committee board, Voting, Updates, Update chat,
 Chat, Events, Clubs, Calendar.
 
 ## Onboarding
@@ -123,3 +123,27 @@ Kept on purpose: the last step's button reads "Finish" (Figma repeats
 "Next"); step 1 highlights the yellow compose button rather than the empty
 state's "Create post"; Services has no filled icon in Figma, so it stays
 outlined when active.
+
+## Profile and settings
+
+| Screen | Fixes |
+| --- | --- |
+| My profile | Page header with 28pt gear and share icons; grey page with white sections; 80 avatar, SemiBold 20 name, 36pt Edit profile / Get verified buttons; "My Activities" in Geist 16 with the 34pt chip |
+| Other resident | Same profile block; 16/24 bio; 48pt Chat; 72pt action rows with 28pt icons (share, mute, block, report) |
+| Edit profile | Page header, 120 avatar with 36pt pencil, 72pt rows (16/24 label, 14/20 value) |
+| Bio sheet | Grabber, 18pt title, copy and close X, labelled field with counter, rule, Save |
+| Change email | Password step and new-email step copy, placeholders and underlined current email from Figma |
+| Settings / Display | Already matched |
+| Account | Titled "Account", key and heart-break icons, Log out pinned under an 8pt grey band |
+| Notification | Grey page with white "In-app notification" and "Email notification" sections, Geist 20 titles, ruled rows, Figma switches |
+| Privacy & Safety | Text-only rows |
+| Mute | Centred modal with Cancel and a red "Yes, mute" |
+| Block (and every confirmation sheet) | Figma action sheet: picture (block), title, copy, yellow "won't be notified" note, rule, stacked action and Cancel; red action when destructive |
+
+Kept on purpose: Settings shows only Phase 1 rows (address book, payment
+methods, security and language are later phase); notification rows are the
+Phase 1 notification types (the Figma rows are later-phase features);
+"Edit profile" moved off the Account page as in Figma but stays on the
+profile; Edit profile keeps Home address and Verify rows (PRF-11, AVW-08);
+the bio limit stays 160 characters (ONB-22), Figma shows 200; My Activities
+shows "My post" only (other tabs are later phase).

@@ -116,7 +116,7 @@ void main() {
     h.fake.on('GET /me/notification-prefs', (_, _) => {'prefs': {'likes': true, 'comments': true, 'mentions': true, 'polls': true, 'updates': true, 'committee': true, 'chat': true, 'events': true, 'clubs': true, 'newsletter': false}});
     await h.pump(t, const NotificationSettingsScreen());
     await t.scrollUntilVisible(find.text('Newsletter'), 200);
-    expect(t.widget<SwitchListTile>(find.widgetWithText(SwitchListTile, 'Newsletter')).value, isFalse);
+    expect(t.widget<KSwitch>(find.byType(KSwitch).last).value, isFalse); // Newsletter is the last switch
   });
 
   testWidgets('PRF-15.3 new passwords must match', (t) async {

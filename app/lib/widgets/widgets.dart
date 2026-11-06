@@ -236,7 +236,7 @@ class Intro extends StatelessWidget {
 
 // ---------------------------------------------------------------- buttons
 
-enum ButtonVariant { primary, secondary, outline, ghost, light }
+enum ButtonVariant { primary, secondary, outline, ghost, light, danger }
 
 class KeysButton extends StatelessWidget {
   const KeysButton(this.label, {super.key, required this.onPressed, this.variant = ButtonVariant.primary, this.loading = false, this.icon});
@@ -256,6 +256,7 @@ class KeysButton extends StatelessWidget {
       ButtonVariant.ghost => (Colors.transparent, enabled ? KColors.textPrimary : KColors.textTertiary, null),
       // Always white: used on photos and camera views in both themes.
       ButtonVariant.light => (Colors.white, const Color(0xFF292929), null),
+      ButtonVariant.danger => (enabled || loading) ? (KColors.error, Colors.white, null) : (KColors.surfaceSubtle, KColors.textDisabled, null),
     };
     return Semantics(
       container: true,

@@ -116,24 +116,48 @@ class AccountScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final me = context.session.me!;
     final hasPw = me.json['hasPassword'] == true;
-    return _page('Your account', [
-      _Row(PhosphorIconsRegular.pencilSimple, 'Edit profile', null, () => context.push('/profile/edit')),
-      hasPw
-          ? _Row(PhosphorIconsRegular.lock, 'Change password', null, () => context.push('/settings/password'))
-          : _Row(PhosphorIconsRegular.lock, 'Create password', 'Keep access to your account secured', () => context.push('/settings/password/create')),
-      _Row(PhosphorIconsRegular.userCircleMinus, 'Deactivate account', null, () => context.push('/settings/deactivate')),
-      ListTile(
-        leading: Icon(PhosphorIconsRegular.signOut, color: KColors.error),
-        title: Text('Log out', style: KText.paragraphMediumLarge.copyWith(color: KColors.error)),
-        onTap: () async {
-          // PRF-17.1 (design copy "our account" corrected).
-          if (!await confirmSheet(context, title: 'Log out', body: 'Are you sure you want to log out of your account?', confirm: 'Log out')) return;
-          if (!context.mounted) return;
-          await context.session.logout();
-          if (context.mounted) context.go('/auth/email');
-        },
-      ),
-    ]);
+    Future<void> logout() async {
+      // PRF-17.1 (design copy "our account" corrected).
+      if (!await confirmSheet(context, title: 'Log out', body: 'Are you sure you want to log out of your account?', confirm: 'Log out')) return;
+      if (!context.mounted) return;
+      await context.session.logout();
+      if (context.mounted) context.go('/auth/email');
+    }
+
+    // Figma 1239:182677: two rows, Log out pinned under an 8pt grey band.
+    return Scaffold(
+      backgroundColor: KColors.surfaceDefault,
+      appBar: const PageHeader('Account', bottomBorder: true),
+      body: Column(children: [
+        Expanded(
+          child: ListView(padding: const EdgeInsets.fromLTRB(16, 8, 16, 20), children: [
+            hasPw
+                ? _Row(PhosphorIconsRegular.key, 'Change password', null, () => context.push('/settings/password'))
+                : _Row(PhosphorIconsRegular.key, 'Create password', 'Keep access to your account secured', () => context.push('/settings/password/create')),
+            const SizedBox(height: 4),
+            _Row(PhosphorIconsRegular.heartBreak, 'Deactivate account', null, () => context.push('/settings/deactivate')),
+          ]),
+        ),
+        Container(height: 8, color: KColors.surfaceSubtle),
+        SafeArea(
+          top: false,
+          child: InkWell(
+            onTap: logout,
+            child: SizedBox(
+              height: 72,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(children: [
+                  Icon(PhosphorIconsRegular.signOut, size: 20, color: KColors.error),
+                  const SizedBox(width: 12),
+                  Text('Log out', style: KText.paragraphMedium.copyWith(color: KColors.error)),
+                ]),
+              ),
+            ),
+          ),
+        ),
+      ]),
+    );
   }
 }
 
@@ -179,14 +203,48 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
   Widget build(BuildContext context) {
     final p = _prefs;
     if (p == null) return _page('Notification', [const Padding(padding: EdgeInsets.all(32), child: Center(child: CircularProgressIndicator()))]);
-    return _page('Notification', [
-      Padding(padding: const EdgeInsets.fromLTRB(16, 8, 16, 0), child: Text('In-app and push', style: KText.overline)),
-      for (final e in labels.entries)
-        SwitchListTile(title: Text(e.value.$1), subtitle: Text(e.value.$2), value: p[e.key] == true, activeTrackColor: KColors.surfaceInverted, onChanged: (v) => _set(e.key, v)),
-      Padding(padding: const EdgeInsets.fromLTRB(16, 16, 16, 0), child: Text('Email', style: KText.overline)),
-      SwitchListTile(title: const Text('Newsletter'), subtitle: const Text('Get latest news and updates about Keys community'), value: p['newsletter'] == true, activeTrackColor: KColors.surfaceInverted, onChanged: (v) => _set('newsletter', v)),
-      const ListTile(title: Text('Sign-in alerts and account updates'), subtitle: Text('Service emails we always send to keep your account safe')),
-    ]);
+    // Figma 1239:181303: two white sections on grey, Geist 20 titles, rows
+    // ruled in surface/subtle. Rows are the Phase 1 notification types.
+    Widget title(String t) => Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: Text(t, style: TextStyle(fontFamily: 'Geist', fontSize: 20, fontWeight: FontWeight.w600, height: 26 / 20, color: KColors.textPrimary)),
+        );
+    Widget row(String t, String? sub, {bool? value, ValueChanged<bool>? onChanged}) => Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(border: Border(bottom: BorderSide(color: KColors.surfaceSubtle))),
+          constraints: const BoxConstraints(minHeight: 72),
+          child: Row(children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(t, style: KText.paragraphLarge),
+                  if (sub != null) ...[const SizedBox(height: 2), Text(sub, style: KText.paragraphSmall.copyWith(color: KColors.textSecondary))],
+                ]),
+              ),
+            ),
+            if (value != null) ...[const SizedBox(width: 12), Semantics(label: t, toggled: value, child: KSwitch(value: value, onChanged: onChanged))],
+          ]),
+        );
+    Widget section(List<Widget> kids) => Container(color: KColors.surfaceDefault, padding: const EdgeInsets.symmetric(vertical: 4), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: kids));
+    return Scaffold(
+      backgroundColor: KColors.surfaceSubtle,
+      appBar: const PageHeader('Notification', bottomBorder: true),
+      body: ListView(padding: const EdgeInsets.only(bottom: 24), children: [
+        section([
+          title('In-app notification'),
+          for (final e in labels.entries) row(e.value.$1, e.value.$2, value: p[e.key] == true, onChanged: (v) => _set(e.key, v)),
+          const SizedBox(height: 16),
+        ]),
+        const SizedBox(height: 8),
+        section([
+          title('Email notification'),
+          row('Newsletter', 'Get latest news and updates about Keys community', value: p['newsletter'] == true, onChanged: (v) => _set('newsletter', v)),
+          row('Sign-in alerts and account updates', 'Service emails we always send to keep your account safe'),
+          const SizedBox(height: 16),
+        ]),
+      ]),
+    );
   }
 }
 
@@ -194,9 +252,10 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
 class PrivacyScreen extends StatelessWidget {
   const PrivacyScreen({super.key});
   @override
-  Widget build(BuildContext context) => _page('Privacy and Safety', [
-        _Row(PhosphorIconsRegular.prohibit, 'Blocked accounts', "Manage all accounts you've blocked", () => context.push('/settings/blocked')),
-        _Row(PhosphorIconsRegular.speakerSimpleSlash, 'Muted accounts', "Manage all accounts you've muted", () => context.push('/settings/muted')),
+  // Figma 1239:181126: text-only rows.
+  Widget build(BuildContext context) => _page('Privacy & Safety', [
+        _Row(null, 'Blocked accounts', "Manage all accounts you've blocked", () => context.push('/settings/blocked')),
+        _Row(null, 'Muted accounts', "Manage all accounts you've muted", () => context.push('/settings/muted')),
       ]);
 }
 

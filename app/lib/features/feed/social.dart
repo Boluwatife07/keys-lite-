@@ -133,24 +133,82 @@ Future<void> showActionSheet(BuildContext context, List<SheetAction> actions) =>
       ),
     );
 
-/// Yes / No confirmation sheet used for delete, block, unmute, log out...
-Future<bool> confirmSheet(BuildContext context, {required String title, required String body, required String confirm, String cancel = 'Cancel', bool destructive = false, String? footnote}) async {
+/// Figma "action confirmation sheet": grabber, optional picture, title,
+/// copy, an optional yellow note, a rule, then the action and Cancel
+/// stacked full width. Used for delete, block, unmute, log out...
+Future<bool> confirmSheet(BuildContext context,
+    {required String title, required String body, required String confirm, String cancel = 'Cancel', bool destructive = false, String? footnote, Widget? leading}) async {
   final r = await showModalBottomSheet<bool>(
     context: context,
-    builder: (c) => Padding(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+    isScrollControlled: true,
+    showDragHandle: false,
+    backgroundColor: KColors.surfaceDefault,
+    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+    builder: (c) => SafeArea(
+      top: false,
       child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(title, style: KText.headingSmall),
         const SizedBox(height: 8),
-        Text(body, style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
-        if (footnote != null) ...[const SizedBox(height: 8), Text(footnote, style: KText.paragraphSmall.copyWith(color: KColors.textSecondary))],
-        const SizedBox(height: 24),
-        Row(children: [
-          Expanded(child: KeysButton(cancel, variant: ButtonVariant.secondary, onPressed: () => Navigator.pop(c, false))),
-          const SizedBox(width: 12),
-          Expanded(child: KeysButton(confirm, onPressed: () => Navigator.pop(c, true))),
-        ]),
+        Center(child: Container(width: 48, height: 4, decoration: BoxDecoration(color: KColors.borderStrong.withValues(alpha: 0.4), borderRadius: BorderRadius.circular(100)))),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            if (leading != null) ...[Center(child: leading), const SizedBox(height: 24)],
+            Text(title, style: TextStyle(fontFamily: 'Inter', fontSize: 18, fontWeight: FontWeight.w500, height: 26 / 18, letterSpacing: -0.2, color: KColors.textPrimary)),
+            const SizedBox(height: 8),
+            Text(body, style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
+            if (footnote != null) ...[
+              const SizedBox(height: 24),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(color: KColors.brandSubtle, borderRadius: BorderRadius.circular(12)),
+                child: Row(children: [
+                  Icon(PhosphorIconsRegular.bellSlash, size: 20, color: KColors.iconDefault),
+                  const SizedBox(width: 12),
+                  Expanded(child: Text(footnote, style: KText.paragraphSmall)),
+                ]),
+              ),
+            ],
+          ]),
+        ),
+        Container(height: 1, color: KColors.borderDefault),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
+          child: Column(children: [
+            KeysButton(confirm, variant: destructive ? ButtonVariant.danger : ButtonVariant.primary, onPressed: () => Navigator.pop(c, true)),
+            const SizedBox(height: 12),
+            KeysButton(cancel, variant: ButtonVariant.secondary, onPressed: () => Navigator.pop(c, false)),
+          ]),
+        ),
       ]),
+    ),
+  );
+  return r == true;
+}
+
+/// Figma "Modal": centred white card, 16pt title, copy, Cancel and a red action.
+Future<bool> confirmDialog(BuildContext context, {required String title, required String body, required String confirm, String cancel = 'Cancel'}) async {
+  final r = await showDialog<bool>(
+    context: context,
+    barrierColor: const Color(0x99000000),
+    builder: (c) => Dialog(
+      backgroundColor: KColors.surfaceElevated,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
+        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(title, style: KText.paragraphLarge.copyWith(fontWeight: FontWeight.w600)),
+          const SizedBox(height: 16),
+          Text(body, style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
+          const SizedBox(height: 16),
+          Row(children: [
+            Expanded(child: KeysButton(cancel, variant: ButtonVariant.secondary, onPressed: () => Navigator.pop(c, false))),
+            const SizedBox(width: 12),
+            Expanded(child: KeysButton(confirm, variant: ButtonVariant.danger, onPressed: () => Navigator.pop(c, true))),
+          ]),
+        ]),
+      ),
     ),
   );
   return r == true;
@@ -246,7 +304,8 @@ Future<void> muteFromPost(BuildContext context, PersonRef p, VoidCallback onChan
 Future<bool> blockPerson(BuildContext context, PersonRef p) async {
   final ok = await confirmSheet(
     context,
-    title: 'Block ${p.name}?',
+    title: 'Block ${p.name}',
+    leading: Avatar(p.photoUrl, size: 64),
     body: "You won't see their posts or comments, they won't be able to message you and you won't receive notifications from them.",
     footnote: "They won't be notified that you blocked or reported them.",
     confirm: 'Block',

@@ -24,8 +24,8 @@ class _Meta extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = KText.paragraphSmall.copyWith(color: KColors.textSecondary);
     return Wrap(spacing: 16, runSpacing: 4, children: [
-      Row(mainAxisSize: MainAxisSize.min, children: [Icon(PhosphorIconsRegular.buildings, size: 14, color: KColors.textSecondary), const SizedBox(width: 4), Text(community, style: s)]),
-      if (joinedAt != null) Row(mainAxisSize: MainAxisSize.min, children: [Icon(PhosphorIconsRegular.calendarBlank, size: 13, color: KColors.textSecondary), const SizedBox(width: 4), Text(joined(joinedAt), style: s)]),
+      Row(mainAxisSize: MainAxisSize.min, children: [Icon(PhosphorIconsRegular.buildings, size: 16, color: KColors.textSecondary), const SizedBox(width: 6), Text(community, style: s)]),
+      if (joinedAt != null) Row(mainAxisSize: MainAxisSize.min, children: [Icon(PhosphorIconsRegular.calendarDots, size: 16, color: KColors.textSecondary), const SizedBox(width: 6), Text(joined(joinedAt), style: s)]),
     ]);
   }
 }
@@ -68,56 +68,52 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
       builder: (context, _) {
         final me = s.me!;
         final p = _p;
+        // Figma 1239:179788.
         return Scaffold(
-          backgroundColor: KColors.surfaceDefault,
-          appBar: AppBar(
-            backgroundColor: KColors.surfaceDefault,
-            surfaceTintColor: Colors.transparent,
-            title: Text('Profile', style: KText.headingXSmall),
-            actions: [
-              IconButton(tooltip: 'Settings', icon: const Icon(PhosphorIconsRegular.gear), onPressed: () => context.push('/settings')),
-              IconButton(tooltip: 'Share profile', icon: const Icon(PhosphorIconsRegular.shareNetwork), onPressed: () => context.deps.sharer.share(p?['shareLink'] ?? '')),
-            ],
-          ),
+          backgroundColor: KColors.surfaceSubtle,
+          appBar: PageHeader('Profile', bottomBorder: true, actions: [
+            IconButton(tooltip: 'Settings', icon: Icon(PhosphorIconsRegular.gearSix, size: 28, color: KColors.iconDefault), onPressed: () => context.push('/settings')),
+            IconButton(tooltip: 'Share profile', icon: Icon(PhosphorIconsRegular.shareFat, size: 28, color: KColors.iconDefault), onPressed: () => context.deps.sharer.share(p?['shareLink'] ?? '')),
+          ]),
           body: PostList(
             path: '/users/${me.id}/posts',
-            header: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Row(children: [
-                  Avatar(me.photoUrl, size: 80),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Text(me.fullName, style: KText.headingSmall),
-                      const SizedBox(height: 4),
-                      if (!me.isVerified) UnverifiedChip(text: me.underReview ? 'Under review' : 'Unverified'),
-                      if (p?['role'] != null) Text(p!['role'], style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
-                    ]),
+            header: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Container(
+                color: KColors.surfaceDefault,
+                padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  _ProfileHead(photoUrl: me.photoUrl, name: me.fullName, unverified: me.isVerified ? null : (me.underReview ? 'Under review' : 'Unverified'), role: p?['role']),
+                  if ((me.bio ?? '').isNotEmpty) ...[const SizedBox(height: 12), Text(me.bio!, style: KText.paragraphMedium)],
+                  const SizedBox(height: 10),
+                  _Meta(community: me.communityName, joinedAt: p?['joinedAt']),
+                  const SizedBox(height: 20),
+                  Row(children: [
+                    Expanded(child: _SmallButton('Edit profile', primary: true, onTap: () => context.push('/profile/edit'))),
+                    if (!me.isVerified) ...[
+                      const SizedBox(width: 8),
+                      // AVW-08.2
+                      Expanded(child: _SmallButton(me.underReview ? 'Under review' : 'Get verified', onTap: () => context.push('/verify'))),
+                    ],
+                  ]),
+                ]),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                width: double.infinity,
+                color: KColors.surfaceDefault,
+                padding: const EdgeInsets.fromLTRB(16, 23, 16, 16),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text('My Activities', style: TextStyle(fontFamily: 'Geist', fontSize: 16, fontWeight: FontWeight.w600, color: KColors.textPrimary)),
+                  const SizedBox(height: 16),
+                  Container(
+                    height: 34,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(color: KColors.surfaceInverted, borderRadius: BorderRadius.circular(20)),
+                    child: Center(widthFactor: 1, child: Text('My post${_total == null ? '' : ' ($_total)'}', style: KText.paragraphMedium.copyWith(height: 1, color: KColors.textInverse))),
                   ),
                 ]),
-                if ((me.bio ?? '').isNotEmpty) ...[const SizedBox(height: 12), Text(me.bio!, style: KText.paragraphMedium)],
-                const SizedBox(height: 8),
-                _Meta(community: me.communityName, joinedAt: p?['joinedAt']),
-                const SizedBox(height: 16),
-                Row(children: [
-                  Expanded(child: SizedBox(height: 40, child: KeysButton('Edit profile', onPressed: () => context.push('/profile/edit')))),
-                  if (!me.isVerified) ...[
-                    const SizedBox(width: 12),
-                    // AVW-08.2
-                    Expanded(child: SizedBox(height: 40, child: KeysButton(me.underReview ? 'Under review' : 'Get verified', variant: ButtonVariant.outline, onPressed: () => context.push('/verify')))),
-                  ],
-                ]),
-                const SizedBox(height: 24),
-                Text('My Activities', style: KText.headingXSmall),
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                  decoration: BoxDecoration(color: KColors.surfaceInverted, borderRadius: BorderRadius.circular(KRadius.pill)),
-                  child: Text('My post${_total == null ? '' : ' ($_total)'}', style: KText.paragraphMediumSmall.copyWith(color: KColors.textInverse, fontSize: 13)),
-                ),
-              ]),
-            ),
+              ),
+            ]),
             empty: const EmptyState(title: 'No posts yet', body: 'Posts you create on the feed would be shown here'),
           ),
         );
@@ -163,7 +159,8 @@ class _OtherProfileScreenState extends State<OtherProfileScreen> {
       final r = await context.api.delete('/users/${widget.id}/mute');
       if (mounted) showToast(context, r['message']);
     } else {
-      if (!await confirmSheet(context, title: 'Mute $first?', body: "Are you sure you want to mute ${p['name']}? You won't receive any posts, messages notification from them for the next 30 days.", confirm: 'Yes, mute')) return;
+      // Figma 1239:178669: centred modal with a red action.
+      if (!await confirmDialog(context, title: 'Mute ${p['name']}', body: "Are you sure you want to mute $first? You won't receive any posts, messages notification from them for the next 30 days.", confirm: 'Yes, mute')) return;
       if (!mounted) return;
       final api = context.api;
       final r = await api.post('/users/${widget.id}/mute');
@@ -189,58 +186,51 @@ class _OtherProfileScreenState extends State<OtherProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final p = _p;
+    // Figma 1239:179248.
     return Scaffold(
-      backgroundColor: KColors.surfaceDefault,
-      appBar: AppBar(backgroundColor: KColors.surfaceDefault, surfaceTintColor: Colors.transparent),
+      backgroundColor: KColors.surfaceSubtle,
+      appBar: const PageHeader('', bottomBorder: true),
       body: _error != null
           ? EmptyState(title: 'Not available', body: _error!.message)
           : p == null
               ? const Center(child: CircularProgressIndicator())
               : ListView(children: [
-                  Padding(
-                    padding: const EdgeInsets.all(16),
+                  Container(
+                    color: KColors.surfaceDefault,
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Row(children: [
-                        GestureDetector(
-                          onTap: p['photoUrl'] == null ? null : () => context.push('/media', extra: {'urls': [p['photoUrl']], 'index': 0}),
-                          child: Avatar(p['photoUrl'], size: 80),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                            Row(children: [
-                              Flexible(child: Text(p['name'], style: KText.headingSmall)),
-                              if (PersonRef(p).isCommittee) ...[const SizedBox(width: 6), const CommitteeMark(size: 18)],
-                            ]),
-                            const SizedBox(height: 4),
-                            if (p['verified'] != true) const UnverifiedChip(),
-                            if (p['role'] != null) Text(p['role'], style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
-                          ]),
-                        ),
-                      ]),
-                      if ((p['bio'] ?? '').isNotEmpty) ...[const SizedBox(height: 12), Text(p['bio'], style: KText.paragraphMedium)],
-                      const SizedBox(height: 8),
+                      _ProfileHead(
+                        photoUrl: p['photoUrl'],
+                        name: p['name'],
+                        committee: PersonRef(p).isCommittee,
+                        unverified: p['verified'] != true ? 'Unverified' : null,
+                        role: p['role'],
+                        onAvatar: p['photoUrl'] == null ? null : () => context.push('/media', extra: {'urls': [p['photoUrl']], 'index': 0}),
+                      ),
+                      if ((p['bio'] ?? '').isNotEmpty) ...[const SizedBox(height: 16), Text(p['bio'], style: KText.paragraphLarge)],
+                      const SizedBox(height: 10),
                       _Meta(community: p['community'], joinedAt: p['joinedAt']),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 20),
                       // PRF-05.2: blocked -> the Chat button becomes Unblock and the actions go.
                       p['isBlocked'] == true
                           ? KeysButton('Unblock', onPressed: _unblock)
                           : KeysButton('Chat', onPressed: () => openDirectChat(context, widget.id)),
                     ]),
                   ),
-                  Container(height: 8, color: KColors.surfaceSubtle),
-                  if (p['isBlocked'] != true) ...[
-                    ListTile(leading: const Icon(PhosphorIconsRegular.shareNetwork), title: const Text('Share profile'), onTap: () => context.deps.sharer.share(p['shareLink'])),
-                    ListTile(leading: Icon(p['isMuted'] == true ? PhosphorIconsRegular.speakerSimpleHigh : PhosphorIconsRegular.speakerSimpleSlash), title: Text('${p['isMuted'] == true ? 'Unmute' : 'Mute'} ${PersonRef(p).firstName}'), onTap: _mute),
-                    ListTile(leading: const Icon(PhosphorIconsRegular.prohibit), title: Text('Block ${PersonRef(p).firstName}'), onTap: () async {
-                      if (await blockPerson(context, PersonRef(p))) _load();
-                    }),
-                    ListTile(
-                      leading: const Icon(PhosphorIconsRegular.flag),
-                      title: Text('Report ${PersonRef(p).firstName}'),
-                      onTap: () => showReportSheet(context, itemType: 'user', itemId: widget.id, title: 'Report ${p['name']}', intro: "Tell us why you are reporting this user. They won't be notified that you reported them."),
+                  const SizedBox(height: 8),
+                  if (p['isBlocked'] != true)
+                    Container(
+                      color: KColors.surfaceDefault,
+                      child: Column(children: [
+                        _ActionRow(PhosphorIconsRegular.shareFat, 'Share profile', () => context.deps.sharer.share(p['shareLink'])),
+                        _ActionRow(p['isMuted'] == true ? PhosphorIconsRegular.speakerSimpleHigh : PhosphorIconsRegular.speakerSimpleSlash, '${p['isMuted'] == true ? 'Unmute' : 'Mute'} ${PersonRef(p).firstName}', _mute),
+                        _ActionRow(PhosphorIconsRegular.prohibit, 'Block ${PersonRef(p).firstName}', () async {
+                          if (await blockPerson(context, PersonRef(p))) _load();
+                        }),
+                        _ActionRow(PhosphorIconsRegular.flag, 'Report ${PersonRef(p).firstName}',
+                            () => showReportSheet(context, itemType: 'user', itemId: widget.id, title: 'Report ${p['name']}', intro: "Tell us why you are reporting this user. They won't be notified that you reported them.")),
+                      ]),
                     ),
-                  ],
                 ]),
     );
   }
@@ -294,17 +284,39 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final saved = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
+      showDragHandle: false,
+    backgroundColor: KColors.surfaceDefault,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+      // Figma 1239:180503: grabber, title + copy with a close X, the field,
+      // a rule, then Save.
       builder: (b) => Padding(
-        padding: EdgeInsets.fromLTRB(20, 0, 20, 20 + MediaQuery.viewInsetsOf(b).bottom),
-        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('Bio', style: KText.headingSmall),
-          const SizedBox(height: 4),
-          Text('Describe yourself and let your neighbors connect with you.', style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
-          const SizedBox(height: 16),
-          KeysTextField(controller: c, maxLength: 160, maxLines: 4, autofocus: true),
-          const SizedBox(height: 16),
-          KeysButton('Save', onPressed: () => Navigator.pop(b, true)),
-        ]),
+        padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(b).bottom),
+        child: SafeArea(
+          top: false,
+          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+            const SizedBox(height: 8),
+            Center(child: Container(width: 48, height: 4, decoration: BoxDecoration(color: KColors.surfaceSubtle, borderRadius: BorderRadius.circular(100)))),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 8, 0),
+              child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Expanded(
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text('Bio', style: TextStyle(fontFamily: 'Inter', fontSize: 18, fontWeight: FontWeight.w500, height: 26 / 18, color: KColors.textPrimary)),
+                    const SizedBox(height: 4),
+                    Text('Describe yourself and let your neighbors connect with you.', style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
+                  ]),
+                ),
+                IconButton(tooltip: 'Close', onPressed: () => Navigator.pop(b, false), icon: Icon(PhosphorIconsRegular.x, size: 24, color: KColors.iconDefault)),
+              ]),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 12, 20),
+              child: KeysTextField(label: 'Bio', controller: c, maxLength: 160, maxLines: 4, minLines: 3, autofocus: true),
+            ),
+            Container(height: 1, color: KColors.borderDefault),
+            Padding(padding: const EdgeInsets.fromLTRB(16, 12, 16, 12), child: KeysButton('Save', onPressed: () => Navigator.pop(b, true))),
+          ]),
+        ),
       ),
     );
     if (saved != true) return;
@@ -335,17 +347,34 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       listenable: s,
       builder: (context, _) {
         final me = s.me!;
-        Widget row(String label, String value, {VoidCallback? onTap}) => ListTile(
+        // Figma 1239:180145 "Menu item": 72 high, 16/24 title, 14/20 value.
+        Widget row(String label, String value, {VoidCallback? onTap, IconData? icon}) => InkWell(
               onTap: onTap,
-              title: Text(label, style: KText.paragraphMediumLarge),
-              subtitle: Text(value, style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
-              trailing: onTap == null ? null : const Icon(PhosphorIconsRegular.caretRight),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: 72),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(children: [
+                    if (icon != null) ...[Icon(icon, size: 24, color: KColors.iconDefault), const SizedBox(width: 12)],
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Text(label, style: KText.paragraphLarge),
+                          if (value.isNotEmpty) ...[const SizedBox(height: 2), Text(value, style: KText.paragraphMedium.copyWith(color: KColors.textSecondary))],
+                        ]),
+                      ),
+                    ),
+                    if (onTap != null) ...[const SizedBox(width: 8), Icon(PhosphorIconsRegular.caretRight, size: 24, color: KColors.iconMuted)],
+                  ]),
+                ),
+              ),
             );
         return Scaffold(
           backgroundColor: KColors.surfaceDefault,
-          appBar: AppBar(backgroundColor: KColors.surfaceDefault, surfaceTintColor: Colors.transparent, title: Text('Edit profile', style: KText.headingXSmall)),
+          appBar: const PageHeader('Edit profile', bottomBorder: true),
           body: ListView(children: [
-            const SizedBox(height: 16),
+            const SizedBox(height: 26),
             Center(
               child: Semantics(
                 container: true,
@@ -354,20 +383,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 child: GestureDetector(
                   onTap: _photo,
                   child: Stack(children: [
-                    Avatar(me.photoUrl, size: 116),
-                    Positioned(right: 0, bottom: 4, child: CircleAvatar(radius: 16, backgroundColor: KColors.surfaceMuted, child: Icon(PhosphorIconsRegular.pencilSimple, size: 16, color: KColors.textPrimary))),
+                    Avatar(me.photoUrl, size: 120),
+                    Positioned(right: 5, bottom: 4, child: CircleAvatar(radius: 18, backgroundColor: KColors.surfaceMuted, child: Icon(PhosphorIconsRegular.pencilSimple, size: 20, color: KColors.textPrimary))),
                   ]),
                 ),
               ),
             ),
             if (_progress != null) Padding(padding: const EdgeInsets.fromLTRB(80, 12, 80, 0), child: LinearProgressIndicator(value: _progress, color: KColors.surfaceInverted)),
-            const SizedBox(height: 16),
+            const SizedBox(height: 25),
             // PRF-07.1: legal name, not editable.
             row('Name', me.fullName),
             row('Bio', (me.bio ?? '').isEmpty ? 'Add a bio' : me.bio!, onTap: _bio),
             row('Email address', me.email, onTap: _email),
             row('Home address', me.address?['formatted'] ?? '', onTap: () => context.push('/profile/address')),
-            if (!me.isVerified) ListTile(leading: const Icon(PhosphorIconsRegular.sealCheck), title: Text(me.underReview ? 'Verification under review' : 'Verify your home address'), trailing: const Icon(PhosphorIconsRegular.caretRight), onTap: () => context.push('/verify')),
+            if (!me.isVerified) row(me.underReview ? 'Verification under review' : 'Verify your home address', '', icon: PhosphorIconsRegular.sealCheck, onTap: () => context.push('/verify')),
           ]),
         );
       },
@@ -416,17 +445,20 @@ class _ChangeEmailScreenState extends State<ChangeEmailScreen> with Busy {
   Widget build(BuildContext context) {
     final me = context.session.me!;
     final body = switch (_step) {
+      // Figma 1239:179976 / 1239:180020.
       0 => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Intro(title: 'Enter password', body: 'Enter your password to change your email address'),
-          const SizedBox(height: 24),
-          KeysTextField(label: 'Password', controller: _pw, obscure: true, error: _error, autofocus: true, onChanged: (_) => setState(() => _error = null)),
+          _StepHead('Enter password', 'Enter your password to continue'),
+          const SizedBox(height: 32),
+          KeysTextField(label: 'Password', hint: 'Enter your password here', controller: _pw, obscure: true, error: _error, autofocus: true, onChanged: (_) => setState(() => _error = null)),
         ]),
       1 => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Intro(title: 'Change email address'),
-          const SizedBox(height: 24),
-          KeysTextField(label: 'Current email address', controller: TextEditingController(text: me.email), enabled: false),
-          const SizedBox(height: 16),
-          KeysTextField(label: 'New email address', controller: _email, keyboardType: TextInputType.emailAddress, error: _error, autofocus: true, onChanged: (_) => setState(() => _error = null)),
+          _StepHead('Change email address', 'Enter your new email address and proceed to email verification'),
+          const SizedBox(height: 32),
+          Text('Current email address:', style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
+          const SizedBox(height: 2),
+          Text(me.email, style: KText.paragraphLarge.copyWith(decoration: TextDecoration.underline, decorationColor: KColors.textPrimary)),
+          const SizedBox(height: 32),
+          KeysTextField(label: 'New email address', hint: 'Enter new email address', controller: _email, keyboardType: TextInputType.emailAddress, error: _error, autofocus: true, onChanged: (_) => setState(() => _error = null)),
         ]),
       _ => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Intro(title: 'Enter verification code', body: 'Enter the 6-digit verification code sent to ${_email.text.trim()}'),
@@ -498,4 +530,90 @@ class _ChangeAddressScreenState extends State<ChangeAddressScreen> with Busy {
       bottom: KeysButton('Proceed to change address', loading: busy, onPressed: c == null || blockers.isNotEmpty ? null : _go),
     );
   }
+}
+
+
+/// Figma profile "User Info": 80 avatar, Inter SemiBold 20 name with the
+/// committee badge, then the unverified tag or the role.
+class _ProfileHead extends StatelessWidget {
+  const _ProfileHead({required this.photoUrl, required this.name, this.committee = false, this.unverified, this.role, this.onAvatar});
+  final String? photoUrl;
+  final String name;
+  final bool committee;
+  final String? unverified;
+  final String? role;
+  final VoidCallback? onAvatar;
+  @override
+  Widget build(BuildContext context) => Row(children: [
+        GestureDetector(onTap: onAvatar, child: Avatar(photoUrl, size: 80)),
+        const SizedBox(width: 20),
+        Expanded(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Row(children: [
+              Flexible(child: Text(name, style: TextStyle(fontFamily: 'Inter', fontSize: 20, fontWeight: FontWeight.w600, height: 28 / 20, color: KColors.textPrimary))),
+              if (committee) ...[const SizedBox(width: 4), const CommitteeMark(size: 16)],
+            ]),
+            if (unverified != null) UnverifiedChip(text: unverified!),
+            if (role != null) Text(role!, style: KText.paragraphMedium.copyWith(color: KColors.textPlaceholder)),
+          ]),
+        ),
+      ]);
+}
+
+/// 36pt pill button with a 12pt label (Figma "Button / Small").
+class _SmallButton extends StatelessWidget {
+  const _SmallButton(this.label, {required this.onTap, this.primary = false});
+  final String label;
+  final VoidCallback onTap;
+  final bool primary;
+  @override
+  Widget build(BuildContext context) => Semantics(
+        button: true,
+        child: Material(
+          color: primary ? KColors.surfaceInverted : Colors.transparent,
+          shape: StadiumBorder(side: primary ? BorderSide.none : BorderSide(color: KColors.borderStrong)),
+          child: InkWell(
+            customBorder: const StadiumBorder(),
+            onTap: onTap,
+            child: SizedBox(height: 36, child: Center(child: Text(label, style: TextStyle(fontFamily: 'Inter', fontSize: 12, fontWeight: FontWeight.w600, height: 1, color: primary ? KColors.textInverse : KColors.textPrimary)))),
+          ),
+        ),
+      );
+}
+
+/// Figma "Menu item" with a 28pt icon (profile actions).
+class _ActionRow extends StatelessWidget {
+  const _ActionRow(this.icon, this.label, this.onTap);
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  @override
+  Widget build(BuildContext context) => InkWell(
+        onTap: onTap,
+        child: SizedBox(
+          height: 72,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(children: [
+              Icon(icon, size: 28, color: KColors.iconDefault),
+              const SizedBox(width: 16),
+              Expanded(child: Text(label, style: KText.paragraphLarge)),
+            ]),
+          ),
+        ),
+      );
+}
+
+
+/// 24pt title over 14pt grey copy (change email steps).
+class _StepHead extends StatelessWidget {
+  const _StepHead(this.title, this.body);
+  final String title;
+  final String body;
+  @override
+  Widget build(BuildContext context) => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(title, style: KText.headingSmall),
+        const SizedBox(height: 8),
+        Text(body, style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
+      ]);
 }
