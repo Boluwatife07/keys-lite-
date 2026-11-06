@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keys_lite/features/feed/compose.dart';
 import 'package:keys_lite/features/feed/feed_screens.dart';
+import 'package:keys_lite/core/feed_models.dart';
 import 'package:keys_lite/features/home/home_shell.dart';
 import '../harness.dart';
 import 'catalog.dart';
@@ -74,5 +75,9 @@ void main() {
           ],
           'total': 143,
         });
+  });
+  shot('post_detail', () => PostDetailScreen(id: 'p1', initial: Post(post('p1', 'Hey everyone, I was wondering, what’s your go-to spot nearby for coffee with this kind of art? I’m always looking for good local gems and would love your suggestions.', likes: 273, comments: 0))), setup: (h) {
+    h.fake.on('GET /posts/p1', (_, _) => {'post': post('p1', 'Hey everyone, I was wondering, what’s your go-to spot nearby for coffee with this kind of art? I’m always looking for good local gems and would love your suggestions.', likes: 273, comments: 0)});
+    h.fake.on('GET /posts/p1/comments', (_, _) => {'comments': []});
   });
 }

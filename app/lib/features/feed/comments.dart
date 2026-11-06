@@ -328,16 +328,40 @@ class _CommentsThreadState extends State<CommentsThread> with Busy {
       Expanded(
         child: list == null
             ? const Center(child: CircularProgressIndicator())
-            : ListView(padding: const EdgeInsets.fromLTRB(16, 0, 16, 16), children: [
+            // The post header runs edge to edge; comments sit 16 in.
+            : ListView(padding: const EdgeInsets.only(bottom: 16), children: [
                 ?widget.header,
+                Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 if (list.isEmpty)
+                  // Figma 3430:177910 empty comments.
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 40),
-                    child: Column(children: [
-                      Text('No comments yet', style: KText.headingXSmall),
-                      const SizedBox(height: 4),
-                      Text('Be the first to comment.', style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
-                    ]),
+                    padding: const EdgeInsets.symmetric(vertical: 120),
+                    child: Center(
+                      child: Column(children: [
+                        Text('No comments yet', style: KText.headingXSmall.copyWith(height: 26 / 18)),
+                        const SizedBox(height: 4),
+                        Text('Be the first to comment.', style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
+                        const SizedBox(height: 16),
+                        Semantics(
+                          button: true,
+                          child: Material(
+                            color: Colors.transparent,
+                            shape: StadiumBorder(side: BorderSide(color: KColors.borderStrong)),
+                            child: InkWell(
+                              customBorder: const StadiumBorder(),
+                              onTap: () => _focus.requestFocus(),
+                              child: SizedBox(
+                                height: 36,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                                  child: Center(widthFactor: 1, child: Text('Write a comment', style: TextStyle(fontFamily: 'Inter', fontSize: 12, fontWeight: FontWeight.w600, height: 1, color: KColors.textPrimary))),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ]),
+                    ),
                   ),
                 for (final c in list) ...[
                   _comment(c),
@@ -349,6 +373,7 @@ class _CommentsThreadState extends State<CommentsThread> with Busy {
                   else if (c.replyCount > 0)
                     Padding(padding: const EdgeInsets.only(left: 44), child: LinkText('Show ${c.replyCount} more ${c.replyCount == 1 ? 'reply' : 'replies'}', onTap: () => _loadReplies(c))),
                 ],
+                ])),
               ]),
       ),
       if (q != null) MentionSuggestions(query: q, onPick: (p) => insertMention(_input, _tags, p)),

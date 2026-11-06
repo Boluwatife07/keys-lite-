@@ -238,7 +238,7 @@ class _Attachment extends StatelessWidget {
   final Post p;
 
   Widget _img(BuildContext context, int i, {String? overlay}) => GestureDetector(
-        onTap: () => context.push('/media', extra: {'urls': p.photos, 'index': i, 'caption': p.text}),
+        onTap: () => context.push('/media', extra: {'urls': p.photos, 'index': i, 'caption': p.text, 'author': p.author.json}),
         child: Stack(fit: StackFit.expand, children: [
           Image.network(context.api.absolute(p.photos[i]), fit: BoxFit.cover, errorBuilder: (_, _, _) => Container(color: KColors.surfaceSubtle)),
           if (overlay != null) Container(color: Colors.black45, alignment: Alignment.center, child: Text(overlay, style: KText.headingSmall.copyWith(color: Colors.white))),
@@ -351,10 +351,12 @@ class _Attachment extends StatelessWidget {
 
 /// FED-07.1: full-screen photos; swipe between them, tap toggles the chrome.
 class MediaViewer extends StatefulWidget {
-  const MediaViewer({super.key, required this.urls, this.index = 0, this.caption});
+  const MediaViewer({super.key, required this.urls, this.index = 0, this.caption, this.author});
   final List<String> urls;
   final int index;
   final String? caption;
+  /// Shown in the top bar, as in the Figma in-post viewer.
+  final Map<String, dynamic>? author;
   @override
   State<MediaViewer> createState() => _MediaViewerState();
 }
@@ -376,19 +378,36 @@ class _MediaViewerState extends State<MediaViewer> {
             ),
             if (_chrome)
               SafeArea(
+                // Figma 3430:178356: translucent bars, back caret + author on
+                // top, caption at the bottom, all in white.
                 child: Column(children: [
-                  Row(children: [
-                    IconButton(tooltip: 'Close', icon: const Icon(PhosphorIconsRegular.x, color: Colors.white), onPressed: () => Navigator.pop(context)),
-                    const Spacer(),
-                    if (widget.urls.length > 1) Padding(padding: const EdgeInsets.only(right: 16), child: Text('${_i + 1}/${widget.urls.length}', style: const TextStyle(color: Colors.white))),
-                  ]),
+                  Container(
+                    height: 48,
+                    color: Colors.black.withValues(alpha: 0.4),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(children: [
+                      Tooltip(
+                        message: 'Close',
+                        child: InkResponse(radius: 20, onTap: () => Navigator.pop(context), child: const Icon(PhosphorIconsRegular.caretLeft, size: 26, color: Colors.white)),
+                      ),
+                      const SizedBox(width: 16),
+                      if (widget.author != null) ...[
+                        Avatar(widget.author!['photoUrl'], size: 28),
+                        const SizedBox(width: 8),
+                        Flexible(child: Text(widget.author!['name'] ?? '', overflow: TextOverflow.ellipsis, style: KText.paragraphMedium.copyWith(fontWeight: FontWeight.w500, color: Colors.white))),
+                        if (PersonRef(widget.author!).isCommittee) ...[const SizedBox(width: 4), const CommitteeMark(size: 14)],
+                      ],
+                      const Spacer(),
+                      if (widget.urls.length > 1) Text('${_i + 1}/${widget.urls.length}', style: KText.paragraphMedium.copyWith(color: Colors.white)),
+                    ]),
+                  ),
                   const Spacer(),
                   if (widget.caption != null && widget.caption!.isNotEmpty)
                     Container(
                       width: double.infinity,
-                      color: Colors.black54,
-                      padding: const EdgeInsets.all(16),
-                      child: Text(widget.caption!, style: const TextStyle(color: Colors.white)),
+                      color: Colors.black.withValues(alpha: 0.4),
+                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+                      child: Text(widget.caption!, maxLines: 6, overflow: TextOverflow.ellipsis, style: KText.paragraphMedium.copyWith(color: Colors.white)),
                     ),
                 ]),
               ),

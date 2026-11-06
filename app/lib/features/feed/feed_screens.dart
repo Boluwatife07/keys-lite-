@@ -196,7 +196,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     final p = _post;
     return Scaffold(
       backgroundColor: KColors.surfaceDefault,
-      appBar: AppBar(backgroundColor: KColors.surfaceDefault, surfaceTintColor: Colors.transparent, title: Text(p?.isPoll == true ? 'Poll' : 'Post', style: KText.headingXSmall)),
+      // Figma 3430:177910: back only, post edge to edge, small "Comments" label.
+      appBar: const PageHeader('', bottomBorder: true),
       body: _gone != null
           ? UnavailablePost(error: _gone!)
           : p == null
@@ -205,8 +206,10 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                   post: p,
                   header: Column(children: [
                     PostCard(post: p, full: true, onChanged: (n) => n == null ? context.pop() : setState(() => _post = n)),
-                    Divider(color: KColors.borderDefault),
-                    Align(alignment: Alignment.centerLeft, child: Padding(padding: const EdgeInsets.only(top: 4), child: Text('Comments', style: KText.paragraphMediumLarge))),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Padding(padding: const EdgeInsets.fromLTRB(16, 16, 16, 4), child: Text('Comments', style: KText.paragraphSmall.copyWith(fontWeight: FontWeight.w600))),
+                    ),
                   ]),
                 ),
     );

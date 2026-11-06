@@ -176,3 +176,15 @@ stays (FED-02).
 Kept on purpose: the share row offers Copy link and the phone's share sheet
 only (Message, Facebook and WhatsApp are reached through the phone's sheet);
 reports keep the "Other" reason with a text box (XFR-03).
+
+## Home feed (part 3: post detail, photo viewer)
+
+| Item | Fixes |
+| --- | --- |
+| Post detail | Back-only header, post edge to edge, small SemiBold "Comments" label, Figma empty comments with "Write a comment" |
+| Photo viewer | Translucent top bar with back caret, author photo, name and badge; caption in a translucent bottom band |
+
+Kept on purpose: the photo viewer has no Like/Comment/Share row (those stay
+on the post); photos are shown whole (not cropped) so they can be zoomed;
+the post detail has no second options button in the header (the post's own
+options button is right below it).

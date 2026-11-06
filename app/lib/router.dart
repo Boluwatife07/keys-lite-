@@ -119,7 +119,7 @@ GoRouter buildRouter({String initial = '/', List<RouteBase> extraRoutes = const 
         GoRoute(path: '/posts/:id/likes', builder: (_, s) => LikesScreen(path: '/posts/${s.pathParameters['id']}/likes')),
         GoRoute(path: '/polls/create', builder: (_, _) => const CreatePollScreen()),
         GoRoute(path: '/polls/preview', builder: (_, s) => PollPreviewScreen(draft: _m(s))),
-        GoRoute(path: '/media', builder: (_, s) => MediaViewer(urls: List<String>.from(_m(s)['urls']), index: _m(s)['index'] ?? 0, caption: _m(s)['caption'])),
+        GoRoute(path: '/media', builder: (_, s) => MediaViewer(urls: List<String>.from(_m(s)['urls']), index: _m(s)['index'] ?? 0, caption: _m(s)['caption'], author: _m(s)['author'] == null ? null : Map<String, dynamic>.from(_m(s)['author']))),
         GoRoute(path: '/video', builder: (_, s) => VideoScreen(url: s.extra as String)),
         GoRoute(path: '/notifications', builder: (_, _) => const NotificationsScreen()),
         GoRoute(path: '/board', builder: (_, _) => const BoardScreen()),
