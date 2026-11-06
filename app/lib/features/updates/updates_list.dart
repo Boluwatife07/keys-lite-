@@ -222,7 +222,21 @@ class UpdateCard extends StatelessWidget {
               ]),
               const Padding(padding: EdgeInsets.symmetric(vertical: 10), child: Divider(height: 1)),
               Row(children: [
-                Expanded(child: Text(u.locations, style: KText.paragraphMedium, maxLines: 1, overflow: TextOverflow.ellipsis)),
+                // Figma: first two places, then "+n others" in grey.
+                Expanded(
+                  child: Builder(builder: (_) {
+                    final n = u.locationNames;
+                    if (n.length <= 2) return Text(n.isEmpty ? u.locations : n.join(', '), style: KText.paragraphMedium, maxLines: 1, overflow: TextOverflow.ellipsis);
+                    return Text.rich(
+                      TextSpan(style: KText.paragraphMedium, children: [
+                        TextSpan(text: n.take(2).join(', ')),
+                        TextSpan(text: ' +${n.length - 2} others', style: TextStyle(color: KColors.textSecondary)),
+                      ]),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    );
+                  }),
+                ),
                 if (u.resolved) ...[
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),

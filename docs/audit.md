@@ -7,7 +7,7 @@ catalogue test (`app/test/catalog`, run with
 Figma (393 x 852).
 
 Status: **Onboarding, Address verification, Learning, Profile/Settings,
-Home feed, Polls, Committee board and Voting done.** Next: Feed, Polls, Committee board, Voting, Updates, Update chat,
+Home feed, Polls, Committee board, Voting and Updates done.** Next: Feed, Polls, Committee board, Voting, Updates, Update chat,
 Chat, Events, Clubs, Calendar.
 
 ## Onboarding
@@ -234,3 +234,17 @@ Kept on purpose: the proposals list stays inside the Community tab's
 Proposals tab (committee only), so it has no page header of its own; the
 turnout line ("n of m eligible voters have voted") is extra information
 the PRD asks for.
+
+## Updates
+
+| Item | Result |
+| --- | --- |
+| Updates list | Already matched: search field, date tile, title, 3-line detail, muted icon, unread dot, yellow unseen card, "+n new additional updates", footer with places and author |
+| Card footer | Now "first two places +n others" as in Figma |
+| Update detail and options | Already matched (author, date tile, affected locations, images, pin / mute / delete-for-me sheet) |
+| Create update | Already matched (title, details, images, documents, audience with Modify) |
+
+Kept on purpose: the Upcoming row stays above the tabs on both Feed and
+Updates (Figma shows it on Feed only), so switching tabs doesn't move the
+page; "Relevant documents" stays (UPD-03); scheduling is later phase. The
+update's group chat uses the main chat screen and is audited with Chat.
