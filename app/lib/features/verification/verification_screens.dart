@@ -63,9 +63,13 @@ class VerifyMethodScreen extends StatefulWidget {
   State<VerifyMethodScreen> createState() => _VerifyMethodScreenState();
 }
 
-class _VerifyMethodScreenState extends State<VerifyMethodScreen> with Busy {
+class _VerifyMethodScreenState extends State<VerifyMethodScreen> with Busy, _CardForm {
   Map<String, dynamic>? _state;
   VerifyMethod? _method;
+  @override
+  String get homeAddress => _state?['homeAddress'] ?? '';
+  @override
+  String? get from => widget.from;
 
   @override
   void initState() {
@@ -99,18 +103,10 @@ class _VerifyMethodScreenState extends State<VerifyMethodScreen> with Busy {
         VerifyMethod.googlePay => 'Verify with Google Pay',
       };
 
-  IconData _icon(VerifyMethod m) => switch (m) {
-        VerifyMethod.card => PhosphorIconsRegular.creditCard,
-        VerifyMethod.applePay => PhosphorIconsFill.appleLogo,
-        VerifyMethod.googlePay => PhosphorIconsBold.googleLogo,
-      };
 
   Future<void> _verify() async {
     final m = _method!;
-    if (m == VerifyMethod.card) {
-      context.push('/verify/card', extra: {'from': widget.from, 'home': _state!['homeAddress']});
-      return;
-    }
+    if (m == VerifyMethod.card) return _verifyCard();
     final d = context.deps;
     await run(() async {
       final pm = await d.cards.walletPaymentMethod(m);
@@ -124,30 +120,104 @@ class _VerifyMethodScreenState extends State<VerifyMethodScreen> with Busy {
     });
   }
 
+  Widget _mark(VerifyMethod m) => switch (m) {
+        VerifyMethod.card => Icon(PhosphorIconsFill.creditCard, size: 32, color: KColors.textPrimary),
+        VerifyMethod.applePay => PathMark.applePay(),
+        VerifyMethod.googlePay => PathMark.googlePay(),
+      };
+
+  Widget _cell(VerifyMethod m) => Semantics(
+        button: true,
+        selected: _method == m,
+        label: _label(m),
+        child: Material(
+          color: KColors.surfaceSubtle,
+          borderRadius: BorderRadius.circular(16),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: () => setState(() => _method = m),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(12, 12, 16, 12),
+              child: SizedBox(
+                height: 40,
+                child: Row(children: [
+                  KRadio(selected: _method == m),
+                  const SizedBox(width: 12),
+                  Expanded(child: ExcludeSemantics(child: Text(_label(m), style: KText.paragraphMedium.copyWith(fontWeight: FontWeight.w500)))),
+                  const SizedBox(width: 12),
+                  _mark(m),
+                ]),
+              ),
+            ),
+          ),
+        ),
+      );
+
+  // Figma 1300:186350: card number, expiry + CVV, read-only billing address.
+  Widget _cardForm() {
+    void changed(_) => setState(() {});
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 8, 0, 24),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        KeysTextField(
+          label: 'Card number',
+          controller: _number,
+          hint: '1234 5678 9012 3456',
+          prefixIcon: PhosphorIconsRegular.creditCard,
+          keyboardType: TextInputType.number,
+          error: _err['number'],
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(19), _CardNumberFormatter()],
+          onChanged: changed,
+        ),
+        const SizedBox(height: 32),
+        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Expanded(child: KeysTextField(label: 'Expiry date', controller: _expiry, hint: 'MM/YY', keyboardType: TextInputType.number, error: _err['expiry'], inputFormatters: [_ExpiryFormatter()], onChanged: changed)),
+          const SizedBox(width: 16),
+          Expanded(child: KeysTextField(label: 'CVV', controller: _cvc, hint: '123', keyboardType: TextInputType.number, error: _err['cvc'], inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(4)], onChanged: changed)),
+        ]),
+        const SizedBox(height: 32),
+        SizedBox(height: 20, child: OverflowBox(maxHeight: 24, alignment: Alignment.bottomLeft, child: Text('Billing address', style: KText.paragraphMediumLarge))),
+        const SizedBox(height: 8),
+        // AVW-02: the billing address checked is the Keys home address.
+        Container(
+          width: double.infinity,
+          constraints: const BoxConstraints(minHeight: 144),
+          padding: const EdgeInsets.fromLTRB(12, 12, 8, 12),
+          decoration: BoxDecoration(
+            color: KColors.surfaceDefault,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: KColors.palette.brightness == Brightness.dark ? KColors.borderDefault : const Color(0xFFDDDDDD), width: 2),
+          ),
+          child: Text(homeAddress.split(RegExp(r',\s*')).join('\n'), style: KText.paragraphLarge),
+        ),
+        const SizedBox(height: 12),
+        Text('*Ensure this card is associated with your address.', style: KText.paragraphSmall),
+      ]),
+    );
+  }
+
+  void _close() => Navigator.of(context).canPop() ? context.pop() : _exitVerification(context, widget.from);
+
+  // Figma 1300:186409 / 186244 / 186350: a sheet over the page that opened it.
   @override
   Widget build(BuildContext context) {
-    return KeysScaffold(
-      header: const KeysHeader(),
-      body: _state == null
+    final st = _state;
+    final ready = _method != null && (_method != VerifyMethod.card || _cardFilled);
+    return KeysSheetPage(
+      title: 'Verify address',
+      onClose: _close,
+      bottom: KeysButton('Verify', loading: busy, onPressed: ready ? _verify : null),
+      child: st == null
           ? const Center(child: Padding(padding: EdgeInsets.all(48), child: CircularProgressIndicator()))
           : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const Intro(overline: 'Verify address', title: 'Verify your home address.', body: kVerifyIntro),
-              const SizedBox(height: 24),
+              Text('*Ensure this card address is same as your home address.You will not be charged for this action.', style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
+              const SizedBox(height: 16),
               for (final m in _methods) ...[
-                OptionTile(
-                  leading: Icon(_icon(m), color: KColors.textPrimary),
-                  title: _label(m),
-                  selected: _method == m,
-                  onTap: () => setState(() => _method = m),
-                ),
+                _cell(m),
+                if (m == VerifyMethod.card && _method == VerifyMethod.card) _cardForm(),
                 const SizedBox(height: 12),
               ],
-              Text('*Ensure this card address is same as your home address. You will not be charged for this action.', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
-              const SizedBox(height: 8),
-              LinkText('How does address verification protect me?', onTap: () => context.push('/verify/why')),
             ]),
-      // AVW-01.2: inactive until a method is chosen.
-      bottom: KeysButton('Verify', loading: busy, onPressed: _method == null ? null : _verify),
     );
   }
 }
@@ -171,11 +241,13 @@ class CardFormScreen extends StatefulWidget {
   State<CardFormScreen> createState() => _CardFormScreenState();
 }
 
-class _CardFormScreenState extends State<CardFormScreen> with Busy {
+/// Card number, expiry and CVV checks shared by the sheet and the card page.
+mixin _CardForm<T extends StatefulWidget> on State<T>, Busy<T> {
+  String get homeAddress;
+  String? get from;
   final _number = TextEditingController();
   final _expiry = TextEditingController();
   final _cvc = TextEditingController();
-  late final _billing = TextEditingController(text: widget.homeAddress);
   final Map<String, String?> _err = {};
 
   static bool luhn(String n) {
@@ -212,15 +284,25 @@ class _CardFormScreenState extends State<CardFormScreen> with Busy {
     return _err.values.every((e) => e == null);
   }
 
-  Future<void> _verify() async {
+  bool get _cardFilled => _number.text.isNotEmpty && _expiry.text.isNotEmpty && _cvc.text.isNotEmpty;
+
+  Future<void> _verifyCard() async {
     if (!_validate()) return;
     final d = context.deps;
     await run(() async {
       final pm = await d.cards.cardPaymentMethod(CardDetails(number: _number.text.replaceAll(' ', ''), expiry: _expiry.text, cvc: _cvc.text));
       final r = await d.api.post('/verification/check', {'method': 'card', 'paymentMethodId': pm});
-      if (mounted) _showResult(context, r, widget.from);
+      if (mounted) _showResult(context, r, from);
     });
   }
+}
+
+class _CardFormScreenState extends State<CardFormScreen> with Busy, _CardForm {
+  @override
+  String get homeAddress => widget.homeAddress;
+  @override
+  String? get from => widget.from;
+  late final _billing = TextEditingController(text: widget.homeAddress);
 
   @override
   Widget build(BuildContext context) {
@@ -254,7 +336,7 @@ class _CardFormScreenState extends State<CardFormScreen> with Busy {
         const SizedBox(height: 8),
         Text('*Ensure this card is associated with your address.', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
       ]),
-      bottom: KeysButton('Verify', loading: busy, onPressed: _number.text.isEmpty || _expiry.text.isEmpty || _cvc.text.isEmpty ? null : _verify),
+      bottom: KeysButton('Verify', loading: busy, onPressed: _cardFilled ? _verifyCard : null),
     );
   }
 }
@@ -286,15 +368,31 @@ class _ExpiryFormatter extends TextInputFormatter {
 class VerifySuccessScreen extends StatelessWidget {
   const VerifySuccessScreen({super.key, this.from});
   final String? from;
+  // Figma 1300:186332.
   @override
   Widget build(BuildContext context) => KeysScaffold(
-        body: Column(children: [
-          const SizedBox(height: 120),
-          CircleAvatar(radius: 40, backgroundColor: KColors.success, child: Icon(PhosphorIconsRegular.check, color: Colors.white, size: 44)),
-          const SizedBox(height: 24),
-          const Intro(center: true, title: 'Successful', body: 'Congratulations, your account has been verified.'),
+        gradient: false,
+        fill: true,
+        header: KeysHeader(onBack: () => _exitVerification(context, from)),
+        padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
+        body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text('YOU’RE ALMOST DONE', style: KText.overline),
+          const SizedBox(height: 12),
+          Text('Verify your home address.', style: KText.headingSmall),
+          const SizedBox(height: 36),
+          Expanded(
+            child: Center(
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                const SuccessMark(),
+                const SizedBox(height: 28),
+                Text('Successful', textAlign: TextAlign.center, style: KText.headingSmall),
+                const SizedBox(height: 8),
+                Text('Congratulations, your account\nhas been verified.', textAlign: TextAlign.center, style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
+              ]),
+            ),
+          ),
         ]),
-        bottom: KeysButton('Continue', onPressed: () => _exitVerification(context, from)),
+        bottom: KeysButton('Proceed', onPressed: () => _exitVerification(context, from)),
       );
 }
 
@@ -303,46 +401,54 @@ class VerifyMismatchScreen extends StatelessWidget {
   const VerifyMismatchScreen({super.key, required this.result});
   final Map<String, dynamic> result;
 
-  String get _method {
+
+  String get _card {
     final brand = (result['brand'] as String? ?? 'card');
     final b = brand.isEmpty ? 'Card' : brand[0].toUpperCase() + brand.substring(1);
-    final via = switch (result['method']) { 'apple_pay' => ' (Apple Pay)', 'google_pay' => ' (Google Pay)', _ => '' };
-    return '$b •••• ${result['last4']}$via';
+    return '$b •••• ${result['last4']}';
   }
 
+  // Figma 1768:17781: a sheet with the failed mark and what was compared.
   @override
   Widget build(BuildContext context) {
-    Widget row(String label, String value) => Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(label, style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
-            const SizedBox(height: 2),
-            Text(value, style: KText.paragraphMediumLarge),
-          ]),
-        );
-    return KeysScaffold(
-      header: const KeysHeader(),
-      body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Center(child: CircleAvatar(radius: 32, backgroundColor: KColors.errorSubtle, child: Icon(PhosphorIconsRegular.x, color: KColors.error, size: 36))),
-        const SizedBox(height: 20),
-        const Intro(center: true, title: "We couldn't verify your address", body: 'The address linked to your card does not match your home address on Keys.'),
-        const SizedBox(height: 20),
+    final label = KText.paragraphSmall.copyWith(fontWeight: FontWeight.w500, height: 1, color: KColors.textSecondary);
+    final wallet = switch (result['method']) { 'apple_pay' => PathMark.applePay(), 'google_pay' => PathMark.googlePay(), _ => null };
+    return KeysSheetPage(
+      onClose: () => _exitVerification(context, result['from']),
+      contentPadding: const EdgeInsets.all(20),
+      bottom: Column(mainAxisSize: MainAxisSize.min, children: [
+        KeysButton('Contest this decision', onPressed: () => context.pushReplacement('/verify/contest', extra: result['from'])),
+        const SizedBox(height: 12),
+        KeysButton('Try again', variant: ButtonVariant.secondary, onPressed: () => context.pushReplacement('/verify', extra: result['from'])),
+        const SizedBox(height: 12),
+        Text('Contesting this decision will send your case to Keys for manual review. Your account will remain unverified during this time.',
+            textAlign: TextAlign.center, style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
+      ]),
+      child: Column(children: [
+        const FailMark(),
+        const SizedBox(height: 28),
+        Text("We couldn't verify your address", textAlign: TextAlign.center, style: KText.headingSmall),
+        const SizedBox(height: 8),
+        Text('The address associated with your payment method does not match the address on your Keys account.', textAlign: TextAlign.center, style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
+        const SizedBox(height: 12),
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-          decoration: BoxDecoration(color: KColors.surfaceDefault, borderRadius: BorderRadius.circular(KRadius.md), border: Border.all(color: KColors.borderDefault)),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(color: KColors.surfaceSubtle, borderRadius: BorderRadius.circular(16)),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            row('Method used', _method),
-            Divider(height: 1, color: KColors.borderDefault),
-            row('Address on Keys', result['homeAddress'] ?? ''),
+            Text('Method used', style: label),
+            const SizedBox(height: 8),
+            Row(children: [if (wallet != null) ...[wallet, const SizedBox(width: 8)], Expanded(child: Text(_card, style: KText.paragraphLarge))]),
+            Padding(padding: const EdgeInsets.symmetric(vertical: 18), child: Container(height: 1, color: KColors.borderDefault)),
+            Text('Address on Keys', style: label),
+            const SizedBox(height: 8),
+            Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Padding(padding: const EdgeInsets.only(top: 2), child: Icon(PhosphorIconsRegular.houseLine, size: 20, color: KColors.iconDefault)),
+              const SizedBox(width: 8),
+              Expanded(child: Text(result['homeAddress'] ?? '', style: KText.paragraphLarge)),
+            ]),
           ]),
         ),
-        const SizedBox(height: 16),
-        Text('Contesting this decision will send your case to Keys for manual review. Your account will remain unverified during this time.', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
-      ]),
-      bottom: ButtonStack([
-        KeysButton('Try again', onPressed: () => context.pushReplacement('/verify', extra: result['from'])),
-        KeysButton('Contest this decision', variant: ButtonVariant.secondary, onPressed: () => context.pushReplacement('/verify/contest', extra: result['from'])),
       ]),
     );
   }
@@ -382,57 +488,77 @@ class _ContestScreenState extends State<ContestScreen> with Busy {
     }, onError: (e) => setState(() => _error = e is ApiException ? e.message : 'Something went wrong.'));
   }
 
+  // Figma 1768:17890 (empty) and 1768:17930 (file chosen).
   @override
   Widget build(BuildContext context) => KeysScaffold(
         header: const KeysHeader(),
+        padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
         body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           const Intro(
-            overline: 'Contest decision',
+            small: true,
+            overline: 'Contest verification',
             title: 'Upload a supporting document',
             body: 'Provide a government or utility document displaying your full name and current residential address as registered with Keys.',
           ),
           const SizedBox(height: 20),
-          Text('Accepted documents', style: KText.paragraphMediumLarge),
-          const SizedBox(height: 8),
-          for (final d in docs)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 6),
-              child: Row(children: [Icon(PhosphorIconsRegular.check, size: 16, color: KColors.success), const SizedBox(width: 8), Text(d, style: KText.paragraphMedium)]),
-            ),
-          const SizedBox(height: 4),
-          Text('* Documents must be dated within the last 3 months, except tenancy agreements.', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(color: KColors.surfaceDefault, borderRadius: BorderRadius.circular(16), border: Border.all(color: KColors.borderDefault)),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text('Accepted documents', style: KText.paragraphMedium.copyWith(fontWeight: FontWeight.w500, color: KColors.textSecondary)),
+              const SizedBox(height: 12),
+              for (final d in docs)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Row(children: [Icon(PhosphorIconsFill.checkCircle, size: 20, color: const Color(0xFF008080)), const SizedBox(width: 8), Text(d, style: KText.paragraphMedium)]),
+                ),
+              const SizedBox(height: 8),
+              Text('* Documents must be dated within the last 3 months, except tenancy agreements.', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
+            ]),
+          ),
           const SizedBox(height: 20),
-          InkWell(
-            onTap: _pick,
-            borderRadius: BorderRadius.circular(KRadius.md),
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(color: KColors.surfaceSubtle, borderRadius: BorderRadius.circular(KRadius.md), border: Border.all(color: _error != null ? KColors.error : KColors.borderDefault)),
-              child: _file == null
-                  ? Column(children: [
-                      const Icon(PhosphorIconsRegular.fileArrowUp, size: 32),
-                      const SizedBox(height: 8),
-                      Text('Tap to upload document', style: KText.paragraphMediumLarge),
-                      Text('Supports PDF, JPG, PNG up to 10MB', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
-                    ])
-                  : Row(children: [
-                      const Icon(PhosphorIconsRegular.fileText),
-                      const SizedBox(width: 12),
-                      Expanded(child: Text(_file!.name, style: KText.paragraphMediumLarge, overflow: TextOverflow.ellipsis)),
-                      Text('${(_file!.size / 1024 / 1024).toStringAsFixed(1)} MB', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
-                    ]),
+          Material(
+            color: KColors.surfaceDefault,
+            borderRadius: BorderRadius.circular(16),
+            child: InkWell(
+              onTap: _pick,
+              borderRadius: BorderRadius.circular(16),
+              child: DashedBox(
+                color: _error != null ? KColors.error : KColors.textSecondary,
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(24),
+                  child: _file == null
+                      ? Column(children: [
+                          Icon(PhosphorIconsRegular.cloudArrowUp, size: 32, color: KColors.textSecondary),
+                          const SizedBox(height: 8),
+                          Text('Tap to upload document', style: KText.paragraphMedium.copyWith(fontWeight: FontWeight.w600)),
+                          const SizedBox(height: 8),
+                          Text('Supports PDF, JPG, PNG up to 10MB', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
+                        ])
+                      : Row(children: [
+                          Icon(PhosphorIconsRegular.fileText, color: KColors.iconDefault),
+                          const SizedBox(width: 12),
+                          Expanded(child: Text(_file!.name, style: KText.paragraphMediumLarge, overflow: TextOverflow.ellipsis)),
+                          Text('${(_file!.size / 1024 / 1024).toStringAsFixed(1)} MB', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
+                        ]),
+                ),
+              ),
             ),
           ),
-          if (_error != null) Padding(padding: const EdgeInsets.only(top: 8), child: ErrorLine(_error!)),
-          const SizedBox(height: 12),
-          Row(children: [
-            Icon(PhosphorIconsRegular.lock, size: 14, color: KColors.textSecondary),
-            const SizedBox(width: 6),
-            Text('Your documents are encrypted and securely stored.', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
-          ]),
+          if (_error != null) Padding(padding: const EdgeInsets.only(top: 10), child: FieldHint(_error!)),
         ]),
-        bottom: KeysButton('Submit for review', loading: busy, onPressed: _file == null ? null : _submit),
+        bottom: Column(mainAxisSize: MainAxisSize.min, children: [
+          KeysButton('Submit for review', loading: busy, onPressed: _file == null ? null : _submit),
+          const SizedBox(height: 10),
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            Icon(PhosphorIconsRegular.lock, size: 16, color: KColors.textSecondary),
+            const SizedBox(width: 6),
+            Flexible(child: Text('Your documents are encrypted and securely stored.', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary))),
+          ]),
+          const SizedBox(height: 8),
+        ]),
       );
 }
 
@@ -441,37 +567,101 @@ class UnderReviewScreen extends StatelessWidget {
   const UnderReviewScreen({super.key, required this.reviewCase, this.from});
   final Map<String, dynamic> reviewCase;
   final String? from;
+
+  // Figma 1768:17827: a full-height card over the page with a 3-step timeline.
   @override
   Widget build(BuildContext context) {
     final submitted = DateTime.tryParse(reviewCase['submittedAt'] ?? '')?.toLocal();
-    return KeysScaffold(
-      header: KeysHeader(onBack: () => _exitVerification(context, from)),
-      body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Intro(overline: 'Verify address', title: 'Your documents are under review'),
-        const SizedBox(height: 20),
-        Container(
+    final small = KText.paragraphSmall.copyWith(color: KColors.textSecondary);
+    void close() => _exitVerification(context, from);
+    Widget step(Widget icon, String title, String? sub) => Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Padding(padding: const EdgeInsets.only(top: 4), child: SizedBox.square(dimension: 20, child: icon)),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(title, style: KText.paragraphMedium.copyWith(fontWeight: FontWeight.w500)),
+                if (sub != null) ...[const SizedBox(height: 2), Text(sub, style: small)],
+              ]),
+            ),
+          ),
+        ]);
+    Widget line(Color c) => Padding(padding: const EdgeInsets.only(left: 9.5), child: Container(width: 1, height: 8, color: c));
+    return Material(
+      color: Colors.black.withValues(alpha: 0.75),
+      child: SafeArea(
+        child: Padding(
           padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(color: KColors.surfaceDefault, borderRadius: BorderRadius.circular(KRadius.md), border: Border.all(color: KColors.borderDefault)),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('Submitted Document', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
-            const SizedBox(height: 4),
-            Row(children: [const Icon(PhosphorIconsRegular.fileText, size: 20), const SizedBox(width: 8), Expanded(child: Text(reviewCase['documentName'] ?? '', style: KText.paragraphMediumLarge))]),
-            if (submitted != null) ...[const SizedBox(height: 4), Text('Submitted ${DateFormat('d MMM yyyy').format(submitted)}', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary))],
-            Divider(height: 28, color: KColors.borderDefault),
-            Row(children: [
-              const Icon(PhosphorIconsRegular.hourglassHigh, size: 18, color: KColors.progressStart),
-              const SizedBox(width: 8),
-              Expanded(child: Text('Keys review in progress', style: KText.paragraphMediumLarge.copyWith(fontSize: 14))),
-              Text(reviewCase['estimate'] ?? 'Est. 1-2 business days', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
+          child: Container(
+            clipBehavior: Clip.antiAlias,
+            decoration: BoxDecoration(color: KColors.surfaceDefault, borderRadius: BorderRadius.circular(16)),
+            child: Column(children: [
+              Container(
+                height: 56,
+                padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                decoration: BoxDecoration(border: Border(bottom: BorderSide(color: KColors.borderDefault))),
+                child: Row(children: [
+                  Semantics(button: true, label: 'Close', child: InkResponse(radius: 20, onTap: close, child: SizedBox.square(dimension: 40, child: Icon(PhosphorIconsRegular.x, size: 22, color: KColors.iconDefault)))),
+                ]),
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
+                  child: Column(children: [
+                    Container(
+                      width: 140,
+                      height: 140,
+                      decoration: BoxDecoration(color: KColors.brandSubtle, shape: BoxShape.circle),
+                      child: Icon(PhosphorIconsRegular.clockCountdown, size: 80, color: KColors.textPrimary),
+                    ),
+                    const SizedBox(height: 28),
+                    Text('Your documents are under review', textAlign: TextAlign.center, style: KText.headingSmall),
+                    const SizedBox(height: 12),
+                    Text('Keys will review your documents within 2 business days and notify you of the outcome via mail.',
+                        textAlign: TextAlign.center, style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
+                    const SizedBox(height: 28),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), border: Border.all(color: KColors.borderDefault, width: 1.5)),
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        step(const Icon(PhosphorIconsFill.checkCircle, size: 20, color: Color(0xFF008080)), 'Document submitted', submitted == null ? null : DateFormat('d MMMM, y').format(submitted)),
+                        line(const Color(0xFF008080)),
+                        step(Icon(PhosphorIconsRegular.clockCountdown, size: 20, color: KColors.textPrimary), 'Keys review in progress', reviewCase['estimate'] ?? 'Est. 1-2 business days'),
+                        line(KColors.iconDisabled),
+                        step(Icon(PhosphorIconsRegular.circle, size: 20, color: KColors.iconDisabled), 'Outcome notification', null),
+                      ]),
+                    ),
+                    const SizedBox(height: 28),
+                    Align(alignment: Alignment.centerLeft, child: Text('Submitted Document', style: small)),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Row(children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(color: KColors.surfaceSubtle, shape: BoxShape.circle),
+                          child: const Icon(PhosphorIconsFill.filePdf, size: 24, color: Color(0xFFDE1135)),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                            Text(reviewCase['documentName'] ?? '', style: KText.paragraphMedium.copyWith(fontWeight: FontWeight.w500), overflow: TextOverflow.ellipsis),
+                            const SizedBox(height: 4),
+                            Text([if ((reviewCase['documentName'] ?? '').toString().toLowerCase().endsWith('.pdf')) 'PDF Document', 'Ref: ${reviewCase['ref']}'].join('  •  '), style: small),
+                          ]),
+                        ),
+                      ]),
+                    ),
+                  ]),
+                ),
+              ),
+              Padding(padding: const EdgeInsets.fromLTRB(24, 12, 24, 20), child: KeysButton('Close', onPressed: close)),
             ]),
-            const SizedBox(height: 12),
-            Text('Ref: ${reviewCase['ref']}', style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
-          ]),
+          ),
         ),
-        const SizedBox(height: 12),
-        Text("We'll email you when the review is complete. Your account stays unverified until then.", style: KText.paragraphSmall.copyWith(color: KColors.textSecondary)),
-      ]),
-      bottom: KeysButton('Close', onPressed: () => _exitVerification(context, from)),
+      ),
     );
   }
 }
@@ -479,34 +669,47 @@ class UnderReviewScreen extends StatelessWidget {
 /// AVW-07: why verification matters.
 class VerifyExplainerScreen extends StatelessWidget {
   const VerifyExplainerScreen({super.key});
+  // Figma 3173:176333: hero illustration, then three illustrated sections.
   @override
   Widget build(BuildContext context) {
-    Widget section(String title, String body) => Padding(
-          padding: const EdgeInsets.only(top: 20),
+    final body = KText.paragraphLarge;
+    Widget section(String image, String title, String text) => Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(title, style: KText.headingXSmall),
-            const SizedBox(height: 6),
-            Text(body, style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
+            ClipOval(child: Image.asset(image, width: 125, height: 125, fit: BoxFit.cover)),
+            const SizedBox(height: 16),
+            Text(title, style: TextStyle(fontFamily: 'Inter', fontSize: 20, fontWeight: FontWeight.w600, height: 28 / 20, color: KColors.textPrimary)),
+            const SizedBox(height: 8),
+            Text(text, style: body),
           ]),
         );
     return KeysScaffold(
+      gradient: false,
       header: const KeysHeader(),
+      padding: EdgeInsets.zero,
       body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('How does address verification protect me and my community?', style: KText.headingSmall),
-        const SizedBox(height: 12),
-        Text(
-          'Address verification is a simple, one-time step that creates a secure, members-only environment based on trust, allowing residents to connect and strengthen their community. Here’s how this benefits you and your community:',
-          style: KText.paragraphMedium.copyWith(color: KColors.textSecondary),
-        ),
-        section('Genuine Connections',
-            'Verification ensures that every profile belongs to a legitimate resident, keeping out outsiders and fake accounts from your neighborhood spaces, clubs, and events. This means you’ll interact with real neighbors, not strangers pretending to be part of your community.'),
-        section('Security and safety', 'By confirming where members live, we significantly reduce impersonation and fraud, keeping your local discussions, interactions, services, and projects safe from malicious actors.'),
-        section('Community Trust', 'When everyone is verified, it encourages collaboration on projects, sharing recommendations, and builds confidence in meeting others in your development.'),
-        const SizedBox(height: 20),
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(color: KColors.brandSubtle, borderRadius: BorderRadius.circular(KRadius.sm)),
-          child: Text('Note: Your payment information is only used for address verification. We don’t charge your card or store your payment details.', style: KText.paragraphSmall),
+        Image.asset('assets/images/verify_hero.jpg', width: double.infinity, height: 320, fit: BoxFit.cover),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 28, 16, 40),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text('How does address verification protect me and my community?', style: KText.headingSmall),
+            const SizedBox(height: 24),
+            Text(
+              'Address verification is a simple, one-time step that creates a secure, members-only environment based on trust, allowing residents to connect and strengthen their community. Here’s how this benefits you and your community:',
+              style: body,
+            ),
+            const SizedBox(height: 24),
+            section('assets/images/verify_benefit_1.png', 'Genuine Connections',
+                'Verification ensures that every profile belongs to a legitimate resident, keeping out outsiders and fake accounts from your neighborhood spaces, clubs, and events. This means you’ll interact with real neighbors, not strangers pretending to be part of your community.'),
+            const SizedBox(height: 24),
+            section('assets/images/verify_benefit_2.png', 'Security and safety',
+                'By confirming where members live, we significantly reduce impersonation and fraud, keeping your local discussions, interactions, services, and projects safe from malicious actors.'),
+            const SizedBox(height: 24),
+            section('assets/images/verify_benefit_3.png', 'Community Trust',
+                'When everyone is verified, it encourages collaboration on projects, sharing recommendations, and builds confidence in meeting others in your development.'),
+            const SizedBox(height: 24),
+            Text('Note: Your payment information is only used for address verification. We don’t charge your card or store your payment details.', style: KText.paragraphMedium.copyWith(color: KColors.textSecondary)),
+          ]),
         ),
       ]),
     );

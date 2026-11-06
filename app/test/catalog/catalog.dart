@@ -3,6 +3,7 @@
 // and saves it as a PNG next to this file (out/<name>.png).
 //
 // Run: flutter test --update-goldens test/catalog
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keys_lite/theme/theme_controller.dart';
@@ -13,11 +14,12 @@ typedef Setup = void Function(Harness h);
 typedef Act = Future<void> Function(WidgetTester t, Harness h);
 
 /// Renders [screen] (light, then dark) and saves out/<name>.png and out/<name>_dark.png.
-void shot(String name, Widget Function() screen, {Setup? setup, Act? act, Map<String, dynamic>? me, bool dark = true}) {
+void shot(String name, Widget Function() screen, {Setup? setup, Act? act, Map<String, dynamic>? me, bool dark = true, TargetPlatform? platform}) {
   for (final mode in [ThemeChoice.light, if (dark) ThemeChoice.dark]) {
     testWidgets('$name ${mode.name}', (t) async {
       t.view.padding = const FakeViewPadding(top: 47 * 3, bottom: 34 * 3);
       t.view.viewPadding = const FakeViewPadding(top: 47 * 3, bottom: 34 * 3);
+      debugDefaultTargetPlatformOverride = platform;
       final h = Harness();
       await h.deps.theme.set(mode);
       addTearDown(() => KColors.palette = KPalette.light);
@@ -34,6 +36,7 @@ void shot(String name, Widget Function() screen, {Setup? setup, Act? act, Map<St
       });
       await t.pumpAndSettle();
       await expectLater(find.byType(MaterialApp), matchesGoldenFile('out/$name${mode == ThemeChoice.dark ? '_dark' : ''}.png'));
+      debugDefaultTargetPlatformOverride = null;
     });
   }
 }

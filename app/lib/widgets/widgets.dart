@@ -6,6 +6,7 @@ import '../core/api.dart';
 import '../theme/tokens.dart';
 export 'keys_logo.dart';
 export 'street_map.dart';
+export 'brand_marks.dart';
 
 // ---------------------------------------------------------------- layout
 
@@ -448,6 +449,25 @@ class _KeysTextFieldState extends State<KeysTextField> {
 }
 
 /// Figma input "Hint" in its error colour: Inter 12/16, no icon.
+/// Figma "Control buttons / Radio button / Small".
+class KRadio extends StatelessWidget {
+  const KRadio({super.key, required this.selected});
+  final bool selected;
+  @override
+  Widget build(BuildContext context) => SizedBox.square(
+        dimension: 24,
+        child: Center(
+          child: Container(
+            width: 20,
+            height: 20,
+            decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: selected ? KColors.textPrimary : KColors.borderStrong, width: 1.5)),
+            alignment: Alignment.center,
+            child: selected ? Container(width: 10, height: 10, decoration: BoxDecoration(shape: BoxShape.circle, color: KColors.textPrimary)) : null,
+          ),
+        ),
+      );
+}
+
 /// Figma "Control buttons / Checkbox / Small": 18pt box in a 24pt slot.
 class KCheckbox extends StatelessWidget {
   const KCheckbox({super.key, required this.value, this.enabled = true});
@@ -472,6 +492,107 @@ class KCheckbox extends StatelessWidget {
       ),
     );
   }
+}
+
+/// A page drawn as a Figma bottom sheet over the screen that opened it:
+/// 75% black scrim, grabber, 18pt title with a close X, scrolling content
+/// and a bottom action bar. Route it with an opaque: false page.
+class KeysSheetPage extends StatelessWidget {
+  const KeysSheetPage({super.key, this.title, required this.child, required this.bottom, this.onClose, this.contentPadding = const EdgeInsets.fromLTRB(20, 8, 20, 20)});
+  final String? title;
+  final Widget child;
+  final Widget bottom;
+  final VoidCallback? onClose;
+  final EdgeInsets contentPadding;
+
+  @override
+  Widget build(BuildContext context) {
+    final close = onClose ?? () => Navigator.of(context).maybePop();
+    return Material(
+      color: Colors.black.withValues(alpha: 0.75),
+      child: Column(children: [
+        Expanded(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: close, child: const SizedBox.expand())),
+        ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height - MediaQuery.paddingOf(context).top - 24),
+          child: Container(
+            clipBehavior: Clip.antiAlias,
+            decoration: BoxDecoration(color: KColors.surfaceDefault, borderRadius: const BorderRadius.vertical(top: Radius.circular(16))),
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              const SizedBox(height: 8),
+              Container(width: 48, height: 4, decoration: BoxDecoration(color: KColors.surfaceSubtle, borderRadius: BorderRadius.circular(100))),
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Row(children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                      child: Text(title ?? '', style: TextStyle(fontFamily: 'Inter', fontSize: 18, fontWeight: FontWeight.w500, height: 1, letterSpacing: -0.2, color: KColors.textPrimary)),
+                    ),
+                  ),
+                  Semantics(
+                    button: true,
+                    label: 'Close',
+                    child: InkResponse(radius: 20, onTap: close, child: SizedBox.square(dimension: 36, child: Icon(PhosphorIconsRegular.x, size: 20, color: KColors.iconDefault))),
+                  ),
+                ]),
+              ),
+              Flexible(child: SingleChildScrollView(padding: contentPadding, child: child)),
+              Container(
+                decoration: BoxDecoration(color: KColors.surfaceDefault, border: Border(top: BorderSide(color: KColors.borderDefault))),
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
+                child: SafeArea(top: false, child: bottom),
+              ),
+            ]),
+          ),
+        ),
+      ]),
+    );
+  }
+}
+
+/// Red ring with a cross, the pair of [SuccessMark] (Figma "Failed").
+class FailMark extends StatelessWidget {
+  const FailMark({super.key, this.size = 120});
+  final double size;
+  @override
+  Widget build(BuildContext context) => Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: KColors.error, width: size / 20)),
+        child: Icon(PhosphorIconsBold.x, size: size * 0.45, color: KColors.error),
+      );
+}
+
+/// Rounded rectangle with a dashed outline (upload areas).
+class DashedBox extends StatelessWidget {
+  const DashedBox({super.key, required this.child, this.color, this.radius = 16});
+  final Widget child;
+  final Color? color;
+  final double radius;
+  @override
+  Widget build(BuildContext context) => CustomPaint(foregroundPainter: _DashPainter(color ?? KColors.textSecondary, radius), child: child);
+}
+
+class _DashPainter extends CustomPainter {
+  _DashPainter(this.color, this.radius);
+  final Color color;
+  final double radius;
+  @override
+  void paint(Canvas canvas, Size size) {
+    final path = Path()..addRRect(RRect.fromRectAndRadius((Offset.zero & size).deflate(0.5), Radius.circular(radius)));
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
+    for (final m in path.computeMetrics()) {
+      for (var d = 0.0; d < m.length; d += 8) {
+        canvas.drawPath(m.extractPath(d, (d + 4).clamp(0, m.length)), paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DashPainter old) => old.color != color;
 }
 
 /// Figma "Success icon": 120pt green ring with a double tick.

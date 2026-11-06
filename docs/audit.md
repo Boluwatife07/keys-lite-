@@ -6,7 +6,7 @@ catalogue test (`app/test/catalog`, run with
 `flutter test --update-goldens test/catalog`) at the iPhone 15 frame used in
 Figma (393 x 852).
 
-Status: **Onboarding done.** Next: Learning, Address verification,
+Status: **Onboarding and Address verification done.** Next: Learning,
 Profile/Settings, Feed, Polls, Committee board, Voting, Updates, Update chat,
 Chat, Events, Clubs, Calendar.
 
@@ -81,3 +81,26 @@ Chat, Events, Clubs, Calendar.
   the same pins.
 - Text in the tests wraps slightly wider than Figma (Inter version); sizes,
   spacing and colours match.
+
+## Address verification
+
+| Screen | Before | Figma / now |
+| --- | --- | --- |
+| Choose a method | Full page with radio rows | Bottom sheet over the page that opened it: grabber, "Verify address" title and close, grey rows with radio, label and brand mark (card, Apple Pay, G Pay) |
+| Bank card | Separate page | Opens inline under "Verify with Bank card": card number with card icon, expiry and CVV side by side, read-only billing address box (your Keys home address, one part per line), note |
+| Successful | Green disc, "Continue" | Green double-tick ring under the "Verify your home address." heading, "Proceed" |
+| Couldn't verify | Full page, "Try again" first | Sheet with the red cross ring, grey info card (method with wallet mark, house icon + address), "Contest this decision" first, "Try again" second, footnote |
+| Upload a supporting document | Plain list, grey upload box | "Contest verification" label, white card of accepted documents with teal ticks, dashed upload area with cloud icon, lock note under the button |
+| Under review | Card with ref and estimate | Full-height card over the page: clock disc, timeline (submitted, in review with estimate, outcome), submitted PDF row with reference |
+| How does verification protect me? | Text only | Hero illustration and three illustrated sections from Figma |
+
+Logic checked: AVW-01.2 Verify inactive until a method is chosen (and, for a
+card, until number, expiry and CVV are filled); AVW-02 Luhn, expiry and CVV
+checks; AVW-03.2 a cancelled wallet sheet leaves you on the sheet; AVW-04
+mismatch shows the method and the Keys address; AVW-05.4 under review opens
+the review screen; AVW-08.1 the verify sheet on restricted actions.
+
+Kept on purpose: the wallet row shows Apple Pay on iPhone and Google Pay on
+Android only (Figma shows both; each only works on its own platform). The CVV
+is shown as typed, as in Figma. The explainer illustrations are 1x exports
+from Figma until 3x files are available.

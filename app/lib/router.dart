@@ -66,12 +66,37 @@ GoRouter buildRouter({String initial = '/', List<RouteBase> extraRoutes = const 
         GoRoute(path: '/onboarding/profile', builder: (_, _) => const ProfileSetupScreen()),
         GoRoute(path: '/onboarding/verify', builder: (_, _) => const VerifyPromptScreen()),
         GoRoute(path: '/onboarding/invite', builder: (_, _) => const InviteScreen()),
-        GoRoute(path: '/verify', builder: (_, s) => VerifyMethodScreen(from: s.extra as String?)),
+        // A see-through page: the method sheet sits over the screen that opened it.
+        GoRoute(
+          path: '/verify',
+          pageBuilder: (_, s) => CustomTransitionPage(
+            key: s.pageKey,
+            opaque: false,
+            child: VerifyMethodScreen(from: s.extra as String?),
+            transitionsBuilder: (_, a, _, child) => FadeTransition(opacity: a, child: child),
+          ),
+        ),
         GoRoute(path: '/verify/card', builder: (_, s) => CardFormScreen(from: _m(s)['from'], homeAddress: _m(s)['home'] ?? '')),
         GoRoute(path: '/verify/success', builder: (_, s) => VerifySuccessScreen(from: s.extra as String?)),
-        GoRoute(path: '/verify/mismatch', builder: (_, s) => VerifyMismatchScreen(result: _m(s))),
+        GoRoute(
+          path: '/verify/mismatch',
+          pageBuilder: (_, s) => CustomTransitionPage(
+            key: s.pageKey,
+            opaque: false,
+            child: VerifyMismatchScreen(result: _m(s)),
+            transitionsBuilder: (_, a, _, child) => FadeTransition(opacity: a, child: child),
+          ),
+        ),
         GoRoute(path: '/verify/contest', builder: (_, s) => ContestScreen(from: s.extra as String?)),
-        GoRoute(path: '/verify/review', builder: (_, s) => UnderReviewScreen(reviewCase: Map<String, dynamic>.from(_m(s)['case']), from: _m(s)['from'])),
+        GoRoute(
+          path: '/verify/review',
+          pageBuilder: (_, s) => CustomTransitionPage(
+            key: s.pageKey,
+            opaque: false,
+            child: UnderReviewScreen(reviewCase: Map<String, dynamic>.from(_m(s)['case']), from: _m(s)['from']),
+            transitionsBuilder: (_, a, _, child) => FadeTransition(opacity: a, child: child),
+          ),
+        ),
         GoRoute(path: '/verify/why', builder: (_, _) => const VerifyExplainerScreen()),
         GoRoute(path: '/home', builder: (_, _) => const HomeShell()),
         GoRoute(path: '/profile', builder: (_, _) => const MyProfileScreen()),

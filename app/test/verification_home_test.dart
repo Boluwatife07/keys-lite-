@@ -37,7 +37,7 @@ void main() {
         });
     await h.pump(t, const VerifyMethodScreen());
     expect(find.text('Your documents are under review'), findsOneWidget);
-    expect(find.text('Ref: KYS-2026-11-0001'), findsOneWidget);
+    expect(find.textContaining('Ref: KYS-2026-11-0001'), findsOneWidget);
     expect(find.text('Est. 1-2 business days'), findsOneWidget);
   });
 
