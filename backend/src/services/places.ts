@@ -158,9 +158,9 @@ export const googlePlaces: PlacesProvider = {
       const lat = street.lat + r * Math.sin(a);
       const lng = street.lng + (r * Math.cos(a)) / Math.cos((street.lat * Math.PI) / 180);
       const res = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&result_type=route`,
-        // Key in a header, never in the URL (it can be injected by the network proxy).
-        { headers: config.googlePlacesKey ? { 'X-Goog-Api-Key': config.googlePlacesKey } : {} },
+        // The Geocoding web service only reads the key from the URL (it ignores
+        // the X-Goog-Api-Key header), so it goes in the query string here.
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&result_type=route&key=${encodeURIComponent(config.googlePlacesKey)}`,
       );
       if (!res.ok) continue;
       const j = (await res.json()) as any;
