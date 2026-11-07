@@ -22,13 +22,32 @@ class _SplashScreenState extends State<SplashScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) => _start());
   }
 
+  /// The splash never stays longer than this, even if the server is slow
+  /// to answer (a sleeping server can take a minute to wake up).
+  static const maxWait = Duration(seconds: 3);
+
   Future<void> _start() async {
     final d = context.deps;
-    await Future.wait([d.session.restore(), Future.delayed(widget.hold)]);
+    final clock = Stopwatch()..start();
+    final hadToken = await d.store.readToken() != null;
+    var reached = true;
+    try {
+      await Future.wait([d.session.restore(), Future.delayed(widget.hold)]).timeout(maxWait);
+    } catch (_) {
+      reached = false;
+    }
     if (!mounted) return;
-    if (d.session.signedIn) {
-      await goToCurrentStep(context);
-    } else if (await d.store.carouselSeen()) {
+    if (reached && d.session.signedIn) {
+      try {
+        await goToCurrentStep(context).timeout(maxWait - clock.elapsed);
+        return;
+      } catch (_) {
+        reached = false;
+      }
+    }
+    if (!mounted) return;
+    if (!reached && hadToken) showToast(context, "We couldn't reach Keys. Please check your connection and sign in again.");
+    if (await d.store.carouselSeen()) {
       // ONB-02.3: returning device skips the carousel.
       if (mounted) context.go('/auth/email');
     } else {

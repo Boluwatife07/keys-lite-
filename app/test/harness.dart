@@ -13,6 +13,7 @@ import 'package:keys_lite/main.dart';
 import 'package:keys_lite/router.dart';
 import 'package:keys_lite/widgets/widgets.dart';
 
+/// May return a Future to simulate a slow server.
 typedef Handler = Object? Function(Map<String, dynamic> body, Map<String, String> query);
 
 /// Fake Keys API: register "METHOD /path" handlers; every call is recorded.
@@ -29,7 +30,8 @@ class FakeApi {
         calls.add((key, body));
         final h = routes[key];
         if (h == null) return http.Response(jsonEncode({'error': {'code': 'NOT_FOUND', 'message': 'no fake for $key'}}), 404);
-        final out = h(body, req.url.queryParameters);
+        var out = h(body, req.url.queryParameters);
+        if (out is Future) out = await out;
         if (out is ApiException) {
           return http.Response(jsonEncode({'error': {'code': out.code, 'message': out.message, ...out.data}}), out.status);
         }
