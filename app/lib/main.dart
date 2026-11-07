@@ -89,6 +89,18 @@ class _KeysAppState extends State<KeysApp> with WidgetsBindingObserver {
   @override
   void didChangePlatformBrightness() => widget.deps.theme.platformChanged();
 
+  /// When the screen gets shorter while typing (the keyboard opening, which
+  /// on iPhone Safari shows up as a resize rather than a keyboard inset),
+  /// scroll the field being typed in back into view.
+  @override
+  void didChangeMetrics() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final ctx = FocusManager.instance.primaryFocus?.context;
+      if (ctx == null || !ctx.mounted || ctx.findAncestorWidgetOfExactType<EditableText>() == null && ctx.widget is! EditableText) return;
+      Scrollable.ensureVisible(ctx, alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd, duration: const Duration(milliseconds: 150));
+    });
+  }
+
   /// Colours are read from [KColors] while building, so every element is
   /// rebuilt when the palette changes (navigation and state are kept).
   void _themeChanged() {

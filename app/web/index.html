@@ -17,6 +17,7 @@
   <base href="$FLUTTER_BASE_HREF">
 
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="A new Flutter project.">
 
@@ -31,8 +32,31 @@
 
   <title>keys_lite</title>
   <link rel="manifest" href="manifest.json">
+  <style>
+    html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #FFD02F; }
+    /* The app lives in this box. Its height follows the part of the screen
+       the keyboard doesn't cover, so fields move up above the keyboard. */
+    #app { position: fixed; top: 0; left: 0; right: 0; height: 100%; }
+  </style>
 </head>
 <body>
+  <div id="app"></div>
+  <script>
+    (function () {
+      var vv = window.visualViewport;
+      if (!vv) return;
+      var app = document.getElementById('app');
+      function fit() {
+        app.style.height = vv.height + 'px';
+        // iPhone Safari scrolls the page up when the keyboard opens; undo it
+        // so the app stays pinned to the top of the screen.
+        if (window.scrollY !== 0) window.scrollTo(0, 0);
+      }
+      vv.addEventListener('resize', fit);
+      vv.addEventListener('scroll', fit);
+      fit();
+    })();
+  </script>
   <!--
     You can customize the "flutter_bootstrap.js" script.
     This is useful to provide a custom configuration to the Flutter loader
